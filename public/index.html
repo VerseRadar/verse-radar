@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Verse Radar – unabhängige deutschsprachige Star-Citizen-Fanseite mit News, Patch Notes, Free Flys und Deals.">
+  <title>Verse Radar – Star-Citizen-News auf Deutsch</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="radar-bg" aria-hidden="true"><div class="radar-sweep"></div></div>
+
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Verse Radar Startseite">
+      <span class="brand-radar"><span></span></span>
+      <span><b>VERSE</b><strong>RADAR</strong><small>DEINE NEWS AUS DEM VERSE</small></span>
+    </a>
+    <button class="menu-toggle" aria-label="Menü öffnen">☰</button>
+    <nav>
+      <a href="/news.html">News</a>
+      <a href="/patches.html">Patch Notes</a>
+      <a href="/patch-history.html">Patch History</a>
+      <a href="/deals.html">Deals</a>
+      <a href="/free-fly.html">Free Fly</a>
+      <a class="ref-link" href="/referral.html">Mein Referral</a>
+      <a href="/about.html">Über uns</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">UNABHÄNGIGE FANSEITE <span class="demo-badge">VERSION 0.4 · LIVE PIPELINE</span></div>
+        <h1>Was passiert gerade<br><span>im Verse?</span></h1>
+        <p>Aktuelle Star-Citizen-News, Patch Notes, Events und Angebote – auf Deutsch, verständlich zusammengefasst.</p>
+        <div class="notice">ⓘ Diese Seite ist ein unabhängiges Fanprojekt und steht in keiner Verbindung zu Cloud Imperium Games.</div>
+      </div>
+      <div class="radar-panel" aria-label="Dekoratives Radar">
+        <div class="radar-grid"></div><div id="radar-contacts"></div>
+        <div class="sweep"></div>
+        <div class="radar-center"></div><div class="radar-label">VERSE SCAN <span id="radar-count">0 Kontakte</span></div>
+      </div>
+    </section>
+    <div id="data-status" class="data-status"><span></span> Live-Daten werden geladen …</div>
+
+    <section class="stats-strip"><div><b id="stat-news">—</b><span>News</span></div><div><b id="stat-patches">—</b><span>Patch Notes</span></div><div><b id="stat-deals">—</b><span>aktive Deals</span></div><div><b id="stat-events">—</b><span>Events</span></div></section>
+
+    <section id="free-fly" class="feature-grid hidden">
+      <article class="feature freefly-card">
+        <div class="eyebrow">FREE FLY</div>
+        <h2 id="freefly-title">Free Fly</h2>
+        <p id="freefly-dates"></p>
+        <p id="freefly-text"></p>
+        <a id="freefly-link" class="button" href="/free-fly.html">ALLE INFOS</a>
+      </article>
+      <aside class="referral-card">
+        <div class="eyebrow">UNTERSTÜTZE VERSE RADAR</div>
+        <h2>Star Citizen starten</h2>
+        <p>Erstelle deinen RSI-Account über meinen Referral-Link und erhalte beim qualifizierenden Kauf eines Game Packages den jeweils gültigen Referral-Bonus.</p>
+        <a id="referral-link" class="button green" target="_blank" rel="noopener noreferrer" href="#">RSI-ACCOUNT ÜBER REFERRAL →</a>
+        <small>Der Link öffnet die offizielle RSI-Seite in einem neuen Tab. Mein Referral-Code ist dort bereits hinterlegt.</small>
+        <a href="/referral.html" class="text-link">Was ist ein Referral? →</a>
+      </aside>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>Top News</h2><a href="/news.html">Alle News ansehen →</a></div>
+      <div id="top-news" class="news-grid"></div>
+    </section>
+
+    <section class="three-grid">
+      <article class="panel">
+        <div class="section-head"><h3>Neueste Patch Notes</h3><a href="/patches.html">Alle →</a></div>
+        <div id="latest-patches"></div>
+      </article>
+      <article class="panel deals-panel">
+        <div class="section-head"><h3>Aktuelle Deals</h3><a href="/deals.html">Alle →</a></div>
+        <div id="latest-deals"></div>
+      </article>
+      <article class="panel">
+        <div class="section-head"><h3>Kommende Events</h3><a href="/free-fly.html">Alle →</a></div>
+        <div id="events"></div>
+      </article>
+    </section>
+
+    <section class="automation-panel">
+      <div><span class="eyebrow">VERSE RADAR PIPELINE</span><h2>Vom Comm-Link direkt ins Radar.</h2><p>0.4 ist für die automatische Redaktion vorbereitet: offizieller RSI-Feed → Relevanzfilter → deutsche KI-Zusammenfassung → strukturierte Daten → Verse Radar.</p></div>
+      <div class="pipeline"><span>RSI</span><i>→</i><span>FILTER</span><i>→</i><span>KI</span><i>→</i><span>RADAR</span></div>
+    </section>
+
+    <section class="trust-grid">
+      <div><b>✦ KI-ZUSAMMENGEFASST</b><p>Inhalte werden mithilfe von KI übersetzt und zusammengefasst. Trotz sorgfältiger Verarbeitung können Fehler oder Ungenauigkeiten entstehen.</p></div>
+      <div><b>↗ ORIGINALQUELLEN</b><p>Jede News-Meldung verlinkt auf die ursprüngliche Quelle. Wir übernehmen keine vollständigen Originalartikel.</p></div>
+      <div><b>◎ UNABHÄNGIG</b><p>Verse Radar ist ein unabhängiges Fanprojekt und nicht mit Cloud Imperium Games oder Roberts Space Industries verbunden.</p></div>
+      <div><b>♢ TRANSPARENTES REFERRAL</b><p>Der Referral-Link wird klar als solcher gekennzeichnet. Es gibt keine versteckten Klicks.</p></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-brand"><b>VERSE</b> <strong>RADAR</strong><small>UNABHÄNGIGE FANSEITE</small></div>
+    <div><b>SEITEN</b><a href="/news.html">News</a><a href="/patches.html">Patch Notes</a><a href="/patch-history.html">Patch History</a><a href="/deals.html">Deals</a><a href="/free-fly.html">Free Fly</a><a href="/referral.html">Mein Referral</a></div>
+    <div><b>RECHTLICHES</b><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a></div>
+    <div><b>OFFIZIELLE LINKS</b><a href="https://robertsspaceindustries.com/" target="_blank" rel="noopener">Roberts Space Industries ↗</a><a href="https://robertsspaceindustries.com/en/comm-link" target="_blank" rel="noopener">RSI Comm-Link ↗</a></div>
+  </footer>
+  <script src="/app.js"></script>
+</body>
+</html>
