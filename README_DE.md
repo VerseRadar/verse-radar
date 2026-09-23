@@ -31,6 +31,6 @@ Deals werden in 0.4 noch nicht automatisch aus dem Pledge Store übernommen. Das
 Vor Veröffentlichung die aktuellen RSI-Fankit/Fan-Site-Vorgaben prüfen und den offiziellen Hinweis sichtbar übernehmen. Inhalte werden nur zusammengefasst; Originalquellen werden verlinkt.
 
 
-## 0.5 – Live-News vorbereiten
+## 0.5.1 – Live-News vorbereiten
 
-Der Worker nutzt die offizielle RSI Comm-Link-Seite als Quelle. Öffne nach dem Deployment `/preview`, um zu testen, ob RSI-Beiträge erkannt werden. Für das automatische Zurückschreiben nach GitHub werden später die Worker-Secrets `GITHUB_TOKEN` und `GITHUB_REPO` benötigt. `OPENAI_API_KEY` ist in 0.5 optional.
+Der Worker nutzt die offizielle RSI Comm-Link-Seite als Quelle. Öffne nach dem Deployment `/preview`, um zu testen, ob RSI-Beiträge erkannt werden. Für das automatische Zurückschreiben nach GitHub werden später die Worker-Secrets `GITHUB_TOKEN` und `GITHUB_REPO` benötigt. `OPENAI_API_KEY` ist in 0.5.1 optional.

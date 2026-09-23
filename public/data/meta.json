@@ -3,5 +3,5 @@
   "source": "RSI Comm-Link",
   "mode": "waiting-for-live-run",
   "automation": "Cloudflare Worker + RSI Comm-Link",
-  "version": "0.5"
+  "version": "0.5.1"
 }

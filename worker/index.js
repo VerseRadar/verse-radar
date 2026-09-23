@@ -1,4 +1,4 @@
-/* Verse Radar 0.5 – RSI news ingestion
+/* Verse Radar 0.5.1 – RSI news ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -18,7 +18,7 @@ export default {
   async fetch(request, env) {
     const u = new URL(request.url);
     if (u.pathname === "/health") {
-      return json({ ok: true, service: "verse-radar-updater", version: "0.5" });
+      return json({ ok: true, service: "verse-radar-updater", version: "0.5.1" });
     }
     if (u.pathname === "/preview") {
       try {
@@ -42,39 +42,103 @@ export default {
 const json = (x, s = 200) => new Response(JSON.stringify(x, null, 2), { status: s, headers: { "content-type": "application/json;charset=utf-8", "cache-control": "no-store" } });
 
 async function fetchRSIItems() {
-  const r = await fetch(COMM_LINK_URL, { headers: { "user-agent": "Verse-Radar/0.5 (+independent fan site)", "accept": "text/html" } });
-  if (!r.ok) throw Error(`RSI Comm-Link fetch failed: ${r.status}`);
-  const html = await r.text();
-  const items = parseCommLink(html);
-  if (!items.length) throw Error("Keine Comm-Link-Beiträge erkannt. RSI-Seitenstruktur möglicherweise geändert.");
-  return items.filter(x => RELEVANT.test(`${x.title} ${x.description}`)).slice(0, Number(0) || MAX);
+  const urls = [
+    "https://robertsspaceindustries.com/en/comm-link?sort=publish_new&type=post",
+    "https://robertsspaceindustries.com/en/comm-link?sort=publish_new"
+  ];
+  let lastError = null;
+  for (const url of urls) {
+    try {
+      const r = await fetch(url, { headers: { "user-agent": "Verse-Radar/0.5.1 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
+      if (!r.ok) throw Error(`RSI Comm-Link fetch failed: ${r.status}`);
+      const html = await r.text();
+      const items = parseCommLink(html);
+      if (items.length) {
+        const relevant = items.filter(x => RELEVANT.test(`${x.title} ${x.description}`)).slice(0, MAX);
+        return await enrichDates(relevant);
+      }
+      lastError = Error("Keine Comm-Link-Beiträge erkannt.");
+    } catch (e) { lastError = e; }
+  }
+  throw lastError || Error("RSI Comm-Link konnte nicht gelesen werden.");
+}
+
+async function enrichDates(items) {
+  // Fetch only the small final set. If an individual article cannot be read,
+  // retain ingestion time rather than dropping the story.
+  return await Promise.all(items.map(async item => {
+    try {
+      const r = await fetch(item.url, { headers: { "user-agent": "Verse-Radar/0.5.1 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
+      if (!r.ok) return item;
+      const html = await r.text();
+      const iso = extractPublishedDate(html);
+      return iso ? { ...item, date: iso } : item;
+    } catch { return item; }
+  }));
+}
+
+function extractPublishedDate(html) {
+  const patterns = [
+    /<meta[^>]+property=["']article:published_time["'][^>]+content=["']([^"']+)["']/i,
+    /<meta[^>]+name=["']date["'][^>]+content=["']([^"']+)["']/i,
+    /<time[^>]+datetime=["']([^"']+)["']/i,
+    /Date:\s*([A-Za-z]+\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4})/i
+  ];
+  for (const re of patterns) {
+    const m = html.match(re);
+    if (m) {
+      const d = new Date(m[1]);
+      if (!Number.isNaN(d.getTime())) return d.toISOString();
+    }
+  }
+  return null;
 }
 
 function parseCommLink(html) {
   const out = [];
   const seen = new Set();
-  // The public Comm-Link page contains links to post pages. We intentionally
-  // parse only anchor/title text and nearby visible snippets; no article body is copied.
-  const re = /<a[^>]+href=["']([^"']*\/comm-link\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  // RSI's current Comm-Link listing contains ordinary article anchors.  Some
+  // entries are rendered more than once (desktop/mobile/navigation), so URLs
+  // are used as the stable deduplication key.
+  const re = /<a\b[^>]*href=["']([^"']*\/comm-link\/[^"'#?]+)[^"']*["'][^>]*>([\s\S]*?)<\/a>/gi;
   for (const m of html.matchAll(re)) {
     const href = cleanUrl(m[1]);
     const title = strip(m[2]);
-    if (!href || !title || title.length < 5 || title.length > 240) continue;
-    if (/^All RSI communications$|^COMM-LINK$|^Input$|^Channel$|^Series$|^Type$|^Sort$/i.test(title)) continue;
-    if (seen.has(href)) continue;
+    if (!isArticleUrl(href) || !validTitle(title) || seen.has(href)) continue;
     seen.add(href);
-    out.push({ title, url: href, date: new Date().toISOString(), description: "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt." });
+    out.push({
+      title,
+      url: href,
+      // The listing is sorted newest-first.  We keep that order as the
+      // ingestion order and use the article's actual date when available.
+      date: extractDateFromSlug(href) || new Date().toISOString(),
+      description: "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt."
+    });
     if (out.length >= 60) break;
   }
   return out;
 }
 
-function cleanUrl(href) {
-  const h = href.replace(/&amp;/g, "&").trim();
-  if (!h || h.startsWith("#") || h.startsWith("javascript:")) return "";
-  try { return new URL(h, "https://robertsspaceindustries.com").href; } catch { return ""; }
+function isArticleUrl(url) {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    if (u.hostname !== "robertsspaceindustries.com") return false;
+    return /\/en\/comm-link\/(?!\?|$)[^/]+\/\d+-/.test(u.pathname) || /\/en\/comm-link\/[^/]+\/\d+/.test(u.pathname);
+  } catch { return false; }
 }
-function strip(s) { return s.replace(/<script[\s\S]*?<\/script>/gi, " ").replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, " ").trim(); }
+
+function validTitle(title) {
+  if (!title || title.length < 5 || title.length > 240) return false;
+  if (/^(all rsi communications|comm-link|input|channel|series|type|sort|new|old)$/i.test(title)) return false;
+  return !/^(read more|view all|login|sign in|search)$/i.test(title);
+}
+
+function extractDateFromSlug(url) {
+  // Slugs normally do not contain dates, so return null here.  Actual article
+  // dates are filled from the article page in the enrichment pass when needed.
+  return null;
+}
 
 async function updateSite(env) {
   const items = await fetchRSIItems();
@@ -107,15 +171,15 @@ async function updateSite(env) {
   const finalNews = news.slice(0, 60);
 
   const now = new Date().toISOString();
-  const meta = { updatedAt: now, source: COMM_LINK_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation: "Cloudflare Worker + RSI Comm-Link", version: "0.5", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length, aiItems: aiCount };
+  const meta = { updatedAt: now, source: COMM_LINK_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation: "Cloudflare Worker + RSI Comm-Link", version: "0.5.1", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length, aiItems: aiCount };
 
   if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) {
-    return { ok: true, version: "0.5", published: false, ...meta, note: "RSI-Abholung funktioniert. GitHub Secrets fehlen noch; daher wurde nichts zurückgeschrieben." };
+    return { ok: true, version: "0.5.1", published: false, ...meta, note: "RSI-Abholung funktioniert. GitHub Secrets fehlen noch; daher wurde nichts zurückgeschrieben." };
   }
 
-  await putGithub(env, "public/data/news.json", JSON.stringify(finalNews, null, 2) + "\n", "Verse Radar 0.5: update news");
-  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", "Verse Radar 0.5: update meta");
-  return { ok: true, version: "0.5", published: true, ...meta };
+  await putGithub(env, "public/data/news.json", JSON.stringify(finalNews, null, 2) + "\n", "Verse Radar 0.5.1: update news");
+  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", "Verse Radar 0.5.1: update meta");
+  return { ok: true, version: "0.5.1", published: true, ...meta };
 }
 
 function classify(t) {
@@ -153,4 +217,4 @@ async function putGithub(env, path, content, message) {
   const r = await fetch(api, { method: "PUT", headers: { ...gh(env.GITHUB_TOKEN), "content-type": "application/json" }, body: JSON.stringify(body) });
   if (!r.ok) throw Error(`GitHub update failed ${r.status}`);
 }
-const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.5" });
+const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.5.1" });

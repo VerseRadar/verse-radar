@@ -1,11 +1,8 @@
-# Verse Radar 0.5
+# Verse Radar 0.5.1
 
-## Erste echte RSI-News-Anbindung
-- Der Worker ruft die offizielle RSI Comm-Link-Seite ab.
-- Relevante Beiträge werden automatisch erkannt und dedupliziert.
-- `/preview` ermöglicht einen sicheren Test der RSI-Abholung ohne Secrets.
-- `/run` veröffentlicht neue News in `public/data/news.json`, sobald GitHub Secrets konfiguriert sind.
-- OpenAI ist optional: ohne API-Key werden zunächst offizielle Überschriften/Quellen übernommen.
-- Mit OpenAI werden Titel, Kurzfassung und Kategorie automatisch erzeugt.
-- Static Assets aus `public/` werden korrekt ausgeliefert.
-- Version 0.5 ist bewusst ein Zwischenstand: Patch-Vergleich, Events/Free Fly und Deals folgen auf der nächsten Stufe.
+## RSI-Abholung korrigiert
+- Der Worker nutzt die aktuelle Comm-Link-Sortierung (`sort=publish_new`) und filtert echte Artikel-Links statt Navigationslinks.
+- Die `/preview`-Route liefert damit die neuesten offiziellen RSI-Comm-Link-Beiträge.
+- Für die gefundenen Beiträge werden die Veröffentlichungsdaten aus den jeweiligen Originalseiten ausgelesen, sofern verfügbar.
+- Mehrere RSI-URL-Varianten dienen als Fallback, falls RSI die Listenparameter verändert.
+- GitHub- und OpenAI-Anbindung bleiben wie in 0.5 optional.
