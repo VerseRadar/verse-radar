@@ -1,123 +1,156 @@
-/* Verse Radar 0.4.1 – automatische Redaktion
-   Secrets: OPENAI_API_KEY, GITHUB_TOKEN, RUN_SECRET
+/* Verse Radar 0.5 – RSI news ingestion
+   Purpose: fetch the official RSI Comm-Link page, normalize current posts,
+   filter relevant Star Citizen news, and (when GitHub secrets are configured)
+   publish public/data/news.json back to the connected repository.
+
+   Secrets: GITHUB_TOKEN, RUN_SECRET (optional), OPENAI_API_KEY (optional)
    Vars: GITHUB_REPO, GITHUB_BRANCH (optional), MAX_ITEMS (optional)
 
-   Pipeline: RSI Comm-Link RSS -> relevance filter -> AI DE summary -> GitHub JSON
-   -> static site. Cron can run every 2 hours.
+   0.5 deliberately works WITHOUT OpenAI: it can publish source headlines first.
+   AI enrichment is added only when OPENAI_API_KEY is configured.
 */
-const RSS_URL = "https://robertsspaceindustries.com/en/comm-link/rss";
+
+const COMM_LINK_URL = "https://robertsspaceindustries.com/en/comm-link?sort=publish_new";
 const MAX = 20;
-const RELEVANT = /patch|alpha\s*\d|free\s*fly|foundation festival|fleet week|invictus|iae|event|roadmap|ship showdown|siege|monthly report|this week in star citizen|live experience|pirate week|subscriber|comm-link/i;
+const RELEVANT = /patch|alpha\s*\d|free\s*fly|foundation festival|fleet week|invictus|iae|event|roadmap|ship showdown|siege|monthly report|this week in star citizen|live experience|pirate week|subscriber|vehicle|ship|aegis|argo|anvil|kruger|rsi|sabre|aurora|gameplay|engineering/i;
 
 export default {
   async fetch(request, env) {
     const u = new URL(request.url);
-    if (u.pathname === "/health") return json({ ok: true, service: "verse-radar-updater", version: "0.4" });
-    if (u.pathname !== "/run") return new Response("Verse Radar updater online – 0.4", { headers: { "content-type": "text/plain;charset=utf-8" } });
-    if (env.RUN_SECRET && u.searchParams.get("key") !== env.RUN_SECRET) return json({ ok: false, error: "Unauthorized" }, 401);
-    try { return json(await updateSite(env)); } catch (e) { return json({ ok: false, error: e.message }, 500); }
+    if (u.pathname === "/health") {
+      return json({ ok: true, service: "verse-radar-updater", version: "0.5" });
+    }
+    if (u.pathname === "/preview") {
+      try {
+        const items = await fetchRSIItems();
+        return json({ ok: true, source: COMM_LINK_URL, count: items.length, items });
+      } catch (e) {
+        return json({ ok: false, error: e.message }, 502);
+      }
+    }
+    if (u.pathname === "/run") {
+      if (env.RUN_SECRET && u.searchParams.get("key") !== env.RUN_SECRET) return json({ ok: false, error: "Unauthorized" }, 401);
+      try { return json(await updateSite(env)); } catch (e) { return json({ ok: false, error: e.message }, 500); }
+    }
+    // Public website: let Cloudflare Static Assets serve /public.
+    if (env.ASSETS) return env.ASSETS.fetch(request);
+    return new Response("Verse Radar 0.5", { headers: { "content-type": "text/plain;charset=utf-8" } });
   },
   async scheduled(_, env, ctx) { ctx.waitUntil(updateSite(env)); }
 };
 
 const json = (x, s = 200) => new Response(JSON.stringify(x, null, 2), { status: s, headers: { "content-type": "application/json;charset=utf-8", "cache-control": "no-store" } });
 
-async function updateSite(env) {
-  for (const k of ["OPENAI_API_KEY", "GITHUB_TOKEN", "GITHUB_REPO"]) if (!env[k]) return { ok: false, error: `Missing ${k}` };
-  const rss = await fetch(RSS_URL, { headers: { "user-agent": "Verse-Radar/0.4.1 (+independent fan site)" } });
-  if (!rss.ok) throw Error(`RSI RSS fetch failed: ${rss.status}`);
-  const items = parseRSS(await rss.text()).filter(x => RELEVANT.test(`${x.title} ${x.description}`)).slice(0, Number(env.MAX_ITEMS) || MAX);
+async function fetchRSIItems() {
+  const r = await fetch(COMM_LINK_URL, { headers: { "user-agent": "Verse-Radar/0.5 (+independent fan site)", "accept": "text/html" } });
+  if (!r.ok) throw Error(`RSI Comm-Link fetch failed: ${r.status}`);
+  const html = await r.text();
+  const items = parseCommLink(html);
+  if (!items.length) throw Error("Keine Comm-Link-Beiträge erkannt. RSI-Seitenstruktur möglicherweise geändert.");
+  return items.filter(x => RELEVANT.test(`${x.title} ${x.description}`)).slice(0, Number(0) || MAX);
+}
 
-  const existing = await readGithubJSON(env, "public/data/news.json", []);
+function parseCommLink(html) {
+  const out = [];
+  const seen = new Set();
+  // The public Comm-Link page contains links to post pages. We intentionally
+  // parse only anchor/title text and nearby visible snippets; no article body is copied.
+  const re = /<a[^>]+href=["']([^"']*\/comm-link\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  for (const m of html.matchAll(re)) {
+    const href = cleanUrl(m[1]);
+    const title = strip(m[2]);
+    if (!href || !title || title.length < 5 || title.length > 240) continue;
+    if (/^All RSI communications$|^COMM-LINK$|^Input$|^Channel$|^Series$|^Type$|^Sort$/i.test(title)) continue;
+    if (seen.has(href)) continue;
+    seen.add(href);
+    out.push({ title, url: href, date: new Date().toISOString(), description: "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt." });
+    if (out.length >= 60) break;
+  }
+  return out;
+}
+
+function cleanUrl(href) {
+  const h = href.replace(/&amp;/g, "&").trim();
+  if (!h || h.startsWith("#") || h.startsWith("javascript:")) return "";
+  try { return new URL(h, "https://robertsspaceindustries.com").href; } catch { return ""; }
+}
+function strip(s) { return s.replace(/<script[\s\S]*?<\/script>/gi, " ").replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, " ").trim(); }
+
+async function updateSite(env) {
+  const items = await fetchRSIItems();
+  const existing = env.GITHUB_TOKEN && env.GITHUB_REPO ? await readGithubJSON(env, "public/data/news.json", []) : [];
   const known = new Set(existing.map(x => x.id));
   const news = [];
+  let aiCount = 0;
+
   for (const item of items) {
     const id = hash(item.url);
     const old = existing.find(x => x.id === id);
     if (old) { news.push(old); continue; }
-    const ai = await summarize(item, env.OPENAI_API_KEY);
-    news.push({ id, title: ai.title || item.title, category: ai.category || classify(item.title), date: item.date, summary: ai.summary || item.description || "", sourceUrl: item.url, source: "RSI Comm-Link", ai: true });
+    let ai = null;
+    if (env.OPENAI_API_KEY) {
+      try { ai = await summarize(item, env.OPENAI_API_KEY); aiCount++; } catch (_) { /* keep source headline */ }
+    }
+    news.push({
+      id,
+      title: ai?.title || item.title,
+      category: ai?.category || classify(item.title),
+      date: item.date,
+      summary: ai?.summary || item.description,
+      sourceUrl: item.url,
+      source: "RSI Comm-Link",
+      ai: Boolean(ai)
+    });
   }
   for (const old of existing) if (!news.some(n => n.id === old.id)) news.push(old);
   news.sort((a, b) => new Date(b.date) - new Date(a.date));
+  const finalNews = news.slice(0, 60);
 
-  const patches = await updatePatchHistory(env, news);
-  const events = deriveEvents(news);
-  const freefly = deriveFreeFly(news);
-  const deals = await readGithubJSON(env, "public/data/deals.json", []);
   const now = new Date().toISOString();
+  const meta = { updatedAt: now, source: COMM_LINK_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation: "Cloudflare Worker + RSI Comm-Link", version: "0.5", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length, aiItems: aiCount };
 
-  await putGithub(env, "public/data/news.json", JSON.stringify(news.slice(0, 60), null, 2) + "\n");
-  await putGithub(env, "public/data/patches.json", JSON.stringify(patches, null, 2) + "\n");
-  await putGithub(env, "public/data/events.json", JSON.stringify(events, null, 2) + "\n");
-  await putGithub(env, "public/data/freefly.json", JSON.stringify(freefly, null, 2) + "\n");
-  await putGithub(env, "public/data/meta.json", JSON.stringify({ updatedAt: now, source: "RSI Comm-Link RSS", mode: "live", automation: "Cloudflare Worker + RSI RSS + OpenAI", version: "0.4", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length }, null, 2) + "\n");
-  return { ok: true, version: "0.4", updatedAt: now, fetched: items.length, news: Math.min(news.length, 60), patches: patches.length, events: events.length, freeFlyActive: freefly.active, note: "Deals bleiben bis zur offiziellen Pledge-Quelle manuell gepflegt." };
-}
-
-function parseRSS(xml) {
-  const out = [];
-  for (const block of xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)) {
-    const b = block[1];
-    const get = tag => { const m = b.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\S]*?)<\\/${tag}>`, "i")); return m ? decode(m[1]).trim() : ""; };
-    out.push({ title: get("title"), url: get("link"), date: get("pubDate") || get("published"), description: strip(get("description") || get("summary")) });
+  if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) {
+    return { ok: true, version: "0.5", published: false, ...meta, note: "RSI-Abholung funktioniert. GitHub Secrets fehlen noch; daher wurde nichts zurückgeschrieben." };
   }
-  return out.filter(x => x.title && x.url);
+
+  await putGithub(env, "public/data/news.json", JSON.stringify(finalNews, null, 2) + "\n", "Verse Radar 0.5: update news");
+  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", "Verse Radar 0.5: update meta");
+  return { ok: true, version: "0.5", published: true, ...meta };
 }
-function strip(s) { return s.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 7000); }
-function decode(s) { return s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)));
-}
+
 function classify(t) {
   if (/patch|alpha\s*\d/i.test(t)) return "PATCH NOTES";
   if (/free\s*fly/i.test(t)) return "FREE FLY";
   if (/event|foundation festival|invictus|fleet week|iae|pirate week|ship showdown|siege/i.test(t)) return "EVENT";
   if (/roadmap/i.test(t)) return "ROADMAP";
-  if (/ship|vehicle|kruger/i.test(t)) return "SCHIFFE";
+  if (/ship|vehicle|sabre|argo|aegis|anvil|kruger|rsi/i.test(t)) return "SCHIFFE";
   return "NEWS";
 }
 
 async function summarize(item, key) {
-  const prompt = `Du bist Redakteur einer unabhängigen deutschen Star-Citizen-Fanseite. Verarbeite ausschließlich den gelieferten RSS-Inhalt. Keine erfundenen Fakten, keine Werbesprache. Antworte ausschließlich als valides JSON mit den Feldern title, summary, category. category muss genau eines sein: NEWS, PATCH NOTES, FREE FLY, EVENT, ROADMAP, SCHIFFE. Titel max. 100 Zeichen. Zusammenfassung 50-110 Wörter. Wenn der Inhalt nur ein Teaser ist, fasse nur diesen Teaser zusammen.\nQuelle: ${item.url}\nTitel: ${item.title}\nInhalt: ${item.description}`;
+  const prompt = `Du bist Redakteur einer unabhängigen deutschen Star-Citizen-Fanseite. Verarbeite ausschließlich den gelieferten Titel. Keine erfundenen Fakten. Antworte ausschließlich als valides JSON mit title, summary, category. category: NEWS, PATCH NOTES, FREE FLY, EVENT, ROADMAP oder SCHIFFE. Titel max. 100 Zeichen. Zusammenfassung 40-90 Wörter. Wenn nur ein Titel vorliegt, darfst du nur vorsichtig paraphrasieren und keine zusätzlichen Fakten ergänzen.\nTitel: ${item.title}`;
   const r = await fetch("https://api.openai.com/v1/responses", { method: "POST", headers: { "content-type": "application/json", "authorization": "Bearer " + key }, body: JSON.stringify({ model: "gpt-5-mini", input: prompt }) });
   if (!r.ok) throw Error(`OpenAI error ${r.status}`);
   const j = await r.json();
   const text = j.output_text || "";
-  try { return JSON.parse(text.replace(/^```json\s*|\s*```$/g, "")); } catch { return { title: item.title, summary: item.description || "Zusammenfassung konnte nicht verarbeitet werden.", category: classify(item.title) }; }
+  return JSON.parse(text.replace(/^```json\s*|\s*```$/g, ""));
 }
 
-function extractVersion(s) { const m = s.match(/(?:Alpha\s*)?(\d+\.\d+(?:\.\d+)?)/i); return m ? `Alpha ${m[1]}` : ""; }
-async function updatePatchHistory(env, news) {
-  const old = await readGithubJSON(env, "public/data/patches.json", []);
-  const map = new Map(old.map(p => [p.version, p]));
-  for (const n of news.filter(x => x.category === "PATCH NOTES")) {
-    const version = extractVersion(n.title);
-    if (!version) continue;
-    if (!map.has(version)) map.set(version, { version, date: n.date, previous: "", summary: n.summary, diff: "Automatisch erkannt. Ein inhaltlicher Diff wird ergänzt, sobald für beide Versionen ausreichende Patchdaten vorliegen.", sourceUrl: n.sourceUrl });
-  }
-  const arr = [...map.values()].sort((a, b) => new Date(b.date) - new Date(a.date));
-  for (let i = 0; i < arr.length; i++) arr[i].previous = arr[i + 1]?.version || "";
-  return arr.slice(0, 30);
-}
-function deriveEvents(news) {
-  return news.filter(n => ["EVENT", "FREE FLY"].includes(n.category)).slice(0, 12).map(n => ({ id: n.id, name: n.title, type: n.category, start: n.date, dateText: `Ankündigung: ${new Intl.DateTimeFormat("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(n.date))}`, sourceUrl: n.sourceUrl }));
-}
-function deriveFreeFly(news) {
-  const n = news.find(x => x.category === "FREE FLY");
-  if (!n) return { active: false, title: "Kein Free Fly erkannt", dateText: "", summary: "Aktuell wurde im offiziellen RSI-Feed kein Free-Fly-Beitrag erkannt.", pageUrl: "https://robertsspaceindustries.com/en/comm-link" };
-  return { active: true, title: n.title, dateText: new Intl.DateTimeFormat("de-DE", { date: "long" }).format(new Date(n.date)), summary: n.summary, pageUrl: n.sourceUrl, sourceUrl: n.sourceUrl };
-}
 async function readGithubJSON(env, path, fallback) {
   const [owner, repo] = env.GITHUB_REPO.split("/");
   const r = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, { headers: gh(env.GITHUB_TOKEN) });
   if (!r.ok) return fallback;
-  try { const j = await r.json(); return JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g, ""))))); } catch { return fallback; }
+  try { const j = await r.json(); return JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(j.content.replace(/\n/g, "")), c => c.charCodeAt(0)))); } catch { return fallback; }
 }
 function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return (h >>> 0).toString(16); }
-async function putGithub(env, path, content) {
+async function putGithub(env, path, content, message) {
   const [owner, repo] = env.GITHUB_REPO.split("/");
   const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
   let sha; const old = await fetch(api, { headers: gh(env.GITHUB_TOKEN) }); if (old.ok) sha = (await old.json()).sha;
-  const body = { message: `Verse Radar 0.4.1: update ${path}`, content: btoa(unescape(encodeURIComponent(content))), branch: env.GITHUB_BRANCH || "main" }; if (sha) body.sha = sha;
-  const r = await fetch(api, { method: "PUT", headers: { ...gh(env.GITHUB_TOKEN), "content-type": "application/json" }, body: JSON.stringify(body) }); if (!r.ok) throw Error(`GitHub update failed ${r.status}`);
+  const bytes = new TextEncoder().encode(content);
+  let binary = ""; for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  const body = { message, content: btoa(binary), branch: env.GITHUB_BRANCH || "main" }; if (sha) body.sha = sha;
+  const r = await fetch(api, { method: "PUT", headers: { ...gh(env.GITHUB_TOKEN), "content-type": "application/json" }, body: JSON.stringify(body) });
+  if (!r.ok) throw Error(`GitHub update failed ${r.status}`);
 }
-const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.4.1" });
+const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.5" });
