@@ -1,4 +1,4 @@
-# Verse Radar 0.4.1
+# Verse Radar 0.5.2
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -34,3 +34,6 @@ Vor Veröffentlichung die aktuellen RSI-Fankit/Fan-Site-Vorgaben prüfen und den
 ## 0.5.1 – Live-News vorbereiten
 
 Der Worker nutzt die offizielle RSI Comm-Link-Seite als Quelle. Öffne nach dem Deployment `/preview`, um zu testen, ob RSI-Beiträge erkannt werden. Für das automatische Zurückschreiben nach GitHub werden später die Worker-Secrets `GITHUB_TOKEN` und `GITHUB_REPO` benötigt. `OPENAI_API_KEY` ist in 0.5.1 optional.
+
+## 0.5.2 – Fix für /preview
+Der Worker enthält jetzt die fehlende URL-Bereinigung (`cleanUrl`). Dadurch kann `/preview` die aktuellen RSI-Comm-Link-Beiträge wieder auswerten.
