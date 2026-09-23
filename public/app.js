@@ -1,7 +1,7 @@
 const CONFIG = {
   referralUrl: "https://robertsspaceindustries.com/enlist?referral=DEINCODE",
   dataBase: "/data/",
-  siteVersion: "0.4"
+  siteVersion: "0.4.1"
 };
 
 async function loadJSON(name){

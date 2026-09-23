@@ -1,4 +1,4 @@
-/* Verse Radar 0.4 – automatische Redaktion
+/* Verse Radar 0.4.1 – automatische Redaktion
    Secrets: OPENAI_API_KEY, GITHUB_TOKEN, RUN_SECRET
    Vars: GITHUB_REPO, GITHUB_BRANCH (optional), MAX_ITEMS (optional)
 
@@ -24,11 +24,11 @@ const json = (x, s = 200) => new Response(JSON.stringify(x, null, 2), { status: 
 
 async function updateSite(env) {
   for (const k of ["OPENAI_API_KEY", "GITHUB_TOKEN", "GITHUB_REPO"]) if (!env[k]) return { ok: false, error: `Missing ${k}` };
-  const rss = await fetch(RSS_URL, { headers: { "user-agent": "Verse-Radar/0.4 (+independent fan site)" } });
+  const rss = await fetch(RSS_URL, { headers: { "user-agent": "Verse-Radar/0.4.1 (+independent fan site)" } });
   if (!rss.ok) throw Error(`RSI RSS fetch failed: ${rss.status}`);
   const items = parseRSS(await rss.text()).filter(x => RELEVANT.test(`${x.title} ${x.description}`)).slice(0, Number(env.MAX_ITEMS) || MAX);
 
-  const existing = await readGithubJSON(env, "data/news.json", []);
+  const existing = await readGithubJSON(env, "public/data/news.json", []);
   const known = new Set(existing.map(x => x.id));
   const news = [];
   for (const item of items) {
@@ -44,14 +44,14 @@ async function updateSite(env) {
   const patches = await updatePatchHistory(env, news);
   const events = deriveEvents(news);
   const freefly = deriveFreeFly(news);
-  const deals = await readGithubJSON(env, "data/deals.json", []);
+  const deals = await readGithubJSON(env, "public/data/deals.json", []);
   const now = new Date().toISOString();
 
-  await putGithub(env, "data/news.json", JSON.stringify(news.slice(0, 60), null, 2) + "\n");
-  await putGithub(env, "data/patches.json", JSON.stringify(patches, null, 2) + "\n");
-  await putGithub(env, "data/events.json", JSON.stringify(events, null, 2) + "\n");
-  await putGithub(env, "data/freefly.json", JSON.stringify(freefly, null, 2) + "\n");
-  await putGithub(env, "data/meta.json", JSON.stringify({ updatedAt: now, source: "RSI Comm-Link RSS", mode: "live", automation: "Cloudflare Worker + RSI RSS + OpenAI", version: "0.4", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length }, null, 2) + "\n");
+  await putGithub(env, "public/data/news.json", JSON.stringify(news.slice(0, 60), null, 2) + "\n");
+  await putGithub(env, "public/data/patches.json", JSON.stringify(patches, null, 2) + "\n");
+  await putGithub(env, "public/data/events.json", JSON.stringify(events, null, 2) + "\n");
+  await putGithub(env, "public/data/freefly.json", JSON.stringify(freefly, null, 2) + "\n");
+  await putGithub(env, "public/data/meta.json", JSON.stringify({ updatedAt: now, source: "RSI Comm-Link RSS", mode: "live", automation: "Cloudflare Worker + RSI RSS + OpenAI", version: "0.4", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length }, null, 2) + "\n");
   return { ok: true, version: "0.4", updatedAt: now, fetched: items.length, news: Math.min(news.length, 60), patches: patches.length, events: events.length, freeFlyActive: freefly.active, note: "Deals bleiben bis zur offiziellen Pledge-Quelle manuell gepflegt." };
 }
 
@@ -87,7 +87,7 @@ async function summarize(item, key) {
 
 function extractVersion(s) { const m = s.match(/(?:Alpha\s*)?(\d+\.\d+(?:\.\d+)?)/i); return m ? `Alpha ${m[1]}` : ""; }
 async function updatePatchHistory(env, news) {
-  const old = await readGithubJSON(env, "data/patches.json", []);
+  const old = await readGithubJSON(env, "public/data/patches.json", []);
   const map = new Map(old.map(p => [p.version, p]));
   for (const n of news.filter(x => x.category === "PATCH NOTES")) {
     const version = extractVersion(n.title);
@@ -117,7 +117,7 @@ async function putGithub(env, path, content) {
   const [owner, repo] = env.GITHUB_REPO.split("/");
   const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
   let sha; const old = await fetch(api, { headers: gh(env.GITHUB_TOKEN) }); if (old.ok) sha = (await old.json()).sha;
-  const body = { message: `Verse Radar 0.4: update ${path}`, content: btoa(unescape(encodeURIComponent(content))), branch: env.GITHUB_BRANCH || "main" }; if (sha) body.sha = sha;
+  const body = { message: `Verse Radar 0.4.1: update ${path}`, content: btoa(unescape(encodeURIComponent(content))), branch: env.GITHUB_BRANCH || "main" }; if (sha) body.sha = sha;
   const r = await fetch(api, { method: "PUT", headers: { ...gh(env.GITHUB_TOKEN), "content-type": "application/json" }, body: JSON.stringify(body) }); if (!r.ok) throw Error(`GitHub update failed ${r.status}`);
 }
-const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.4" });
+const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.4.1" });
