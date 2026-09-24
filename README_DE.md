@@ -1,39 +1,39 @@
-# Verse Radar 0.5.2
+# Verse Radar 0.5.4
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
 ## Lokal testen
 `START-VORSCHAU.bat` starten. Danach öffnet sich die Seite unter `http://localhost:8000/`.
 
-## Was 0.4 vorbereitet
-Die automatische Redaktion liest den offiziellen RSI Comm-Link RSS-Feed, filtert relevante Meldungen, erstellt mit OpenAI eine deutsche Kurzfassung und schreibt strukturierte JSON-Daten in ein GitHub-Repository. Cloudflare Cron kann den Worker regelmäßig ausführen.
+## Automatischer RSI-News-Import
+Der Worker liest die offizielle RSI Comm-Link-Seite ein, erkennt aktuelle Comm-Link-Artikel, filtert relevante Meldungen und kann die strukturierten Daten später in das verbundene GitHub-Repository zurückschreiben.
 
 ### Benötigt für Live-Betrieb
 - GitHub Repository für die Website-Daten
 - Cloudflare-Konto
-- OpenAI API Key
 - GitHub Token mit Schreibzugriff auf das Repository
+- OpenAI API Key nur für optionale deutsche KI-Zusammenfassungen
 
 ### Cloudflare Variablen/Secrets
-- Secret: `OPENAI_API_KEY`
-- Secret: `GITHUB_TOKEN`
+- Secret: `OPENAI_API_KEY` (optional)
+- Secret: `GITHUB_TOKEN` (für automatisches Zurückschreiben)
 - Secret optional: `RUN_SECRET`
 - Variable: `GITHUB_REPO` = `DEIN-USERNAME/verse-radar`
 - Variable optional: `GITHUB_BRANCH` = `main`
 - Variable optional: `MAX_ITEMS`
 
-Cron-Vorschlag: alle 2 Stunden (`0 */2 * * *`).
+Cron: alle 2 Stunden (`0 */2 * * *`).
 
-## Was noch bewusst manuell bleibt
-Deals werden in 0.4 noch nicht automatisch aus dem Pledge Store übernommen. Das soll erst mit einer belastbaren offiziellen/strukturierten Quelle passieren, damit keine veralteten Preise auf der Seite landen.
+## Test-Endpunkte
+- `/health` – zeigt die laufende Worker-Version.
+- `/preview` – holt RSI-Beiträge ab, ohne GitHub zu verändern.
+- `/run` – führt den Import aus und schreibt bei vorhandenen GitHub-Zugangsdaten die Daten zurück.
+
+## 0.5.4
+Der RSI-Parser wurde robuster gegen Änderungen am HTML-Aufbau der Comm-Link-Seite gemacht. `/preview` liefert bei einem Fehler zusätzliche technische Diagnosewerte, damit ein weiterer Fehler gezielt behoben werden kann.
+
+## Was bewusst manuell bleibt
+Deals werden noch nicht automatisch aus dem Pledge Store übernommen. Das soll erst mit einer belastbaren offiziellen/strukturierten Quelle passieren, damit keine veralteten Preise auf der Seite landen.
 
 ## Rechtlicher Fan-Hinweis
 Vor Veröffentlichung die aktuellen RSI-Fankit/Fan-Site-Vorgaben prüfen und den offiziellen Hinweis sichtbar übernehmen. Inhalte werden nur zusammengefasst; Originalquellen werden verlinkt.
-
-
-## 0.5.1 – Live-News vorbereiten
-
-Der Worker nutzt die offizielle RSI Comm-Link-Seite als Quelle. Öffne nach dem Deployment `/preview`, um zu testen, ob RSI-Beiträge erkannt werden. Für das automatische Zurückschreiben nach GitHub werden später die Worker-Secrets `GITHUB_TOKEN` und `GITHUB_REPO` benötigt. `OPENAI_API_KEY` ist in 0.5.1 optional.
-
-## 0.5.2 – Fix für /preview
-Der Worker enthält jetzt die fehlende URL-Bereinigung (`cleanUrl`). Dadurch kann `/preview` die aktuellen RSI-Comm-Link-Beiträge wieder auswerten.

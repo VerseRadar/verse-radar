@@ -1,4 +1,4 @@
-/* Verse Radar 0.5.3 – RSI news ingestion
+/* Verse Radar 0.5.4 – RSI news ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -18,7 +18,7 @@ export default {
   async fetch(request, env) {
     const u = new URL(request.url);
     if (u.pathname === "/health") {
-      return json({ ok: true, service: "verse-radar-updater", version: "0.5.2" });
+      return json({ ok: true, service: "verse-radar-updater", version: "0.5.4" });
     }
     if (u.pathname === "/preview") {
       try {
@@ -47,20 +47,38 @@ async function fetchRSIItems() {
     "https://robertsspaceindustries.com/en/comm-link?sort=publish_new"
   ];
   let lastError = null;
+  let diagnostics = [];
   for (const url of urls) {
     try {
-      const r = await fetch(url, { headers: { "user-agent": "Verse-Radar/0.5.2 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
-      if (!r.ok) throw Error(`RSI Comm-Link fetch failed: ${r.status}`);
+      const r = await fetch(url, {
+        headers: {
+          "user-agent": "Verse-Radar/0.5.4 (+independent fan site)",
+          "accept": "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
+          "accept-language": "en-US,en;q=0.9,de;q=0.8"
+        }
+      });
       const html = await r.text();
-      const items = parseCommLink(html);
-      if (items.length) {
-        const relevant = items.filter(x => RELEVANT.test(`${x.title} ${x.description}`)).slice(0, MAX);
-        return await enrichDates(relevant);
+      const diag = { url, httpStatus: r.status, htmlLength: html.length };
+      if (!r.ok) throw Error(`RSI Comm-Link fetch failed: ${r.status}`);
+      const parsed = parseCommLink(html);
+      diag.articleCandidates = parsed.candidates;
+      diag.parsedItems = parsed.items.length;
+      diagnostics.push(diag);
+      if (parsed.items.length) {
+        const relevant = parsed.items.filter(x => RELEVANT.test(`${x.title} ${x.description}`)).slice(0, MAX);
+        if (relevant.length) return await enrichDates(relevant);
+        // If parsing works but the relevance filter is too strict, keep the
+        // newest posts rather than showing an empty result.
+        return await enrichDates(parsed.items.slice(0, MAX));
       }
       lastError = Error("Keine Comm-Link-Beiträge erkannt.");
-    } catch (e) { lastError = e; }
+    } catch (e) {
+      lastError = e;
+      diagnostics.push({ url, error: e.message });
+    }
   }
-  throw lastError || Error("RSI Comm-Link konnte nicht gelesen werden.");
+  const detail = diagnostics.map(d => `${d.url}: HTTP ${d.httpStatus ?? "?"}, HTML ${d.htmlLength ?? 0}, Kandidaten ${d.articleCandidates ?? 0}, erkannt ${d.parsedItems ?? 0}`).join(" | ");
+  throw Error(`${lastError?.message || "RSI Comm-Link konnte nicht gelesen werden."} [Debug: ${detail}]`);
 }
 
 async function enrichDates(items) {
@@ -68,7 +86,7 @@ async function enrichDates(items) {
   // retain ingestion time rather than dropping the story.
   return await Promise.all(items.map(async item => {
     try {
-      const r = await fetch(item.url, { headers: { "user-agent": "Verse-Radar/0.5.2 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
+      const r = await fetch(item.url, { headers: { "user-agent": "Verse-Radar/0.5.4 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
       if (!r.ok) return item;
       const html = await r.text();
       const iso = extractPublishedDate(html);
@@ -97,26 +115,63 @@ function extractPublishedDate(html) {
 function parseCommLink(html) {
   const out = [];
   const seen = new Set();
-  // RSI's current Comm-Link listing contains ordinary article anchors.  Some
-  // entries are rendered more than once (desktop/mobile/navigation), so URLs
-  // are used as the stable deduplication key.
-  const re = /<a\b[^>]*href=["']([^"']*\/comm-link\/[^"'#?]+)[^"']*["'][^>]*>([\s\S]*?)<\/a>/gi;
-  for (const m of html.matchAll(re)) {
-    const href = cleanUrl(m[1]);
-    const title = strip(m[2]);
-    if (!isArticleUrl(href) || !validTitle(title) || seen.has(href)) continue;
-    seen.add(href);
+  let candidates = 0;
+
+  // Current RSI pages can expose links in normal anchors as well as in
+  // serialized/escaped markup. We deliberately search for the URL pattern
+  // itself instead of depending on one specific DOM structure.
+  const patterns = [
+    /href\s*=\s*["']([^"']*\/en\/comm-link\/[^"'#?\s<>]+)["']/gi,
+    /["']((?:https?:\/\/robertsspaceindustries\.com)?\/en\/comm-link\/[^"'#?\s<>]+)["']/gi,
+    /\\\/en\\\/comm-link\\\/[^"'\s<>\\]+/gi
+  ];
+
+  const hrefs = [];
+  for (const re of patterns) {
+    for (const m of html.matchAll(re)) {
+      const raw = m[1] || m[0];
+      const href = cleanUrl(raw.replace(/\\\//g, "/"));
+      if (!href || !isArticleUrl(href) || seen.has(href)) continue;
+      seen.add(href);
+      hrefs.push(href);
+    }
+  }
+  candidates = hrefs.length;
+
+  // First try to recover the visible title from the anchor containing each URL.
+  for (const href of hrefs) {
+    let title = "";
+    const escapedHref = href.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const pathOnly = new URL(href).pathname;
+    const slug = pathOnly.split("/").pop() || "";
+    const slugTitle = slug.replace(/^\d+-/, "").replace(/[-_]+/g, " ");
+
+    const anchorPatterns = [
+      new RegExp(`<a\\b[^>]*href=["'](?:${escapedHref}|${escapeRegExp(pathOnly)})["'][^>]*>([\s\S]*?)<\\/a>`, "i"),
+      new RegExp(`<a\\b[^>]*href=["'][^"']*${escapeRegExp(pathOnly)}[^"']*["'][^>]*>([\s\S]*?)<\\/a>`, "i")
+    ];
+    for (const re of anchorPatterns) {
+      const m = html.match(re);
+      if (m) { title = strip(m[1]); if (title) break; }
+    }
+
+    if (!title) title = slugTitle;
+    if (!validTitle(title)) continue;
+
     out.push({
       title,
       url: href,
-      // The listing is sorted newest-first.  We keep that order as the
-      // ingestion order and use the article's actual date when available.
-      date: extractDateFromSlug(href) || new Date().toISOString(),
+      date: new Date().toISOString(),
       description: "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt."
     });
     if (out.length >= 60) break;
   }
-  return out;
+
+  return { items: out, candidates };
+}
+
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function strip(raw) {
@@ -200,15 +255,15 @@ async function updateSite(env) {
   const finalNews = news.slice(0, 60);
 
   const now = new Date().toISOString();
-  const meta = { updatedAt: now, source: COMM_LINK_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation: "Cloudflare Worker + RSI Comm-Link", version: "0.5.2", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length, aiItems: aiCount };
+  const meta = { updatedAt: now, source: COMM_LINK_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation: "Cloudflare Worker + RSI Comm-Link", version: "0.5.4", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length, aiItems: aiCount };
 
   if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) {
-    return { ok: true, version: "0.5.2", published: false, ...meta, note: "RSI-Abholung funktioniert. GitHub Secrets fehlen noch; daher wurde nichts zurückgeschrieben." };
+    return { ok: true, version: "0.5.4", published: false, ...meta, note: "RSI-Abholung funktioniert. GitHub Secrets fehlen noch; daher wurde nichts zurückgeschrieben." };
   }
 
-  await putGithub(env, "public/data/news.json", JSON.stringify(finalNews, null, 2) + "\n", "Verse Radar 0.5.3: update news");
-  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", "Verse Radar 0.5.3: update meta");
-  return { ok: true, version: "0.5.2", published: true, ...meta };
+  await putGithub(env, "public/data/news.json", JSON.stringify(finalNews, null, 2) + "\n", "Verse Radar 0.5.4: update news");
+  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", "Verse Radar 0.5.4: update meta");
+  return { ok: true, version: "0.5.4", published: true, ...meta };
 }
 
 function classify(t) {
@@ -246,4 +301,4 @@ async function putGithub(env, path, content, message) {
   const r = await fetch(api, { method: "PUT", headers: { ...gh(env.GITHUB_TOKEN), "content-type": "application/json" }, body: JSON.stringify(body) });
   if (!r.ok) throw Error(`GitHub update failed ${r.status}`);
 }
-const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.5.2" });
+const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.5.4" });
