@@ -37,3 +37,7 @@ Deals werden noch nicht automatisch aus dem Pledge Store übernommen. Das soll e
 
 ## Rechtlicher Fan-Hinweis
 Vor Veröffentlichung die aktuellen RSI-Fankit/Fan-Site-Vorgaben prüfen und den offiziellen Hinweis sichtbar übernehmen. Inhalte werden nur zusammengefasst; Originalquellen werden verlinkt.
+
+
+## Diagnose
+- `/debug/github` prüft die GitHub-Verbindung des Workers, ohne das Secret auszugeben.

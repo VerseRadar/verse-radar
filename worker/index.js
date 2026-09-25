@@ -1,4 +1,4 @@
-/* Verse Radar 0.5.9 – RSI news ingestion
+/* Verse Radar 0.5.10 – RSI news ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -18,7 +18,7 @@ export default {
   async fetch(request, env) {
     const u = new URL(request.url);
     if (u.pathname === "/health") {
-      return json({ ok: true, service: "verse-radar-updater", version: "0.5.9" });
+      return json({ ok: true, service: "verse-radar-updater", version: "0.5.10" });
     }
     if (u.pathname === "/preview") {
       try {
@@ -31,6 +31,14 @@ export default {
     if (u.pathname === "/run") {
       if (env.RUN_SECRET && u.searchParams.get("key") !== env.RUN_SECRET) return json({ ok: false, error: "Unauthorized" }, 401);
       try { return json(await updateSite(env)); } catch (e) { return json({ ok: false, error: e.message }, 500); }
+    }
+    if (u.pathname === "/debug/github") {
+      try {
+        const d = await githubDiagnostics(env, "public/data/news.json");
+        return json({ ok: true, version: "0.5.10", github: d });
+      } catch (e) {
+        return json({ ok: false, version: "0.5.10", error: e.message }, 500);
+      }
     }
     if (u.pathname === "/api/news") {
       try {
@@ -59,7 +67,7 @@ export default {
     }
     // Public website: let Cloudflare Static Assets serve /public.
     if (env.ASSETS) return env.ASSETS.fetch(request);
-    return new Response("Verse Radar 0.5.9", { headers: { "content-type": "text/plain;charset=utf-8" } });
+    return new Response("Verse Radar 0.5.10", { headers: { "content-type": "text/plain;charset=utf-8" } });
   },
   async scheduled(_, env, ctx) { ctx.waitUntil(updateSite(env)); }
 };
@@ -81,7 +89,7 @@ async function fetchRSIItems() {
     try {
       const r = await fetch(url, {
         headers: {
-          "user-agent": "Verse-Radar/0.5.9 (+independent fan site)",
+          "user-agent": "Verse-Radar/0.5.10 (+independent fan site)",
           "accept": "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
           "accept-language": "en-US,en;q=0.9,de;q=0.8"
         }
@@ -104,7 +112,7 @@ async function fetchRSIItems() {
     const apiUrl = "https://api.star-citizen.wiki/api/comm-links?page[size]=50&sort=-id";
     const r = await fetch(apiUrl, {
       headers: {
-        "user-agent": "Verse-Radar/0.5.9 (+independent fan site)",
+        "user-agent": "Verse-Radar/0.5.10 (+independent fan site)",
         "accept": "application/json"
       }
     });
@@ -168,7 +176,7 @@ async function enrichDates(items) {
   // retain ingestion time rather than dropping the story.
   return await Promise.all(items.map(async item => {
     try {
-      const r = await fetch(item.url, { headers: { "user-agent": "Verse-Radar/0.5.9 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
+      const r = await fetch(item.url, { headers: { "user-agent": "Verse-Radar/0.5.10 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
       if (!r.ok) return item;
       const html = await r.text();
       const iso = extractPublishedDate(html);
@@ -337,15 +345,15 @@ async function updateSite(env) {
   const finalNews = news.slice(0, 60);
 
   const now = new Date().toISOString();
-  const meta = { updatedAt: now, source: COMM_LINK_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation: "Cloudflare Worker + RSI Comm-Link", version: "0.5.9", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length, aiItems: aiCount };
+  const meta = { updatedAt: now, source: COMM_LINK_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation: "Cloudflare Worker + RSI Comm-Link", version: "0.5.10", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length, aiItems: aiCount };
 
   if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) {
-    return { ok: true, version: "0.5.9", published: false, ...meta, note: "RSI-Abholung funktioniert. GitHub Secrets fehlen noch; daher wurde nichts zurückgeschrieben." };
+    return { ok: true, version: "0.5.10", published: false, ...meta, note: "RSI-Abholung funktioniert. GitHub Secrets fehlen noch; daher wurde nichts zurückgeschrieben." };
   }
 
-  await putGithub(env, "public/data/news.json", JSON.stringify(finalNews, null, 2) + "\n", "Verse Radar 0.5.9: update news");
-  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", "Verse Radar 0.5.9: update meta");
-  return { ok: true, version: "0.5.9", published: true, ...meta };
+  await putGithub(env, "public/data/news.json", JSON.stringify(finalNews, null, 2) + "\n", "Verse Radar 0.5.10: update news");
+  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", "Verse Radar 0.5.10: update meta");
+  return { ok: true, version: "0.5.10", published: true, ...meta };
 }
 
 function classify(t) {
@@ -366,17 +374,69 @@ async function summarize(item, key) {
   return JSON.parse(text.replace(/^```json\s*|\s*```$/g, ""));
 }
 
+async function githubDiagnostics(env, path) {
+  const rawRepo = String(env.GITHUB_REPO || "").trim();
+  const parts = rawRepo.split("/").filter(Boolean);
+  const owner = parts[0] || "";
+  const repo = parts[1] || "";
+  const branch = String(env.GITHUB_BRANCH || "main").trim() || "main";
+  const tokenConfigured = Boolean(env.GITHUB_TOKEN);
+  const result = {
+    tokenConfigured,
+    repoConfigured: Boolean(rawRepo),
+    repo: rawRepo || null,
+    branch,
+    path,
+    requestAttempted: false,
+    httpStatus: null,
+    githubMessage: null,
+    hasContent: false,
+    decodedBytes: 0,
+    parsedJson: false,
+    itemCount: null
+  };
+  if (!owner || !repo) { result.githubMessage = "GITHUB_REPO fehlt oder hat nicht das Format owner/repository"; return result; }
+  if (!tokenConfigured) { result.githubMessage = "GITHUB_TOKEN ist im Worker nicht konfiguriert"; return result; }
+  const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`;
+  result.requestAttempted = true;
+  const r = await fetch(api, { headers: gh(env.GITHUB_TOKEN) });
+  result.httpStatus = r.status;
+  const text = await r.text();
+  let j = null;
+  try { j = JSON.parse(text); } catch {}
+  if (!r.ok) {
+    result.githubMessage = j?.message || `GitHub API HTTP ${r.status}`;
+    return result;
+  }
+  result.hasContent = Boolean(j?.content);
+  if (!j?.content) {
+    result.githubMessage = "GitHub API antwortet, aber die Datei enthält kein content-Feld";
+    return result;
+  }
+  try {
+    const b64 = String(j.content).replace(/\s/g, "");
+    const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+    result.decodedBytes = bytes.length;
+    const parsed = JSON.parse(new TextDecoder().decode(bytes));
+    result.parsedJson = true;
+    result.itemCount = Array.isArray(parsed) ? parsed.length : null;
+  } catch (e) {
+    result.githubMessage = `JSON/Content konnte nicht gelesen werden: ${e.message}`;
+  }
+  return result;
+}
+
 async function readGithubJSON(env, path, fallback) {
+  const d = await githubDiagnostics(env, path);
+  if (!d.parsedJson) return fallback;
   const [owner, repo] = String(env.GITHUB_REPO || "").trim().split("/");
-  if (!owner || !repo) return fallback;
-  const branch = env.GITHUB_BRANCH || "main";
+  const branch = String(env.GITHUB_BRANCH || "main").trim() || "main";
   const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`;
   const r = await fetch(api, { headers: gh(env.GITHUB_TOKEN) });
   if (!r.ok) return fallback;
   try {
     const j = await r.json();
-    if (!j.content) return fallback;
-    const b64 = String(j.content).replace(/\s/g, "");
+    const b64 = String(j.content || "").replace(/\s/g, "");
     const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
     return JSON.parse(new TextDecoder().decode(bytes));
   } catch { return fallback; }
@@ -392,4 +452,4 @@ async function putGithub(env, path, content, message) {
   const r = await fetch(api, { method: "PUT", headers: { ...gh(env.GITHUB_TOKEN), "content-type": "application/json" }, body: JSON.stringify(body) });
   if (!r.ok) throw Error(`GitHub update failed ${r.status}`);
 }
-const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.5.9" });
+const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.5.10" });
