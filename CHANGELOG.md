@@ -1,5 +1,14 @@
 # Verse Radar – Changelog
 
+## 0.5.11 – Datenstruktur bereinigt
+- `public/data/` ist die einzige vorgesehene Datenablage für die Website.
+- Alle sechs Daten-Dateien werden über `/data/...` im Browser geladen; das entspricht der Cloudflare-Asset-Wurzel `public/`.
+- Der Worker liest und schreibt `public/data/news.json` und `public/data/meta.json`.
+- GitHub-Konfiguration bleibt auf `VerseRadar/verse-radar`, Branch `main`, maximal 20 importierte Comm-Link-Beiträge.
+- Die Root-Ebene `data/` wird nicht mehr verwendet; bestehende alte Dateien dort müssen einmalig im GitHub-Repository gelöscht werden.
+- `/debug/github` bleibt vorerst für die Verifikation der GitHub-Anbindung erhalten.
+- Changelog wird zentral in dieser Datei fortgeführt.
+
 ## 0.5.10 – GitHub-Diagnose
 - Fügt `/debug/github` hinzu, um die GitHub-Verbindung des Workers gezielt zu diagnostizieren.
 - Zeigt keinen Token an, sondern nur Konfigurationsstatus, Repository, Branch, HTTP-Status, Dateistatus und JSON-Ergebnis.

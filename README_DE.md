@@ -18,11 +18,22 @@ Der Worker liest die offizielle RSI Comm-Link-Seite ein, erkennt aktuelle Comm-L
 - Secret: `OPENAI_API_KEY` (optional)
 - Secret: `GITHUB_TOKEN` (für automatisches Zurückschreiben)
 - Secret optional: `RUN_SECRET`
-- Variable: `GITHUB_REPO` = `DEIN-USERNAME/verse-radar`
+- Variable: `GITHUB_REPO` = `VerseRadar/verse-radar`
 - Variable optional: `GITHUB_BRANCH` = `main`
 - Variable optional: `MAX_ITEMS`
 
 Cron: alle 2 Stunden (`0 */2 * * *`).
+
+## Datenstruktur
+Die Website-Daten liegen ausschließlich unter `public/data/`.
+- `public/data/news.json`
+- `public/data/patches.json`
+- `public/data/deals.json`
+- `public/data/events.json`
+- `public/data/freefly.json`
+- `public/data/meta.json`
+
+Im Browser werden diese Dateien über `/data/...` geladen, weil `public/` bei Cloudflare als Website-Wurzel dient. Der alte Root-Ordner `data/` wird nicht mehr verwendet und sollte im GitHub-Repository gelöscht werden.
 
 ## Test-Endpunkte
 - `/health` – zeigt die laufende Worker-Version.
