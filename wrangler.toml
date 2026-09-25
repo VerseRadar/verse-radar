@@ -9,6 +9,6 @@ directory = "./public/"
 crons = ["0 */2 * * *"]
 
 [vars]
-GITHUB_REPO = "DEIN-GITHUB-USERNAME/verse-radar"
+GITHUB_REPO = "VerseRadar/verse-radar"
 GITHUB_BRANCH = "main"
 MAX_ITEMS = "20"
