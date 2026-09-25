@@ -1,11 +1,13 @@
 const CONFIG = {
   referralUrl: "https://robertsspaceindustries.com/enlist?referral=DEINCODE",
   dataBase: "/data/",
-  siteVersion: "0.5.1"
+  newsEndpoint: "/api/news",
+  siteVersion: "0.5.6"
 };
 
 async function loadJSON(name){
-  const r=await fetch(CONFIG.dataBase+name,{cache:"no-store"});
+  const url = name === "news.json" ? CONFIG.newsEndpoint : CONFIG.dataBase+name;
+  const r=await fetch(url,{cache:"no-store"});
   if(!r.ok) throw new Error(name+" "+r.status);
   return r.json();
 }
