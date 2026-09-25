@@ -1,10 +1,10 @@
 {
-  "updatedAt": "2026-09-25T11:47:39.302Z",
+  "updatedAt": "2026-09-25T12:00:31.516Z",
   "source": "https://robertsspaceindustries.com/en/comm-link?sort=publish_new",
   "mode": "live",
   "automation": "Cloudflare Worker + RSI Comm-Link",
   "version": "0.5.10",
   "fetchedItems": 20,
-  "newItems": 20,
+  "newItems": 0,
   "aiItems": 0
 }
