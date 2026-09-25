@@ -2,14 +2,26 @@ const CONFIG = {
   referralUrl: "https://robertsspaceindustries.com/enlist?referral=DEINCODE",
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.5.6"
+  siteVersion: "0.5.7"
 };
 
 async function loadJSON(name){
   const url = name === "news.json" ? CONFIG.newsEndpoint : CONFIG.dataBase+name;
   const r=await fetch(url,{cache:"no-store"});
-  if(!r.ok) throw new Error(name+" "+r.status);
-  return r.json();
+  if(!r.ok) {
+    if(name === "news.json") return loadStaticNews();
+    throw new Error(name+" "+r.status);
+  }
+  const data=await r.json();
+  if(name === "news.json" && !Array.isArray(data)) return loadStaticNews();
+  return data;
+}
+async function loadStaticNews(){
+  const r=await fetch(CONFIG.dataBase+"news.json",{cache:"no-store"});
+  if(!r.ok) throw new Error("news.json "+r.status);
+  const data=await r.json();
+  if(!Array.isArray(data)) throw new Error("news.json is not an array");
+  return data;
 }
 function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
 function dateDE(v){if(!v)return "—"; const d=new Date(v); return Number.isNaN(d.getTime())?esc(v):new Intl.DateTimeFormat("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"}).format(d);}

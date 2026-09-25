@@ -1,4 +1,4 @@
-# Verse Radar 0.5.4
+# Verse Radar 0.5.7
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -29,7 +29,7 @@ Cron: alle 2 Stunden (`0 */2 * * *`).
 - `/preview` – holt RSI-Beiträge ab, ohne GitHub zu verändern.
 - `/run` – führt den Import aus und schreibt bei vorhandenen GitHub-Zugangsdaten die Daten zurück.
 
-## 0.5.4
+## 0.5.7
 Der RSI-Parser wurde robuster gegen Änderungen am HTML-Aufbau der Comm-Link-Seite gemacht. `/preview` liefert bei einem Fehler zusätzliche technische Diagnosewerte, damit ein weiterer Fehler gezielt behoben werden kann.
 
 ## Was bewusst manuell bleibt
