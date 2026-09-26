@@ -1,14 +1,24 @@
 # Changelog – Verse Radar
 
-## 0.6.2 – Patch Notes repariert und robuster gemacht
+## 0.6.3 – Patch Notes repariert und robuster gemacht
 - Doppelte Patch-Versionen werden jetzt vor der Verarbeitung entfernt; bei `Alpha 4.10.1` wird der aktuellere Datensatz bevorzugt.
 - `previous` wird erst nach der Bereinigung ermittelt und zeigt damit die tatsächliche Vorgängerversion statt eines Duplikats.
 - Patch-Inhalte werden aus mehreren möglichen API-Feldern erkannt.
 - Falls die Listen-/Detailantwort keinen ausreichenden Inhalt liefert, versucht Verse Radar zusätzlich das archivierte Patch-Notes-Dokument von StarCitizen.tools auszulesen.
 - Strukturierte Änderungen für Gameplay, Inventar, Audio sowie Bugfixes werden auch ohne OpenAI-Key erzeugt.
 - Die lokale Fallback-Zusammenfassung wurde erweitert und bleibt deutsch.
-- Versionsanzeige, Worker-User-Agent, GitHub-Commitmeldungen und README auf 0.6.2 aktualisiert.
+- Versionsanzeige, Worker-User-Agent, GitHub-Commitmeldungen und README auf 0.6.3 aktualisiert.
 - Attribution für `api.star-citizen.wiki` ergänzt.
+
+## 0.6.2 – Patch-Archiv-Fallback korrigiert
+- Korrekte StarCitizen.tools-Wiki-Seiten für Patch-Versionen verwendet.
+- Patch-Titel mit Varianten wie `Alpha 4.10: ...` werden erkannt.
+- Patch-Versionen werden nach numerischer Versionsnummer sortiert und dedupliziert.
+
+## 0.6.1 – Patch-Notes-Datenpipeline
+- Patch-Discovery und Archiv-Fallback erweitert.
+- Vorgängerversion und Patch-Vergleich bereinigt.
+- Strukturierte Patch-Daten für die spätere deutsche Aufbereitung vorbereitet.
 
 ## 0.6.0
 - Patch-Notes-Pipeline ergänzt: automatische Erkennung aktueller Alpha-Patchnotes über RSI/Star Citizen Wiki API.
