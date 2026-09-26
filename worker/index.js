@@ -1,4 +1,4 @@
-/* Verse Radar 0.6.9 – RSI news + patch notes ingestion
+/* Verse Radar 0.7.0 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -19,18 +19,28 @@ const PATCH_SEEDS = [
 ];
 const VERSION_RE = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?$/;
 const PATCH_NOTES_URL = "https://robertsspaceindustries.com/en/patch-notes";
-const RELEVANT = /patch|alpha\s*\d|free\s*fly|foundation festival|fleet week|invictus|iae|event|roadmap|ship showdown|siege|monthly report|this week in star citizen|live experience|pirate week|subscriber|vehicle|ship|aegis|argo|anvil|kruger|rsi|sabre|aurora|gameplay|engineering/i;
+const RELEVANT = /patch|alpha\s*\d|free\s*fly|foundation festival|fleet week|invictus|iae|event|roadmap|ship showdown|siege|monthly report|this week in star citizen|live experience|pirate week|subscriber|vehicle|ship|aegis|argo|anvil|kruger|sabre|aurora|gameplay|engineering|q\s*&\s*a|letter from the chairman/i;
+const NEWS_SUMMARY_VERSION = "0.7.0";
+const OLD_NEWS_PLACEHOLDER = "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.";
 
 export default {
   async fetch(request, env) {
     const u = new URL(request.url);
     if (u.pathname === "/health") {
-      return json({ ok: true, service: "verse-radar-updater", version: "0.6.9" });
+      return json({ ok: true, service: "verse-radar-updater", version: "0.7.0" });
     }
     if (u.pathname === "/preview") {
       try {
         const items = await fetchRSIItems();
         return json({ ok: true, source: COMM_LINK_URL, count: items.length, items });
+      } catch (e) {
+        return json({ ok: false, error: e.message }, 502);
+      }
+    }
+    if (u.pathname === "/preview/news") {
+      try {
+        const result = await buildNews(env);
+        return json({ ok: true, count: result.news.length, fetchedItems: result.fetchedItems, newItems: result.newItems, refreshedItems: result.refreshedItems, aiItems: result.aiItems, published: false, items: result.news });
       } catch (e) {
         return json({ ok: false, error: e.message }, 502);
       }
@@ -59,25 +69,25 @@ export default {
       try {
         if (env.GITHUB_TOKEN && env.GITHUB_REPO) {
           const patches = await readGithubJSON(env, "public/data/patches.json", null);
-          if (Array.isArray(patches)) return json(patches);
+          if (Array.isArray(patches)) return new Response(JSON.stringify(patches, null, 2), { headers: { "content-type": "application/json;charset=utf-8", "cache-control": "no-store", "x-verse-radar-patches-source": "github" } });
         }
         if (env.ASSETS) {
           const asset = await env.ASSETS.fetch(new Request(new URL("/data/patches.json", u.origin), request));
-          return new Response(await asset.text(), { status: asset.status, headers: { "content-type": "application/json;charset=utf-8", "cache-control": "no-store, no-cache, must-revalidate" } });
+          return new Response(await asset.text(), { status: asset.status, headers: { "content-type": "application/json;charset=utf-8", "cache-control": "no-store, no-cache, must-revalidate", "x-verse-radar-patches-source": "static-fallback" } });
         }
         return json([]);
       } catch (e) { return json({ ok: false, error: e.message }, 500); }
     }
-    if (u.pathname === "/run") {
+    if (u.pathname === "/run" || u.pathname === "/run/news") {
       if (env.RUN_SECRET && u.searchParams.get("key") !== env.RUN_SECRET) return json({ ok: false, error: "Unauthorized" }, 401);
-      try { return json(await updateSite(env)); } catch (e) { return json({ ok: false, error: e.message }, 500); }
+      try { return json(await updateSite(env, { includePatches: u.pathname === "/run" })); } catch (e) { return json({ ok: false, error: e.message }, 500); }
     }
     if (u.pathname === "/debug/github") {
       try {
         const d = await githubDiagnostics(env, "public/data/news.json");
-        return json({ ok: true, version: "0.6.9", github: d });
+        return json({ ok: true, version: "0.7.0", github: d });
       } catch (e) {
-        return json({ ok: false, version: "0.6.9", error: e.message }, 500);
+        return json({ ok: false, version: "0.7.0", error: e.message }, 500);
       }
     }
     if (u.pathname === "/api/news") {
@@ -107,12 +117,13 @@ export default {
     }
     // Public website: let Cloudflare Static Assets serve /public.
     if (env.ASSETS) return env.ASSETS.fetch(request);
-    return new Response("Verse Radar 0.6.9", { headers: { "content-type": "text/plain;charset=utf-8" } });
+    return new Response("Verse Radar 0.7.0", { headers: { "content-type": "text/plain;charset=utf-8" } });
   },
   async scheduled(_, env, ctx) {
-    // Keep the proven news schedule; patches are published automatically only
-    // after the preview has been reviewed and this flag is explicitly enabled.
-    ctx.waitUntil(updateSite(env, { includePatches: env.PATCH_AUTO_PUBLISH === "true" }));
+    // Both data types require a reviewed preview before scheduled publishing.
+    const includeNews = env.NEWS_AUTO_PUBLISH === "true";
+    const includePatches = env.PATCH_AUTO_PUBLISH === "true";
+    if (includeNews || includePatches) ctx.waitUntil(updateSite(env, { includeNews, includePatches }));
   }
 };
 
@@ -133,7 +144,7 @@ async function fetchRSIItems() {
     try {
       const r = await fetch(url, {
         headers: {
-          "user-agent": "Verse-Radar/0.6.9 (+independent fan site)",
+          "user-agent": "Verse-Radar/0.7.0 (+independent fan site)",
           "accept": "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
           "accept-language": "en-US,en;q=0.9,de;q=0.8"
         }
@@ -142,8 +153,8 @@ async function fetchRSIItems() {
       const parsed = r.ok ? parseCommLink(html) : { candidates: 0, items: [] };
       diagnostics.push({ source: url, httpStatus: r.status, htmlLength: html.length, candidates: parsed.candidates, parsedItems: parsed.items.length });
       if (r.ok && parsed.items.length) {
-        const relevant = parsed.items.filter(x => RELEVANT.test(`${x.title} ${x.description}`)).slice(0, MAX);
-        return await enrichDates(relevant.length ? relevant : parsed.items.slice(0, MAX));
+        const relevant = dedupeNewsItems(parsed.items.filter(x => relevantNewsTitle(x.title))).slice(0, MAX);
+        if (relevant.length >= 3) return await enrichDates(relevant);
       }
     } catch (e) {
       diagnostics.push({ source: url, error: e.message });
@@ -156,7 +167,7 @@ async function fetchRSIItems() {
     const apiUrl = "https://api.star-citizen.wiki/api/comm-links?page[size]=50&sort=-id";
     const r = await fetch(apiUrl, {
       headers: {
-        "user-agent": "Verse-Radar/0.6.9 (+independent fan site)",
+        "user-agent": "Verse-Radar/0.7.0 (+independent fan site)",
         "accept": "application/json"
       }
     });
@@ -167,8 +178,8 @@ async function fetchRSIItems() {
     diagnostics.push({ source: apiUrl, httpStatus: r.status, bodyLength: textBody.length, records: records.length });
     if (r.ok && records.length) {
       const items = records.map(normalizeWikiCommLink).filter(Boolean);
-      const relevant = items.filter(x => RELEVANT.test(`${x.title} ${x.description}`));
-      return (relevant.length ? relevant : items).slice(0, MAX);
+      const relevant = dedupeNewsItems(items.filter(x => relevantNewsTitle(x.title))).slice(0, MAX);
+      if (relevant.length >= 3) return relevant;
     }
   } catch (e) {
     diagnostics.push({ source: "star-citizen-wiki-api", error: e.message });
@@ -187,11 +198,8 @@ function normalizeWikiCommLink(record) {
   if (!Number.isInteger(id) || id <= 0 || !validTitle(title)) return null;
   const slug = slugify(title);
   const url = `https://robertsspaceindustries.com/en/comm-link/transmission/${id}-${slug}`;
-  let date = null;
-  if (record?.created_at) {
-    const d = new Date(record.created_at);
-    if (!Number.isNaN(d.getTime())) date = d.toISOString();
-  }
+  let date = record?.published_at ? validDate(record.published_at) : null;
+  if (!date && record?.created_at) date = validDate(record.created_at);
   if (!date && record?.created_at_human) {
     const d = new Date(record.created_at_human);
     if (!Number.isNaN(d.getTime())) date = d.toISOString();
@@ -200,7 +208,7 @@ function normalizeWikiCommLink(record) {
     title,
     url,
     date: date || new Date().toISOString(),
-    description: "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
+    description: "",
     sourceId: id
   };
 }
@@ -220,7 +228,7 @@ async function enrichDates(items) {
   // retain ingestion time rather than dropping the story.
   return await Promise.all(items.map(async item => {
     try {
-      const r = await fetch(item.url, { headers: { "user-agent": "Verse-Radar/0.6.9 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
+      const r = await fetch(item.url, { headers: { "user-agent": "Verse-Radar/0.7.0 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
       if (!r.ok) return item;
       const html = await r.text();
       const iso = extractPublishedDate(html);
@@ -296,7 +304,7 @@ function parseCommLink(html) {
       title,
       url: href,
       date: new Date().toISOString(),
-      description: "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt."
+      description: ""
     });
     if (out.length >= 60) break;
   }
@@ -352,45 +360,115 @@ function validTitle(title) {
   return !/^(read more|view all|login|sign in|search)$/i.test(title);
 }
 
+function relevantNewsTitle(title) {
+  // The archive can also contain internal asset names such as
+  // R-PU-ORS-HeavyArmour-6; these are not editorial news articles.
+  return validTitle(title) && !/^R-PU-ORS-/i.test(title) && RELEVANT.test(title);
+}
+
+function newsTitleKey(title) {
+  return String(title || "").normalize("NFKC").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function dedupeNewsItems(items) {
+  const urls = new Set();
+  const titles = new Set();
+  return items.filter(item => {
+    const key = newsTitleKey(item.title);
+    const url = item.url || item.sourceUrl;
+    if (urls.has(url) || (!/^this week in star citizen$/i.test(key) && titles.has(key))) return false;
+    urls.add(url);
+    titles.add(key);
+    return true;
+  });
+}
+
+function isNewsPlaceholder(summary) {
+  return !summary || strip(summary) === OLD_NEWS_PLACEHOLDER;
+}
+
+function fallbackNewsSummary(item) {
+  const title = strip(item.title);
+  let match;
+  if (/^this week in star citizen$/i.test(title)) return "RSI veröffentlicht einen neuen Wochenüberblick zu Star Citizen. Die konkreten Themen stehen in der Originalmeldung.";
+  if ((match = title.match(/^q\s*&\s*a:\s*(.+)$/i))) return `Fragen und Antworten zu ${match[1]}. Die einzelnen Aussagen stehen in der Originalmeldung.`;
+  if (/^roadmap roundup/i.test(title)) return `RSI veröffentlicht „${title}“. Welche Punkte des Entwicklungsplans besprochen werden, steht in der Originalmeldung.`;
+  if ((match = title.match(/^star citizen monthly report:\s*(.+)$/i))) return `Monatsbericht zur Entwicklung von Star Citizen für ${match[1]}. Die behandelten Arbeiten stehen in der Originalmeldung.`;
+  if (/ship showdown.*winners/i.test(title)) return `RSI gibt in „${title}“ die Gewinner des Ship Showdown bekannt. Die Ergebnisse stehen in der Originalmeldung.`;
+  if (/^star citizen alpha\s*\d/i.test(title)) return `Offizielle Mitteilung zu ${title}. Die konkreten Änderungen findest du in den verlinkten Patch Notes.`;
+  if (/letter from the chairman/i.test(title)) return `Brief des Chairman unter dem Titel „${title}“. Den Wortlaut findest du in der Originalmeldung.`;
+  if (/improving the live experience/i.test(title)) return `RSI informiert unter „${title}“ über die Live-Spielerfahrung. Einzelheiten stehen in der Originalmeldung.`;
+  if (/free\s*fly/i.test(title)) return `RSI-Beitrag zu Free Fly: „${title}“. Termine und Bedingungen stehen in der Originalmeldung.`;
+  if (/^aegis\s|^argo\s|^anvil\s|^kruger\s/i.test(title)) return `RSI-Beitrag über ${title}. Weitere Angaben stehen in der Originalmeldung.`;
+  return `RSI-Beitrag mit dem Titel „${title}“. Die Einzelheiten stehen in der Originalmeldung.`;
+}
+
+function patchNewsSummary(item, patches) {
+  const articleId = Number(item.sourceId || item.url?.match(/\/(\d+)-/)?.[1]);
+  if (!articleId || !Array.isArray(patches)) return "";
+  const patch = patches.find(x => x.summaryVersion === "0.6.8" && Number(x.sourceUrl?.match(/\/(\d+)-/)?.[1]) === articleId);
+  if (!patch?.summary) return "";
+  // Use only the beginning of the already reviewed patch summary on news cards.
+  return patch.summary.split(/(?<=[.!?])\s+(?=[A-ZÄÖÜ])/u).slice(0, 2).join(" ").trim();
+}
+
 function extractDateFromSlug(url) {
   // Slugs normally do not contain dates, so return null here.  Actual article
   // dates are filled from the article page in the enrichment pass when needed.
   return null;
 }
 
-async function updateSite(env, { includePatches = true } = {}) {
+async function buildNews(env) {
   const items = await fetchRSIItems();
-  const existing = env.GITHUB_TOKEN && env.GITHUB_REPO ? await readGithubJSON(env, "public/data/news.json", []) : [];
+  if (items.length < 3) throw Error("Zu wenige redaktionelle Comm-Link-Beiträge erkannt; News-Import nicht veröffentlicht.");
+  const existingData = env.GITHUB_TOKEN && env.GITHUB_REPO ? await readGithubJSON(env, "public/data/news.json", null) : [];
+  if (!Array.isArray(existingData)) throw Error("Gespeicherte News aus GitHub nicht lesbar; News-Import sicherheitshalber abgebrochen.");
+  const existing = existingData;
+  const existingPatches = env.GITHUB_TOKEN && env.GITHUB_REPO ? await readGithubJSON(env, "public/data/patches.json", []) : [];
   const known = new Set(existing.map(x => x.id));
   const news = [];
   let aiCount = 0;
+  let refreshedItems = 0;
 
   for (const item of items) {
     const id = hash(item.url);
     const old = existing.find(x => x.id === id);
-    if (old) { news.push(old); continue; }
+    if (old && !isNewsPlaceholder(old.summary)) { news.push(old); continue; }
+    if (old) refreshedItems++;
+    const patchSummary = patchNewsSummary(item, existingPatches);
     let ai = null;
-    if (env.OPENAI_API_KEY) {
+    if (env.OPENAI_API_KEY && !patchSummary) {
       try { ai = await summarize(item, env.OPENAI_API_KEY); aiCount++; } catch (_) {}
     }
-    news.push({ id, title: ai?.title || item.title, category: ai?.category || classify(item.title), date: item.date, summary: ai?.summary || item.description, sourceUrl: item.url, source: "RSI Comm-Link", ai: Boolean(ai) });
+    news.push({ id, title: ai?.title || item.title, category: ai?.category || classify(item.title), date: item.date, summary: patchSummary || ai?.summary || fallbackNewsSummary(item), sourceUrl: item.url, source: "RSI Comm-Link", ai: Boolean(ai), summaryBasis: patchSummary ? "Patch Notes" : ai ? "KI" : "Titel", summaryVersion: NEWS_SUMMARY_VERSION });
   }
-  for (const old of existing) if (!news.some(n => n.id === old.id)) news.push(old);
-  news.sort((a, b) => new Date(b.date) - new Date(a.date));
-  const finalNews = news.slice(0, 60);
+  // Preserve older useful articles, but remove stale demo links, technical
+  // archive records and the repeated placeholder from earlier imports.
+  for (const old of existing) {
+    if (news.some(n => n.id === old.id) || isNewsPlaceholder(old.summary) || !isArticleUrl(old.sourceUrl) || /^R-PU-ORS-/i.test(old.title || "")) continue;
+    news.push(old);
+  }
+  news.sort((a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0));
+  const finalNews = dedupeNewsItems(news).slice(0, 60);
+  return { news: finalNews, fetchedItems: items.length, newItems: finalNews.filter(n => n.id && !known.has(n.id)).length, refreshedItems, aiItems: aiCount };
+}
+
+async function updateSite(env, { includeNews = true, includePatches = true } = {}) {
+  const newsResult = includeNews ? await buildNews(env) : null;
 
   const patchResult = includePatches ? await updatePatches(env) : null;
   const now = new Date().toISOString();
-  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation: includePatches ? "Cloudflare Worker + RSI Comm-Link + RSI Patch Notes" : "Cloudflare Worker + RSI Comm-Link; Patch-Import pausiert", version: "0.6.9", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length, aiItems: aiCount, patchItems: patchResult?.items.length ?? null, patchAiItems: patchResult?.aiItems ?? null };
+  const automation = includeNews && includePatches ? "Cloudflare Worker + RSI Comm-Link + RSI Patch Notes" : includeNews ? "Cloudflare Worker + RSI Comm-Link; Patch-Import pausiert" : "Cloudflare Worker + RSI Patch Notes; News-Import pausiert";
+  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation, version: "0.7.0", fetchedItems: newsResult?.fetchedItems ?? null, newItems: newsResult?.newItems ?? null, refreshedItems: newsResult?.refreshedItems ?? null, aiItems: newsResult?.aiItems ?? null, newsItems: newsResult?.news.length ?? null, patchItems: patchResult?.items.length ?? null, patchAiItems: patchResult?.aiItems ?? null };
 
   if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) {
-    return { ok: true, version: "0.6.9", published: false, ...meta, note: "RSI-Abholung funktioniert. GitHub Secrets fehlen noch; daher wurde nichts zurückgeschrieben." };
+    return { ok: true, version: "0.7.0", published: false, ...meta, note: "GitHub Secrets fehlen; nichts zurückgeschrieben." };
   }
 
-  await putGithub(env, "public/data/news.json", JSON.stringify(finalNews, null, 2) + "\n", "Verse Radar 0.6.9: update news");
-  if (includePatches) await putGithub(env, "public/data/patches.json", JSON.stringify(patchResult.patches, null, 2) + "\n", "Verse Radar 0.6.9: update patches");
-  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", "Verse Radar 0.6.9: update meta");
-  return { ok: true, version: "0.6.9", published: true, ...meta };
+  if (includeNews) await putGithub(env, "public/data/news.json", JSON.stringify(newsResult.news, null, 2) + "\n", "Verse Radar 0.7.0: update news");
+  if (includePatches) await putGithub(env, "public/data/patches.json", JSON.stringify(patchResult.patches, null, 2) + "\n", "Verse Radar 0.7.0: update patches");
+  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", "Verse Radar 0.7.0: update meta");
+  return { ok: true, version: "0.7.0", published: true, ...meta };
 }
 
 async function updatePatches(env) {
@@ -433,7 +511,7 @@ async function fetchPatchItems() {
   const discovered = [];
   try {
     const apiUrl = "https://api.star-citizen.wiki/api/comm-links?page[size]=100&sort=-id";
-    const r = await fetch(apiUrl, { headers: { "user-agent": "Verse-Radar/0.6.9 (+independent fan site)", "accept": "application/json" } });
+    const r = await fetch(apiUrl, { headers: { "user-agent": "Verse-Radar/0.7.0 (+independent fan site)", "accept": "application/json" } });
     const body = await r.json();
     const records = Array.isArray(body?.data) ? body.data : [];
     for (const record of records) {
@@ -490,7 +568,7 @@ function extractPatchContent(record) {
 async function fetchPatchDetail(id, current = "") {
   try {
     const detail = await fetch(`https://api.star-citizen.wiki/api/comm-links/${id}`, {
-      headers: { "user-agent": "Verse-Radar/0.6.9 (+independent fan site)", "accept": "application/json" }
+      headers: { "user-agent": "Verse-Radar/0.7.0 (+independent fan site)", "accept": "application/json" }
     });
     if (!detail.ok) return current;
     const dj = await detail.json();
@@ -517,7 +595,7 @@ async function fetchWikiUpdatePage(version, current = "") {
       api.searchParams.set("format", "json");
       api.searchParams.set("origin", "*");
       const r = await fetch(api.toString(), {
-        headers: { "user-agent": "Verse-Radar/0.6.9 (+independent fan site)", "accept": "application/json" }
+        headers: { "user-agent": "Verse-Radar/0.7.0 (+independent fan site)", "accept": "application/json" }
       });
       if (r.ok) {
         const body = await r.json();
@@ -533,7 +611,7 @@ async function fetchWikiUpdatePage(version, current = "") {
     try {
       const slug = `Star Citizen ${candidate}`.replace(/\s+/g, "_");
       const url = `https://starcitizen.tools/Update%3A${encodeURIComponent(slug)}`;
-      const r = await fetch(url, { headers: { "user-agent": "Verse-Radar/0.6.9 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
+      const r = await fetch(url, { headers: { "user-agent": "Verse-Radar/0.7.0 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
       if (!r.ok) continue;
       const html = await r.text();
       const main = html.match(/<main[\s\S]*?<\/main>/i)?.[0] || html.match(/<article[\s\S]*?<\/article>/i)?.[0] || html;
@@ -781,14 +859,14 @@ async function githubDiagnostics(env, path) {
 }
 
 async function readGithubJSON(env, path, fallback) {
-  const d = await githubDiagnostics(env, path);
-  if (!d.parsedJson) return fallback;
+  if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) return fallback;
   const [owner, repo] = String(env.GITHUB_REPO || "").trim().split("/");
+  if (!owner || !repo) return fallback;
   const branch = String(env.GITHUB_BRANCH || "main").trim() || "main";
   const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`;
-  const r = await fetch(api, { headers: gh(env.GITHUB_TOKEN) });
-  if (!r.ok) return fallback;
   try {
+    const r = await fetch(api, { headers: gh(env.GITHUB_TOKEN) });
+    if (!r.ok) return fallback;
     const j = await r.json();
     const b64 = String(j.content || "").replace(/\s/g, "");
     const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
@@ -806,4 +884,4 @@ async function putGithub(env, path, content, message) {
   const r = await fetch(api, { method: "PUT", headers: { ...gh(env.GITHUB_TOKEN), "content-type": "application/json" }, body: JSON.stringify(body) });
   if (!r.ok) throw Error(`GitHub update failed ${r.status}`);
 }
-const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.6.9" });
+const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.7.0" });

@@ -1,5 +1,23 @@
 # Changelog – Verse Radar
 
+## 0.7.0 – News-Import überprüfen und bereinigen
+- `/preview/news` zeigt die veröffentlichbare News-Liste ohne GitHub-Schreibzugriff. `/run/news` veröffentlicht nur News und Metadaten.
+- Relevanz wird am Titel geprüft; der generische RSI-Platzhalter zählt nicht mehr als Suchtreffer. Technische `R-PU-ORS-*`-Kennungen und doppelte identische Roadmap-Titel werden ausgelassen. Wiederkehrende Wochenübersichten bleiben erhalten.
+- Die alten identischen News-Platzhalter werden durch vorsichtige deutsche Beschreibungen anhand des Titels ersetzt. Für eine News zur exakt selben Comm-Link-ID wie bereits geprüfte Patch Notes werden zwei Sätze daraus verwendet. Die Herkunft der Beschreibung ist auf der Seite gekennzeichnet.
+- Der automatische News-Import pausiert nach dem Einspielen, bis `NEWS_AUTO_PUBLISH=true` ausdrücklich gesetzt wird. Die Patch-Automatik bleibt separat deaktiviert; die manuelle `/run`-Route bleibt erhalten.
+- Die statischen Rückfalldaten spiegeln den geprüften Stand mit 13 relevanten News und sechs Patch Notes statt alter Beispiele. GitHub-JSON wird mit einer Anfrage je Lesevorgang gelesen.
+- Bei statischem Datenrückfall meldet die Startseite einen gespeicherten Stand statt fälschlich „ONLINE“. Der News-Import bricht bei nicht lesbaren GitHub-Bestandsdaten ab, bevor er bestehende Einträge überschreiben könnte.
+- News-Kategoriefilter an die tatsächlich gespeicherten Werte `FREE FLY` und `EVENT` angepasst.
+- Startseite und Über-uns-Text beschreiben die tatsächliche Herkunft der Kurztexte; pauschale KI-Behauptungen und der alte Versionshinweis wurden entfernt.
+- Fehlende Koordinaten für den sechsten News- und vierten Event-Kontakt im Startseitenradar ergänzt.
+- Alte Event-Beispiele ohne Termin und Quelle entfernt. Nur Events mit gültigem aktuellem oder zukünftigem Zeitraum erscheinen; bei leerem Kalender wird ein ehrlicher Leerzustand angezeigt.
+
+## 0.6.10 – Fünf aktuelle Patch Notes, ältere in der History
+- `/patches.html` zeigt höchstens die fünf neuesten Versionen. Die Startseite zeigt weiterhin höchstens fünf.
+- `/patch-history.html` zeigt alle aktuell gespeicherten Versionen; für Einträge außerhalb der fünf neuesten lassen sich Zusammenfassung und Änderungen direkt dort öffnen.
+- Die bisherige Importgrenze von zwölf Einträgen bleibt bestehen. Ein dauerhaftes Archiv ist ein gesonderter Ausbau.
+- Worker- und Frontend-Version aktualisiert; die Patch-Aufbereitung bleibt auf `summaryVersion=0.6.8`.
+
 ## 0.6.9 – Kennzeichnung der Zusammenfassungen
 - News und Patch Notes werden nur bei `ai: true` als KI-gestützt bezeichnet. Regelbasiert erzeugte Patch-Zusammenfassungen sind entsprechend gekennzeichnet; News ohne KI tragen die neutrale Bezeichnung „Kurzbeschreibung“.
 - Startseite und Patch History lesen wie die Patch-Seite die aktuellen Einträge von `/api/patches`, mit Rückfall auf die lokale Datei bei API-Fehlern. Die History verlinkt echte Änderungen und Originalquellen statt einen noch nicht vorhandenen Vergleich zu versprechen.
