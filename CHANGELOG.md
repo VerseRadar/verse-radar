@@ -1,5 +1,12 @@
 # Changelog – Verse Radar
 
+## 0.6.7 – Patch-Aliasse und fehlende Quelltexte
+- Titelvarianten mit derselben numerischen Version werden als ein Patch behandelt; „Alpha 4.8: Tactical Strike“ kann nicht mehr fälschlich als Vorgänger von Alpha 4.8 erscheinen.
+- Einträge ohne auswertbaren Quelltext werden nicht als allgemeine Patch-Zusammenfassung veröffentlicht. Fehlen alle brauchbaren Quellen, meldet die Vorschau einen Fehler.
+- Bei doppelten Versionen wird zuerst ein brauchbarer Quelltext bevorzugt; bei zwei brauchbaren Treffern bleibt die neuere Quell-ID maßgeblich.
+- Die Vorschau bleibt ohne GitHub-Schreibzugriff, der automatische Patch-Import pausiert weiterhin bis zur ausdrücklichen Aktivierung.
+
+
 ## 0.6.6 – Patch-Vorschau zeigt die veröffentlichbare Ausgabe
 - `/preview/patches` führt nun dieselbe Aufbereitung wie `/run` aus, ohne Dateien in GitHub zu schreiben. Die Vorschau enthält `previous`, `summary`, `changes`, `fullSummary`, `sourceUrl`, `ai` und `summaryVersion`.
 - Eine kompakte `discovery`-Diagnose zeigt Quell-ID und Textlänge, ohne komplette Original-Patch-Notes in der Vorschau auszugeben.
