@@ -1,12 +1,12 @@
 {
-  "updatedAt": "2026-09-26T12:00:27.148Z",
+  "updatedAt": "2026-09-26T14:00:59.325Z",
   "source": "https://robertsspaceindustries.com/en/comm-link?sort=publish_new",
   "patchSource": "https://robertsspaceindustries.com/en/patch-notes",
   "mode": "live",
   "automation": "Cloudflare Worker + RSI Comm-Link + RSI Patch Notes",
   "version": "0.6.3",
   "fetchedItems": 20,
-  "newItems": 20,
+  "newItems": 0,
   "aiItems": 0,
   "patchItems": 7,
   "patchAiItems": 0
