@@ -450,6 +450,47 @@ async function fetchPatchItems() {
   return { items: unique };
 }
 
+function extractPatchContent(record) {
+  const candidates = [
+    record?.content,
+    record?.content_html,
+    record?.content_text,
+    record?.body,
+    record?.description,
+    record?.summary
+  ];
+  for (const value of candidates) {
+    const text = strip(value || "");
+    if (text.length >= 500) return text;
+  }
+  return "";
+}
+
+async function fetchPatchDetail(id, current = "") {
+  try {
+    const detail = await fetch(`https://api.star-citizen.wiki/api/comm-links/${id}`, {
+      headers: { "user-agent": "Verse-Radar/0.6.3 (+independent fan site)", "accept": "application/json" }
+    });
+    if (!detail.ok) return current;
+    const dj = await detail.json();
+    const d = dj?.data || dj;
+    return extractPatchContent(d) || current;
+  } catch (_) { return current; }
+}
+
+async function fetchWikiUpdatePage(version, current = "") {
+  try {
+    const slug = `Star Citizen ${version}`.replace(/\s+/g, "_");
+    const url = `https://starcitizen.tools/Update%3A${encodeURIComponent(slug)}`;
+    const r = await fetch(url, { headers: { "user-agent": "Verse-Radar/0.6.3 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
+    if (!r.ok) return current;
+    const html = await r.text();
+    const main = html.match(/<main[\s\S]*?<\/main>/i)?.[0] || html.match(/<article[\s\S]*?<\/article>/i)?.[0] || html;
+    const text = strip(main);
+    return text.length > current.length ? text : current;
+  } catch (_) { return current; }
+}
+
 function normalizePatchVersion(v) {
   return String(v || "").replace(/\.0(?=\b)/g, "").replace(/\s+/g, " ").trim();
 }
