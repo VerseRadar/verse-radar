@@ -1,5 +1,14 @@
 # Changelog – Verse Radar
 
+## 0.6.5 – Patch-Zusammenfassungen deutlich verbessert
+- Die echte Patch-Notiz bleibt weiterhin die Datenbasis; 0.6.4 hatte bereits den Content-Fetch repariert.
+- Fallback-Zusammenfassungen wurden für große Patches wie 4.10, 4.10.1 und 4.9 deutlich erweitert.
+- „Was hat sich geändert?“ erzeugt jetzt konkrete Punkte zu Gameplay, Missionen, Schiffen/Fahrzeugen, Loot, Technik, VR und wichtigen Fixes statt allgemeiner Sammeltexte.
+- Die lokale deutsche Gesamtzusammenfassung greift wichtige konkrete Patch-Themen und dokumentierte Fix-Zahlen auf.
+- Bereits gespeicherte 0.6.4-Zusammenfassungen werden nicht mehr fälschlich als aktuell übernommen; 0.6.5 erzeugt sie neu.
+- Der OpenAI-Prompt wurde präzisiert: 6–12 konkrete Änderungen, 350–900 Wörter Gesamtzusammenfassung, nur tatsächlich im Patch vorhandene Kategorien.
+- Worker-Version, User-Agent und GitHub-Commitmeldungen auf 0.6.5 aktualisiert.
+
 ## 0.6.3 – Patch Notes repariert und robuster gemacht
 - Doppelte Patch-Versionen werden jetzt vor der Verarbeitung entfernt; bei `Alpha 4.10.1` wird der aktuellere Datensatz bevorzugt.
 - `previous` wird erst nach der Bereinigung ermittelt und zeigt damit die tatsächliche Vorgängerversion statt eines Duplikats.

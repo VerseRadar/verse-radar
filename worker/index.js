@@ -1,4 +1,4 @@
-/* Verse Radar 0.6.4 – RSI news + patch notes ingestion
+/* Verse Radar 0.6.5 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -25,7 +25,7 @@ export default {
   async fetch(request, env) {
     const u = new URL(request.url);
     if (u.pathname === "/health") {
-      return json({ ok: true, service: "verse-radar-updater", version: "0.6.4" });
+      return json({ ok: true, service: "verse-radar-updater", version: "0.6.5" });
     }
     if (u.pathname === "/preview") {
       try {
@@ -63,9 +63,9 @@ export default {
     if (u.pathname === "/debug/github") {
       try {
         const d = await githubDiagnostics(env, "public/data/news.json");
-        return json({ ok: true, version: "0.6.4", github: d });
+        return json({ ok: true, version: "0.6.5", github: d });
       } catch (e) {
-        return json({ ok: false, version: "0.6.4", error: e.message }, 500);
+        return json({ ok: false, version: "0.6.5", error: e.message }, 500);
       }
     }
     if (u.pathname === "/api/news") {
@@ -95,7 +95,7 @@ export default {
     }
     // Public website: let Cloudflare Static Assets serve /public.
     if (env.ASSETS) return env.ASSETS.fetch(request);
-    return new Response("Verse Radar 0.6.4", { headers: { "content-type": "text/plain;charset=utf-8" } });
+    return new Response("Verse Radar 0.6.5", { headers: { "content-type": "text/plain;charset=utf-8" } });
   },
   async scheduled(_, env, ctx) { ctx.waitUntil(updateSite(env)); }
 };
@@ -117,7 +117,7 @@ async function fetchRSIItems() {
     try {
       const r = await fetch(url, {
         headers: {
-          "user-agent": "Verse-Radar/0.6.4 (+independent fan site)",
+          "user-agent": "Verse-Radar/0.6.5 (+independent fan site)",
           "accept": "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
           "accept-language": "en-US,en;q=0.9,de;q=0.8"
         }
@@ -140,7 +140,7 @@ async function fetchRSIItems() {
     const apiUrl = "https://api.star-citizen.wiki/api/comm-links?page[size]=50&sort=-id";
     const r = await fetch(apiUrl, {
       headers: {
-        "user-agent": "Verse-Radar/0.6.4 (+independent fan site)",
+        "user-agent": "Verse-Radar/0.6.5 (+independent fan site)",
         "accept": "application/json"
       }
     });
@@ -204,7 +204,7 @@ async function enrichDates(items) {
   // retain ingestion time rather than dropping the story.
   return await Promise.all(items.map(async item => {
     try {
-      const r = await fetch(item.url, { headers: { "user-agent": "Verse-Radar/0.6.4 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
+      const r = await fetch(item.url, { headers: { "user-agent": "Verse-Radar/0.6.5 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
       if (!r.ok) return item;
       const html = await r.text();
       const iso = extractPublishedDate(html);
@@ -365,16 +365,16 @@ async function updateSite(env) {
 
   const patchResult = await updatePatches(env);
   const now = new Date().toISOString();
-  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation: "Cloudflare Worker + RSI Comm-Link + RSI Patch Notes", version: "0.6.4", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length, aiItems: aiCount, patchItems: patchResult.items.length, patchAiItems: patchResult.aiItems };
+  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation: "Cloudflare Worker + RSI Comm-Link + RSI Patch Notes", version: "0.6.5", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length, aiItems: aiCount, patchItems: patchResult.items.length, patchAiItems: patchResult.aiItems };
 
   if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) {
-    return { ok: true, version: "0.6.4", published: false, ...meta, note: "RSI-Abholung funktioniert. GitHub Secrets fehlen noch; daher wurde nichts zurückgeschrieben." };
+    return { ok: true, version: "0.6.5", published: false, ...meta, note: "RSI-Abholung funktioniert. GitHub Secrets fehlen noch; daher wurde nichts zurückgeschrieben." };
   }
 
-  await putGithub(env, "public/data/news.json", JSON.stringify(finalNews, null, 2) + "\n", "Verse Radar 0.6.4: update news");
-  await putGithub(env, "public/data/patches.json", JSON.stringify(patchResult.patches, null, 2) + "\n", "Verse Radar 0.6.4: update patches");
-  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", "Verse Radar 0.6.4: update meta");
-  return { ok: true, version: "0.6.4", published: true, ...meta };
+  await putGithub(env, "public/data/news.json", JSON.stringify(finalNews, null, 2) + "\n", "Verse Radar 0.6.5: update news");
+  await putGithub(env, "public/data/patches.json", JSON.stringify(patchResult.patches, null, 2) + "\n", "Verse Radar 0.6.5: update patches");
+  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", "Verse Radar 0.6.5: update meta");
+  return { ok: true, version: "0.6.5", published: true, ...meta };
 }
 
 async function updatePatches(env) {
@@ -389,7 +389,7 @@ async function updatePatches(env) {
     const item = unique[i];
     const previous = unique[i + 1]?.version || null;
     const old = existing.find(x => x.version === item.version && x.sourceUrl === item.sourceUrl);
-    if (old && old.summary && old.fullSummary && Array.isArray(old.changes) && old.changes.length) {
+    if (old && old.summaryVersion === "0.6.5" && old.summary && old.fullSummary && Array.isArray(old.changes) && old.changes.length) {
       patches.push({ ...old, previous });
       continue;
     }
@@ -406,6 +406,7 @@ async function updatePatches(env) {
       fullSummary: ai?.fullSummary || item.fallbackFullSummary,
       sourceUrl: item.sourceUrl,
       ai: Boolean(ai),
+      summaryVersion: "0.6.5",
       note: "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
     });
   }
@@ -416,7 +417,7 @@ async function fetchPatchItems() {
   const discovered = [];
   try {
     const apiUrl = "https://api.star-citizen.wiki/api/comm-links?page[size]=100&sort=-id";
-    const r = await fetch(apiUrl, { headers: { "user-agent": "Verse-Radar/0.6.4 (+independent fan site)", "accept": "application/json" } });
+    const r = await fetch(apiUrl, { headers: { "user-agent": "Verse-Radar/0.6.5 (+independent fan site)", "accept": "application/json" } });
     const body = await r.json();
     const records = Array.isArray(body?.data) ? body.data : [];
     for (const record of records) {
@@ -469,7 +470,7 @@ function extractPatchContent(record) {
 async function fetchPatchDetail(id, current = "") {
   try {
     const detail = await fetch(`https://api.star-citizen.wiki/api/comm-links/${id}`, {
-      headers: { "user-agent": "Verse-Radar/0.6.4 (+independent fan site)", "accept": "application/json" }
+      headers: { "user-agent": "Verse-Radar/0.6.5 (+independent fan site)", "accept": "application/json" }
     });
     if (!detail.ok) return current;
     const dj = await detail.json();
@@ -496,7 +497,7 @@ async function fetchWikiUpdatePage(version, current = "") {
       api.searchParams.set("format", "json");
       api.searchParams.set("origin", "*");
       const r = await fetch(api.toString(), {
-        headers: { "user-agent": "Verse-Radar/0.6.4 (+independent fan site)", "accept": "application/json" }
+        headers: { "user-agent": "Verse-Radar/0.6.5 (+independent fan site)", "accept": "application/json" }
       });
       if (r.ok) {
         const body = await r.json();
@@ -512,7 +513,7 @@ async function fetchWikiUpdatePage(version, current = "") {
     try {
       const slug = `Star Citizen ${candidate}`.replace(/\s+/g, "_");
       const url = `https://starcitizen.tools/Update%3A${encodeURIComponent(slug)}`;
-      const r = await fetch(url, { headers: { "user-agent": "Verse-Radar/0.6.4 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
+      const r = await fetch(url, { headers: { "user-agent": "Verse-Radar/0.6.5 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
       if (!r.ok) continue;
       const html = await r.text();
       const main = html.match(/<main[\s\S]*?<\/main>/i)?.[0] || html.match(/<article[\s\S]*?<\/article>/i)?.[0] || html;
@@ -573,53 +574,77 @@ function dedupePatchItems(items) {
 }
 
 function validDate(v) { const d = new Date(v); return Number.isNaN(d.getTime()) ? null : d.toISOString(); }
+function sentenceList(parts, max=6) {
+  return parts.filter(Boolean).slice(0, max).join(" ");
+}
 function fallbackPatchSummary(version, content) {
-  const text = content || "";
+  const t = content || "";
   const parts = [];
-  if (/orison relief support/i.test(text)) parts.push("Orison Relief Support ergänzt neue Unterstützungs- und Wiederaufbauinhalte rund um Orison.");
-  if (/ground vehicle soft death/i.test(text)) parts.push("Das Verhalten von Bodenfahrzeugen bei Soft Death wurde erweitert.");
-  if (/creature and plant loot quality/i.test(text)) parts.push("Die Qualität bzw. Verfügbarkeit von Beute bei Kreaturen und Pflanzen wurde angepasst.");
-  if (/weapon attachment availability/i.test(text)) parts.push("Bestimmte Waffenaufsätze sind nun breiter im Loot-Pool verfügbar.");
-  if (/cargo distribution|pickup/i.test(text)) parts.push("Die Verteilung von Fracht bei Liefer- und Hauling-Aufträgen wurde überarbeitet.");
-  if (/audio/i.test(text)) parts.push("Mehrere Audio-Bereiche wurden erweitert oder überarbeitet.");
-  if (/client crashes|server crashes|stability and performance|bug fixes/i.test(text)) parts.push("Der Patch enthält zahlreiche Fehlerbehebungen sowie Stabilitätsverbesserungen.");
-  return parts.slice(0,5).join(" ") || `${version} enthält Änderungen und Fehlerbehebungen laut den offiziellen Patch Notes.`;
+  if (/orison relief support/i.test(t)) parts.push("Orison Relief Support bringt eine neue Reihe von Wiederaufbau-, Transport-, Herstellungs- und Kampfeinsätzen mit persönlichem Fortschritts- und Belohnungssystem.");
+  if (/siege of orison v2/i.test(t)) parts.push("Siege of Orison wurde als Instancing-Mission überarbeitet und bietet eine geschlossene Mission für Spieler und Gruppe.");
+  if (/recco battaglia/i.test(t)) parts.push("Recco Battaglia erweitert das Missionsangebot mit storybasierten und wiederholbaren Aufträgen rund um Bergbau und Ressourcenlogistik.");
+  if (/instancing/i.test(t)) parts.push("Instancing hält unterstützte Inhalte in separaten Instanzen für die jeweilige Gruppe und führt dafür neue Backend- und Skalierungslogik ein.");
+  if (/hydrogen & quantum fuel rebalance/i.test(t)) parts.push("Hydrogen- und Quantum-Treibstoff wurden bei Kapazitäten, Verbrauch und Preisen neu ausbalanciert.");
+  if (/vehicle armor update/i.test(t)) parts.push("Die Schiffsrüstung berücksichtigt ihren Zustand nun bei der Schadensreduktion und Schadensberechnung.");
+  if (/pricing, claims, & availability/i.test(t)) parts.push("Claim-, Liefer- und Expedite-Kosten sowie die Verfügbarkeit verschiedener Fahrzeuge, Waffen und Gegenstände wurden angepasst.");
+  if (/new fps weapon|arlington rifle|cq7.*bullpup|vendetta hmg|super heavy armor/i.test(t)) parts.push("Mehrere neue Waffen bzw. Ausrüstungsgegenstände wurden hinzugefügt, darunter neue FPS-Waffen und schwere Ausrüstung.");
+  if (/virtual reality updates|experimental vr|openxr/i.test(t)) parts.push("Die experimentelle VR-Unterstützung wurde bei Headtracking, Cursor, Rendering und OpenXR erweitert.");
+  if (/ground vehicle soft death/i.test(t)) parts.push("Bodenfahrzeuge können nun einen Soft-Death-Zustand erreichen, statt direkt zerstört zu werden.");
+  if (/creature and plant loot quality/i.test(t)) parts.push("Bei Kreaturen- und Pflanzenbeute gibt es nun unterschiedliche Qualitätsstufen.");
+  if (/weapon attachment availability/i.test(t)) parts.push("Bestimmte Waffenaufsätze sind nun breiter im allgemeinen Loot-Pool verfügbar.");
+  if (/hauling and delivery cargo distribution/i.test(t)) parts.push("Die Frachtverteilung bei Multi-Pickup-Aufträgen berücksichtigt nun die SCU-Menge der einzelnen Abholorte.");
+  const m = t.match(/closes\s+(\d+)\s+(?:bug fixes|issues)/i);
+  if (m) parts.push(`Zusätzlich wurden ${m[1]} dokumentierte Korrekturen bzw. Issues geschlossen.`);
+  else if (/stability and performance|client crashes|server crashes/i.test(t)) parts.push("Der Patch enthält zahlreiche Stabilitäts-, Crash- und Performance-Korrekturen.");
+  return sentenceList(parts, 7) || `${version} enthält Gameplay-, Technik- und Fehlerbehebungsänderungen laut den offiziellen Patch Notes.`;
 }
 function fallbackFullSummary(version, content) {
   if (!content) return "Die Patch-Notizen konnten technisch noch nicht vollständig aus dem Archiv übernommen werden. Die offizielle Originalquelle ist direkt verlinkt.";
   const t = content;
   const parts = [];
-  if (/orison relief support/i.test(t)) parts.push("Im Gameplay bringt der Patch mit Orison Relief Support eine zeitlich begrenzte Reihe von Aufträgen zum Wiederaufbau von Orison. Dazu gehören Sammel-, Herstellungs-, Transport- und Kampfeinsätze mit einem persönlichen Fortschritts- und Belohnungssystem.");
-  if (/ground vehicle soft death/i.test(t)) parts.push("Bodenfahrzeuge können nun in einen Soft-Death-Zustand wechseln, anstatt direkt zerstört zu werden.");
-  if (/creature and plant loot quality/i.test(t)) parts.push("Bei Kreaturen und Pflanzen gibt es nun abgestufte Beutequalitäten.");
-  if (/weapon attachment availability/i.test(t)) parts.push("Bestimmte Waffenaufsätze sind breiter im allgemeinen Loot-Pool verfügbar.");
-  if (/hauling and delivery cargo distribution/i.test(t)) parts.push("Die Frachtverteilung bei mehrteiligen Hauling- und Lieferaufträgen wurde überarbeitet und berücksichtigt die SCU-Menge der einzelnen Abholorte.");
-  if (/hydrogen & quantum fuel rebalance|siege of orison v2/i.test(t)) parts.push("Der Patch enthält außerdem umfangreiche Gameplay- und Systemänderungen rund um Siege of Orison, Treibstoff, Schiffs- und Fahrzeugmechaniken sowie Instancing.");
-  if (/client crashes|server crashes|stability and performance|closes 37 issues|closes 479 bug fixes/i.test(t)) {
-    const m=t.match(/closes\s+(\d+)\s+(?:bug fixes|issues)/i);
-    parts.push(`Zusätzlich wurden zahlreiche Stabilitäts- und Fehlerprobleme behoben${m ? `, darunter ${m[1]} dokumentierte Korrekturen` : ""}.`);
-  }
-  if (/experimental vr|openxr/i.test(t)) parts.push("Für VR wurden experimentelle Verbesserungen an Headtracking, Cursor, Rendering und OpenXR ergänzt.");
-  return parts.slice(0,8).join(" ") || `${version} enthält Gameplay-, Technik- und Fehlerbehebungsänderungen. Die vollständige Liste ist über die offizielle Originalquelle abrufbar.`;
+  if (/orison relief support/i.test(t)) parts.push("Im Gameplay bringt der Patch mit Orison Relief Support eine neue Reihe von Wiederaufbau- und Unterstützungsaufträgen. Je nach Auftrag geht es um Ressourcensammlung, Herstellung, Transporte oder Kämpfe; der persönliche Fortschritt schaltet mehrere Belohnungen frei.");
+  if (/siege of orison v2/i.test(t)) parts.push("Siege of Orison wurde als Instancing-Inhalt überarbeitet. Die Mission läuft in einer geschlossenen Instanz für die eigene Gruppe, nutzt Checkpoints und wurde bei Plattformen, Gegnern und Belohnungen angepasst.");
+  if (/recco battaglia/i.test(t)) parts.push("Mit Recco Battaglia kommt ein weiterer Missionsgeber hinzu. Ihre Aufträge führen durch Bergbau-, Verteidigungs-, Such- und Bergungsinhalte und schalten über Reputation weitere Verträge und Belohnungen frei.");
+  if (/loot generation & drop rates/i.test(t)) parts.push("Die Loot-Generierung wurde umfassend angepasst: Caches und Container enthalten mehr Gegenstände, Seltenheitsstufen wurden neu gewichtet und bestimmte Gegenstände erhalten eigene Loot-Quellen.");
+  if (/hydrogen & quantum fuel rebalance/i.test(t)) parts.push("Bei Hydrogen- und Quantum-Treibstoff wurden Kapazitäten, Verbrauch, Preise und die darauf abgestimmten Refuelling-Missionen neu ausbalanciert.");
+  if (/vehicle armor update/i.test(t)) parts.push("Die Schiffsrüstung wurde technisch angepasst: Schadensreduktion greift nur noch bei vorhandener Rüstungsintegrität, und der Zustand der Rüstung beeinflusst die Schadensaufnahme.");
+  if (/pricing, claims, & availability/i.test(t)) parts.push("Claim- und Lieferzeiten orientieren sich stärker am Wert des Fahrzeugs. Auch Ausrüstung, Expedite-Gebühren, Munitionspreise und Shop-Angebote wurden angepasst.");
+  if (/instancing/i.test(t)) parts.push("Instancing wird technisch durch einen neuen Broker und zusätzliche Skalierungsmechanismen unterstützt. Serverlast, Instanzverwaltung, Streaming und einige Performance-Bereiche wurden ebenfalls überarbeitet.");
+  if (/performance & streaming/i.test(t)) parts.push("Für Performance und Streaming wurden unter anderem Physik- und Rendering-Abläufe, Partikeleffekte, Speicherverwaltung und die Darstellung in Levski optimiert.");
+  if (/virtual reality updates|experimental vr|openxr/i.test(t)) parts.push("Die experimentelle VR-Unterstützung erhält Verbesserungen für Headtracking, Stereo-Cursor, Kioske, Wasser-Rendering und OpenXR.");
+  if (/ground vehicle soft death/i.test(t)) parts.push("Bodenfahrzeuge können nun in Soft Death übergehen.");
+  if (/creature and plant loot quality/i.test(t)) parts.push("Kreaturen- und Pflanzenbeute besitzt nun Qualitätsstufen.");
+  if (/weapon attachment availability/i.test(t)) parts.push("Bestimmte Waffenaufsätze wurden in den allgemeinen Loot-Pool aufgenommen.");
+  if (/hauling and delivery cargo distribution/i.test(t)) parts.push("Die Verteilung von Fracht auf mehrere Abholorte wurde korrigiert und berücksichtigt die SCU-Menge je Pickup.");
+  const m = t.match(/closes\s+(\d+)\s+(?:bug fixes|issues)/i);
+  if (m) parts.push(`Bei Stabilität und Fehlerbehebungen wurden ${m[1]} dokumentierte Korrekturen bzw. Issues geschlossen.`);
+  else if (/stability and performance/i.test(t)) parts.push("Zusätzlich enthält der Patch zahlreiche Stabilitäts-, Crash- und Performance-Fixes.");
+  return sentenceList(parts, 12) || `${version} enthält Gameplay-, Technik-, Missions- und Fehlerbehebungsänderungen. Die vollständige Liste ist über die offizielle Originalquelle abrufbar.`;
 }
 function buildPatchChanges(item) {
-  const t=item.content||""; const changes=[];
-  const add=(category,title,description,pattern)=>{ if(pattern.test(t)) changes.push({category,title,description}); };
-  add("Gameplay","Orison Relief Support","Neue Unterstützungs- und Wiederaufbauinhalte rund um Orison mit Aufträgen für Ressourcen, Herstellung, Transport und Kampf.",/orison relief support/i);
-  add("Gameplay","Ground Vehicle Soft Death","Bodenfahrzeuge können nun in einen Soft-Death-Zustand wechseln.",/ground vehicle soft death/i);
-  add("Gameplay","Creature & Plant Loot","Beute von Kreaturen und Pflanzen erhält abgestufte Qualitätsstufen.",/creature and plant loot quality/i);
-  add("Inventar","Waffenaufsätze","Bestimmte Kompensatoren und Stabilisatoren sind nun breiter im allgemeinen Loot-Pool verfügbar.",/weapon attachment availability/i);
-  add("Missionen","Frachtverteilung","Multi-Pickup-Verträge berücksichtigen die SCU-Menge je Abholort bei der Verteilung.",/hauling and delivery cargo distribution|cargo distribution/i);
-  add("Schiffe & Fahrzeuge","Fahrzeug- und Hangar-Fixes","Mehrere Probleme mit Fahrzeugschaden, Soft Death, ASOP, Hangars und Fahrzeugabruf wurden behoben.",/ships and vehicles|hangars, asop|vehicle retrieval/i);
-  add("Audio","Audio-Überarbeitungen","Mehrere Schiffs- und gemeinsame Audioarbeiten sowie zusätzliche Waffengeräusche wurden ergänzt.",/audio|sabre series audio/i);
-  add("Technik","Stabilität & Performance","Der Patch enthält zahlreiche Stabilitäts-, Crash- und Performance-Korrekturen.",/stability and performance|client crashes|server crashes|crash and stability/i);
-  add("Bugfixes","Missionen & UI","Mehrere Fehler bei Missionen, Starmap, Inventar, Aufträgen und Benutzeroberflächen wurden behoben.",/bug fixes|starmap|inventory and items/i);
-  add("VR","Experimentelle VR-Unterstützung","VR-Headtracking, Cursor und Rendering wurden weiter überarbeitet.",/experimental vr|openxr/i);
-  return changes;
+  const t = item.content || ""; const changes = [];
+  const add = (category,title,description,pattern) => { if (pattern.test(t)) changes.push({category,title,description}); };
+  add("Gameplay","Orison Relief Support","Neue Wiederaufbau- und Unterstützungsaufträge rund um Orison mit Ressourcen, Herstellung, Transport und Kampf.",/orison relief support/i);
+  add("Missionen","Siege of Orison V2","Die Mission wurde auf Instancing umgestellt und für Gruppen mit Checkpoints und überarbeiteten Gefechten neu aufgebaut.",/siege of orison v2/i);
+  add("Missionen","Recco Battaglia","Neue storybasierte und wiederholbare Aufträge rund um Bergbau, Verteidigung, Suche und Ressourcenlogistik.",/recco battaglia/i);
+  add("Gameplay","Loot und Drop-Raten","Loot-Caches, Container und Seltenheitsstufen wurden umfassend neu gewichtet.",/loot generation & drop rates/i);
+  add("Schiffe & Fahrzeuge","Treibstoff-Balance","Hydrogen- und Quantum-Treibstoff wurden bei Kapazität, Verbrauch, Preisen und Refuelling angepasst.",/hydrogen & quantum fuel rebalance/i);
+  add("Schiffe & Fahrzeuge","Schiffsarmor","Die Schadensreduktion durch Rüstung berücksichtigt nun deren aktuellen Zustand.",/vehicle armor update/i);
+  add("Schiffe & Fahrzeuge","Claims und Verfügbarkeit","Claim-/Lieferzeiten, Expedite-Kosten, Munitionspreise und verschiedene Shop-Angebote wurden angepasst.",/pricing, claims, & availability/i);
+  add("Schiffe & Fahrzeuge","Soft Death für Bodenfahrzeuge","Bodenfahrzeuge können nun deaktiviert werden und bleiben inert, statt direkt zerstört zu werden.",/ground vehicle soft death/i);
+  add("Inventar","Neue Waffen und Ausrüstung","Neue FPS-Waffen und schwere Ausrüstung erweitern das verfügbare Arsenal.",/new fps weapon|arlington rifle|cq7.*bullpup|vendetta hmg|super heavy armor/i);
+  add("Technik","Instancing","Geschlossene Instanzen für unterstützte Inhalte werden durch neue Backend- und Skalierungslogik ermöglicht.",/instancing/i);
+  add("Technik","Performance & Streaming","Physik, Rendering, Partikel, Streaming und Speicherverwaltung wurden an mehreren Stellen optimiert.",/performance & streaming/i);
+  add("VR","Experimentelle VR-Unterstützung","Headtracking, Stereo-Cursor, Rendering und OpenXR wurden weiterentwickelt.",/virtual reality updates|experimental vr|openxr/i);
+  add("Missionen","Frachtverteilung","Multi-Pickup-Aufträge verteilen Fracht nun anhand der SCU-Menge der einzelnen Abholorte.",/hauling and delivery cargo distribution/i);
+  add("Inventar","Loot-Verfügbarkeit von Waffenaufsätzen","Bestimmte Kompensatoren und Stabilisatoren sind nun breiter im allgemeinen Loot-Pool verfügbar.",/weapon attachment availability/i);
+  add("Gameplay","Kreaturen- und Pflanzenbeute","Beute von Kreaturen und Pflanzen erhält abgestufte Qualitätsstufen.",/creature and plant loot quality/i);
+  add("Technik","Stabilität und Fehlerbehebungen","Der Patch enthält zahlreiche Crash-, Stabilitäts- und Performance-Korrekturen.",/stability and performance|client crashes|server crashes|bug fixes/i);
+  return changes.slice(0,12);
 }
 
 async function summarizePatch(item, previous, key) {
-  const prompt = `Du bist Redakteur einer unabhängigen deutschen Star-Citizen-Fanseite. Fasse die gelieferten offiziellen Patch Notes auf Deutsch zusammen. Erfinde nichts. Erzeuge KEINE vollständige Übersetzung des Originaltexts und kopiere keine langen Passagen. Gib stattdessen eine vollständige, strukturierte deutsche Zusammenfassung der wesentlichen Änderungen. JSON-Felder: summary (80-140 Wörter), fullSummary (300-900 Wörter), changes (Array mit category,title,description), previous. Kategorien: Gameplay, Schiffe & Fahrzeuge, Orte, Missionen, Inventar, Technik, Audio, Bugfixes, Sonstiges. Patch: ${item.version}. Vorherige Version: ${previous||"unbekannt"}. Inhalt: ${item.content.slice(0,50000)}`;
+  const prompt = `Du bist Redakteur einer unabhängigen deutschen Star-Citizen-Fanseite. Arbeite ausschließlich mit den gelieferten Patch Notes. Erfinde nichts. Keine 1:1-Übersetzung und keine langen Originalpassagen. Erstelle eine wirklich informative deutsche Zusammenfassung der wichtigsten Änderungen. Berücksichtige neue Inhalte, Gameplay-Systeme, Missionen, Schiffe/Fahrzeuge, Waffen/Ausrüstung, Orte, Technik/Performance, Audio/VR und wichtige Fixes. changes soll 6-12 konkrete Punkte enthalten; nur Kategorien verwenden, die im Patch tatsächlich vorkommen. summary: 80-140 Wörter. fullSummary: 350-900 Wörter. JSON-Felder exakt: summary, fullSummary, changes, previous. changes ist ein Array aus {category,title,description}. Patch: ${item.version}. Vorherige Version: ${previous||"unbekannt"}. Inhalt: ${item.content.slice(0,50000)}`;
   const r=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"content-type":"application/json","authorization":"Bearer "+key},body:JSON.stringify({model:"gpt-5-mini",input:prompt})});
   if(!r.ok) throw Error(`OpenAI error ${r.status}`);
   const j=await r.json(); const text=j.output_text||""; return JSON.parse(text.replace(/^```json\s*|\s*```$/g,""));
@@ -721,4 +746,4 @@ async function putGithub(env, path, content, message) {
   const r = await fetch(api, { method: "PUT", headers: { ...gh(env.GITHUB_TOKEN), "content-type": "application/json" }, body: JSON.stringify(body) });
   if (!r.ok) throw Error(`GitHub update failed ${r.status}`);
 }
-const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.6.4" });
+const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.6.5" });
