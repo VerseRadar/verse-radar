@@ -1,3 +1,14 @@
+# Changelog – Verse Radar
+
+## 0.6.0
+- Patch-Notes-Pipeline ergänzt: automatische Erkennung aktueller Alpha-Patchnotes über RSI/Star Citizen Wiki API.
+- Neue Worker-Routen `/preview/patches` und `/api/patches`.
+- `public/data/patches.json` wird bei `/run` automatisch aktualisiert.
+- Patch-Darstellung um „Was hat sich geändert?“, strukturierte Kategorien und deutsche Zusammenfassung erweitert.
+- Optional: KI-Zusammenfassung über `OPENAI_API_KEY`; ohne API-Key bleibt ein lokaler Fallback.
+- Original-RSI-Quelle wird immer verlinkt; Verse Radar veröffentlicht keinen offiziellen RSI-Originaltext.
+- Version auf 0.6.0 erhöht.
+
 # Verse Radar – Changelog
 
 ## 0.5.11 – Datenstruktur bereinigt

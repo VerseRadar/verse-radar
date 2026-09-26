@@ -2,7 +2,7 @@ const CONFIG = {
   referralUrl: "https://robertsspaceindustries.com/enlist?referral=DEINCODE",
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.5.11"
+  siteVersion: "0.6.0"
 };
 
 async function loadJSON(name){
@@ -42,6 +42,13 @@ function radarContacts(news,events){
 function renderStats(news,patches,deals,events){
   const map={"stat-news":news.length,"stat-patches":patches.length,"stat-deals":deals.filter(d=>d.active).length,"stat-events":events.length};
   Object.entries(map).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.textContent=v;});
+}
+function renderPatchChanges(changes){
+  if(!Array.isArray(changes)||!changes.length)return '<p class="page-intro">Noch keine strukturierte Änderungsliste verfügbar.</p>';
+  return `<div class="patch-changes">${changes.map(c=>`<div class="article"><span class="tag">${esc(c.category||"ÄNDERUNG")}</span><h3>${esc(c.title||"")}</h3><p>${esc(c.description||"")}</p></div>`).join("")}</div>`;
+}
+function renderPatches(items){
+  return items.map(p=>`<article class="article patch-card" id="${encodeURIComponent(p.version)}"><div><span class="tag">PATCH NOTES</span><span class="date">${dateDE(p.date)}</span></div><h2>${esc(p.version)}</h2><p class="patch-lead">${esc(p.summary||"")}</p><h3>Was hat sich gegenüber ${esc(p.previous||"der Vorgängerversion")} geändert?</h3>${renderPatchChanges(p.changes)}<h3>Deutsche Zusammenfassung der Patch Notes</h3><p>${esc(p.fullSummary||"")}</p><p class="ai-note">KI-gestützte Zusammenfassung · Kein offizieller RSI-Text · ${sourceLink({sourceUrl:p.sourceUrl})}</p></article>`).join("");
 }
 async function home(){
   document.querySelectorAll("#referral-link").forEach(a=>a.href=CONFIG.referralUrl);
