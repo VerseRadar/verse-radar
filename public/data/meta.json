@@ -1,13 +1,7 @@
 {
-  "updatedAt": "2026-09-26T10:00:16.847Z",
-  "source": "https://robertsspaceindustries.com/en/comm-link?sort=publish_new",
-  "patchSource": "https://robertsspaceindustries.com/en/patch-notes",
-  "mode": "live",
-  "automation": "Cloudflare Worker + RSI Comm-Link + RSI Patch Notes",
-  "version": "0.6.0",
-  "fetchedItems": 20,
-  "newItems": 0,
-  "aiItems": 0,
-  "patchItems": 5,
-  "patchAiItems": 0
+  "updatedAt": null,
+  "source": "RSI Comm-Link",
+  "mode": "waiting-for-live-run",
+  "automation": "Cloudflare Worker + RSI Comm-Link",
+  "version": "0.5.1"
 }

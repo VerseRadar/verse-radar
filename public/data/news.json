@@ -1,195 +1,5 @@
 [
   {
-    "id": "377d75dc",
-    "title": "This Week in Star Citizen",
-    "category": "NEWS",
-    "date": "2026-09-21T20:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21339-this-week-in-star-citizen",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
-    "id": "50296b3e",
-    "title": "Aegis Sabre Raven EX | Star Citizen",
-    "category": "SCHIFFE",
-    "date": "2026-09-16T18:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21332-aegis-sabre-raven-ex-star-citizen",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
-    "id": "926840b5",
-    "title": "Star Citizen Alpha 4.10.1",
-    "category": "PATCH NOTES",
-    "date": "2026-09-16T18:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21330-star-citizen-alpha-4-10-1",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
-    "id": "41c6bd3",
-    "title": "Q&A: Aegis Sabre Raven EX and Argo ATLS IKTI Akuma",
-    "category": "SCHIFFE",
-    "date": "2026-09-16T18:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21329-q-and-a-aegis-sabre-raven-ex-and-argo-atls-ikti-akuma",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
-    "id": "41d23f45",
-    "title": "R-PU-ORS-HeavyArmour-6",
-    "category": "NEWS",
-    "date": "2026-09-16T18:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21328-r-pu-ors-heavyarmour-6",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
-    "id": "3c798781",
-    "title": "R-PU-ORS-SMG-5",
-    "category": "NEWS",
-    "date": "2026-09-16T18:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21327-r-pu-ors-smg-5",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
-    "id": "8164e453",
-    "title": "R-PU-ORS-MediumArmour-4",
-    "category": "NEWS",
-    "date": "2026-09-16T18:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21326-r-pu-ors-mediumarmour-4",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
-    "id": "2199c65e",
-    "title": "R-PU-ORS-Rifle-3",
-    "category": "NEWS",
-    "date": "2026-09-16T18:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21325-r-pu-ors-rifle-3",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
-    "id": "b6e37b2e",
-    "title": "R-PU-ORS-LightArmour-2",
-    "category": "NEWS",
-    "date": "2026-09-16T18:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21324-r-pu-ors-lightarmour-2",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
-    "id": "22dddccb",
-    "title": "R-PU-ORS-Pistol-1",
-    "category": "NEWS",
-    "date": "2026-09-16T18:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21323-r-pu-ors-pistol-1",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
-    "id": "f94575ed",
-    "title": "This Week in Star Citizen",
-    "category": "NEWS",
-    "date": "2026-09-14T22:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21318-this-week-in-star-citizen",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
-    "id": "1b2d1c56",
-    "title": "Roadmap Roundup - August 26, 2026",
-    "category": "ROADMAP",
-    "date": "2026-09-09T20:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21314-roadmap-roundup-august-26-2026",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
-    "id": "efc22de2",
-    "title": "This Week in Star Citizen",
-    "category": "NEWS",
-    "date": "2026-09-07T21:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21315-this-week-in-star-citizen",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
-    "id": "55bd807f",
-    "title": "Ship Showdown 2956 Winners | Star Citizen",
-    "category": "EVENT",
-    "date": "2026-09-07T21:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21308-ship-showdown-2956-winners-star-citizen",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
-    "id": "cbb509b9",
-    "title": "Star Citizen Monthly Report: August 2026",
-    "category": "NEWS",
-    "date": "2026-09-02T19:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21307-star-citizen-monthly-report-august-2026",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
-    "id": "a4069440",
-    "title": "This Week in Star Citizen",
-    "category": "NEWS",
-    "date": "2026-08-31T18:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21304-this-week-in-star-citizen",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
-    "id": "cf65a3e5",
-    "title": "Letter From The Chairman",
-    "category": "NEWS",
-    "date": "2026-08-27T17:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21301-letter-from-the-chairman",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
-    "id": "92d7d578",
-    "title": "Improving the Live Experience",
-    "category": "NEWS",
-    "date": "2026-08-27T17:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21300-improving-the-live-experience",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
-    "id": "1e29507e",
-    "title": "Roadmap Roundup - August 26, 2026",
-    "category": "ROADMAP",
-    "date": "2026-08-26T22:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21299-roadmap-roundup-august-26-2026",
-    "source": "RSI Comm-Link",
-    "ai": false
-  },
-  {
     "title": "Alpha 4.10: Siege of Orison",
     "category": "PATCH / EVENT",
     "date": "2026-08-26",
@@ -197,13 +7,31 @@
     "sourceUrl": "https://robertsspaceindustries.com/en/comm-link"
   },
   {
-    "id": "472a46c",
-    "title": "This Week in Star Citizen",
-    "category": "NEWS",
-    "date": "2026-08-24T22:00:00.000Z",
-    "summary": "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21296-this-week-in-star-citizen",
-    "source": "RSI Comm-Link",
-    "ai": false
+    "title": "Roadmap Roundup – August 2026",
+    "category": "ROADMAP",
+    "date": "2026-08-26",
+    "summary": "Der aktuelle Roadmap Roundup gibt einen Überblick über Änderungen an geplanten Inhalten und zeigt, welche Themen sich im Entwicklungsplan verschieben oder konkretisieren.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link"
+  },
+  {
+    "title": "Kruger S-65 Stingray",
+    "category": "SCHIFFE",
+    "date": "2026-08-26",
+    "summary": "Kruger stellt mit der S-65 Stingray einen neuen Fighter vor und erweitert damit das Angebot des Herstellers.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link"
+  },
+  {
+    "title": "Ship Showdown 2956: Die Elite Eight",
+    "category": "COMMUNITY",
+    "date": "2026-08-26",
+    "summary": "Das Ship Showdown geht in die nächste Runde. Acht Schiffe bleiben im Wettbewerb und kämpfen um die Gunst der Community.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link"
+  },
+  {
+    "title": "Star Citizen Monthly Report – August 2026",
+    "category": "DEVELOPMENT",
+    "date": "2026-09-01",
+    "summary": "Der Monatsbericht fasst die wichtigsten Entwicklungsarbeiten des Augusts zusammen und liefert Einblicke in Gameplay, Technik, Schiffe und weitere Bereiche.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link"
   }
 ]

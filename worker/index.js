@@ -1,4 +1,4 @@
-/* Verse Radar 0.6.0 – RSI news + patch notes ingestion
+/* Verse Radar 0.6.1 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -13,6 +13,7 @@
 const COMM_LINK_URL = "https://robertsspaceindustries.com/en/comm-link?sort=publish_new";
 const MAX = 20;
 const PATCH_MAX = 12;
+const VERSION_RE = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?$/;
 const PATCH_NOTES_URL = "https://robertsspaceindustries.com/en/patch-notes";
 const RELEVANT = /patch|alpha\s*\d|free\s*fly|foundation festival|fleet week|invictus|iae|event|roadmap|ship showdown|siege|monthly report|this week in star citizen|live experience|pirate week|subscriber|vehicle|ship|aegis|argo|anvil|kruger|rsi|sabre|aurora|gameplay|engineering/i;
 
@@ -20,7 +21,7 @@ export default {
   async fetch(request, env) {
     const u = new URL(request.url);
     if (u.pathname === "/health") {
-      return json({ ok: true, service: "verse-radar-updater", version: "0.6.0" });
+      return json({ ok: true, service: "verse-radar-updater", version: "0.6.1" });
     }
     if (u.pathname === "/preview") {
       try {
@@ -58,9 +59,9 @@ export default {
     if (u.pathname === "/debug/github") {
       try {
         const d = await githubDiagnostics(env, "public/data/news.json");
-        return json({ ok: true, version: "0.6.0", github: d });
+        return json({ ok: true, version: "0.6.1", github: d });
       } catch (e) {
-        return json({ ok: false, version: "0.6.0", error: e.message }, 500);
+        return json({ ok: false, version: "0.6.1", error: e.message }, 500);
       }
     }
     if (u.pathname === "/api/news") {
@@ -90,7 +91,7 @@ export default {
     }
     // Public website: let Cloudflare Static Assets serve /public.
     if (env.ASSETS) return env.ASSETS.fetch(request);
-    return new Response("Verse Radar 0.6.0", { headers: { "content-type": "text/plain;charset=utf-8" } });
+    return new Response("Verse Radar 0.6.1", { headers: { "content-type": "text/plain;charset=utf-8" } });
   },
   async scheduled(_, env, ctx) { ctx.waitUntil(updateSite(env)); }
 };
@@ -112,7 +113,7 @@ async function fetchRSIItems() {
     try {
       const r = await fetch(url, {
         headers: {
-          "user-agent": "Verse-Radar/0.6.0 (+independent fan site)",
+          "user-agent": "Verse-Radar/0.6.1 (+independent fan site)",
           "accept": "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
           "accept-language": "en-US,en;q=0.9,de;q=0.8"
         }
@@ -135,7 +136,7 @@ async function fetchRSIItems() {
     const apiUrl = "https://api.star-citizen.wiki/api/comm-links?page[size]=50&sort=-id";
     const r = await fetch(apiUrl, {
       headers: {
-        "user-agent": "Verse-Radar/0.6.0 (+independent fan site)",
+        "user-agent": "Verse-Radar/0.6.1 (+independent fan site)",
         "accept": "application/json"
       }
     });
@@ -199,7 +200,7 @@ async function enrichDates(items) {
   // retain ingestion time rather than dropping the story.
   return await Promise.all(items.map(async item => {
     try {
-      const r = await fetch(item.url, { headers: { "user-agent": "Verse-Radar/0.6.0 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
+      const r = await fetch(item.url, { headers: { "user-agent": "Verse-Radar/0.6.1 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
       if (!r.ok) return item;
       const html = await r.text();
       const iso = extractPublishedDate(html);
@@ -360,51 +361,58 @@ async function updateSite(env) {
 
   const patchResult = await updatePatches(env);
   const now = new Date().toISOString();
-  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation: "Cloudflare Worker + RSI Comm-Link + RSI Patch Notes", version: "0.6.0", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length, aiItems: aiCount, patchItems: patchResult.items.length, patchAiItems: patchResult.aiItems };
+  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation: "Cloudflare Worker + RSI Comm-Link + RSI Patch Notes", version: "0.6.1", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length, aiItems: aiCount, patchItems: patchResult.items.length, patchAiItems: patchResult.aiItems };
 
   if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) {
-    return { ok: true, version: "0.6.0", published: false, ...meta, note: "RSI-Abholung funktioniert. GitHub Secrets fehlen noch; daher wurde nichts zurückgeschrieben." };
+    return { ok: true, version: "0.6.1", published: false, ...meta, note: "RSI-Abholung funktioniert. GitHub Secrets fehlen noch; daher wurde nichts zurückgeschrieben." };
   }
 
-  await putGithub(env, "public/data/news.json", JSON.stringify(finalNews, null, 2) + "\n", "Verse Radar 0.6.0: update news");
-  await putGithub(env, "public/data/patches.json", JSON.stringify(patchResult.patches, null, 2) + "\n", "Verse Radar 0.6.0: update patches");
-  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", "Verse Radar 0.6.0: update meta");
-  return { ok: true, version: "0.6.0", published: true, ...meta };
+  await putGithub(env, "public/data/news.json", JSON.stringify(finalNews, null, 2) + "\n", "Verse Radar 0.6.1: update news");
+  await putGithub(env, "public/data/patches.json", JSON.stringify(patchResult.patches, null, 2) + "\n", "Verse Radar 0.6.1: update patches");
+  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", "Verse Radar 0.6.1: update meta");
+  return { ok: true, version: "0.6.1", published: true, ...meta };
 }
 
 async function updatePatches(env) {
-  const items = await fetchPatchItems();
-  const existing = env.GITHUB_TOKEN && env.GITHUB_REPO ? await readGithubJSON(env, "public/data/patches.json", []) : [];
+  const { items } = await fetchPatchItems();
+  const existingData = await readGithubJSON(env, "public/data/patches.json", []);
+  const existing = Array.isArray(existingData) ? existingData : [];
+  const unique = dedupePatchItems(items).sort(comparePatchVersionsDesc);
   const patches = [];
   let aiItems = 0;
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-    const previous = items[i + 1]?.version || null;
-    const old = existing.find(x => x.version === item.version);
-    if (old && old.summary && old.sourceUrl === item.sourceUrl) { patches.push({ ...old, previous: old.previous || previous }); continue; }
+
+  for (let i = 0; i < unique.length && i < PATCH_MAX; i++) {
+    const item = unique[i];
+    const previous = unique[i + 1]?.version || null;
+    const old = existing.find(x => x.version === item.version && x.sourceUrl === item.sourceUrl);
+    if (old && old.summary && old.fullSummary && Array.isArray(old.changes) && old.changes.length) {
+      patches.push({ ...old, previous });
+      continue;
+    }
     let ai = null;
     if (env.OPENAI_API_KEY && item.content) {
       try { ai = await summarizePatch(item, previous, env.OPENAI_API_KEY); aiItems++; } catch (_) {}
     }
     patches.push({
-      version: item.version, date: item.date, previous,
+      version: item.version,
+      date: item.date,
+      previous,
       summary: ai?.summary || item.fallbackSummary,
-      changes: ai?.changes || buildPatchChanges(item),
+      changes: ai?.changes?.length ? ai.changes : buildPatchChanges(item),
       fullSummary: ai?.fullSummary || item.fallbackFullSummary,
       sourceUrl: item.sourceUrl,
       ai: Boolean(ai),
       note: "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
     });
   }
-  patches.sort((a,b)=>new Date(b.date)-new Date(a.date));
-  return { patches: patches.slice(0, PATCH_MAX), items, aiItems };
+  return { patches, items: unique.slice(0, PATCH_MAX), aiItems };
 }
 
 async function fetchPatchItems() {
-  const out = [];
+  const discovered = [];
   try {
     const apiUrl = "https://api.star-citizen.wiki/api/comm-links?page[size]=100&sort=-id";
-    const r = await fetch(apiUrl, { headers: { "user-agent": "Verse-Radar/0.6.0 (+independent fan site)", "accept": "application/json" } });
+    const r = await fetch(apiUrl, { headers: { "user-agent": "Verse-Radar/0.6.1 (+independent fan site)", "accept": "application/json" } });
     const body = await r.json();
     const records = Array.isArray(body?.data) ? body.data : [];
     for (const record of records) {
@@ -414,42 +422,111 @@ async function fetchPatchItems() {
       const version = title.replace(/^Star Citizen /i, "").trim();
       const date = validDate(record?.created_at) || validDate(record?.published_at) || new Date().toISOString();
       const sourceUrl = `https://robertsspaceindustries.com/en/comm-link/Patch-Notes/${id}-${slugify(title.replace(/\s+/g," ").replace(/^Star Citizen /i,"Star-Citizen-"))}`;
-      let content = strip(record?.content || record?.body || record?.description || "");
-      if (content.length < 300) {
-        try {
-          const detail = await fetch(`https://api.star-citizen.wiki/api/comm-links/${id}`, { headers: { "user-agent": "Verse-Radar/0.6.0 (+independent fan site)", "accept": "application/json" } });
-          if (detail.ok) { const dj = await detail.json(); const d = dj?.data || dj; content = strip(d?.content || d?.body || d?.description || content); }
-        } catch {}
-      }
-      out.push({ version, date, sourceUrl, content, fallbackSummary: fallbackPatchSummary(version, content), fallbackFullSummary: fallbackFullSummary(content) });
-      if (out.length >= PATCH_MAX) break;
+      let content = extractPatchContent(record);
+      if (content.length < 500) content = await fetchPatchDetail(id, content);
+      if (content.length < 500) content = await fetchWikiUpdatePage(version, content);
+      discovered.push({ version, date, sourceUrl, sourceId: id, content, fallbackSummary: fallbackPatchSummary(version, content), fallbackFullSummary: fallbackFullSummary(content) });
     }
-  } catch {}
-  if (!out.length) throw Error("Keine Patch Notes erkannt.");
-  return out;
+  } catch (_) {}
+
+  if (!discovered.length) throw Error("Keine Patch Notes erkannt.");
+  const unique = dedupePatchItems(discovered).sort(comparePatchVersionsDesc).slice(0, PATCH_MAX);
+  return { items: unique };
+}
+
+function extractPatchContent(record) {
+  const candidates = [
+    record?.content,
+    record?.content_html,
+    record?.content_text,
+    record?.body,
+    record?.description,
+    record?.summary
+  ];
+  for (const value of candidates) {
+    const text = strip(value || "");
+    if (text.length >= 500) return text;
+  }
+  return "";
+}
+
+async function fetchPatchDetail(id, current = "") {
+  try {
+    const detail = await fetch(`https://api.star-citizen.wiki/api/comm-links/${id}`, {
+      headers: { "user-agent": "Verse-Radar/0.6.1 (+independent fan site)", "accept": "application/json" }
+    });
+    if (!detail.ok) return current;
+    const dj = await detail.json();
+    const d = dj?.data || dj;
+    return extractPatchContent(d) || current;
+  } catch (_) { return current; }
+}
+
+async function fetchWikiUpdatePage(version, current = "") {
+  try {
+    const slug = version.replace(/\s+/g, "_");
+    const url = `https://starcitizen.tools/Update%3A${encodeURIComponent(slug)}`;
+    const r = await fetch(url, { headers: { "user-agent": "Verse-Radar/0.6.1 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
+    if (!r.ok) return current;
+    const html = await r.text();
+    const main = html.match(/<main[\s\S]*?<\/main>/i)?.[0] || html.match(/<article[\s\S]*?<\/article>/i)?.[0] || html;
+    const text = strip(main);
+    return text.length > current.length ? text : current;
+  } catch (_) { return current; }
+}
+
+function versionParts(version) {
+  const m = String(version || "").match(/(\d+(?:\.\d+){0,2})/);
+  if (!m) return [0,0,0];
+  const p = m[1].split(".").map(Number);
+  return [p[0]||0,p[1]||0,p[2]||0];
+}
+function comparePatchVersionsDesc(a,b) {
+  const av=versionParts(a.version), bv=versionParts(b.version);
+  for(let i=0;i<3;i++){ if(av[i]!==bv[i]) return bv[i]-av[i]; }
+  return new Date(b.date)-new Date(a.date);
+}
+function dedupePatchItems(items) {
+  const map = new Map();
+  for (const item of items) {
+    const key = item.version;
+    const old = map.get(key);
+    if (!old || Number(item.sourceId||0) > Number(old.sourceId||0) || item.content.length > old.content.length) map.set(key,item);
+  }
+  return [...map.values()];
 }
 
 function validDate(v) { const d = new Date(v); return Number.isNaN(d.getTime()) ? null : d.toISOString(); }
 function fallbackPatchSummary(version, content) {
   const text = content || "";
   const parts = [];
-  if (/orison relief support/i.test(text)) parts.push("Orison Relief Support bringt neue Wiederaufbau- und Unterstützungsaufträge nach dem Angriff auf Orison.");
+  if (/orison relief support/i.test(text)) parts.push("Orison Relief Support ergänzt neue Unterstützungs- und Wiederaufbauinhalte rund um Orison.");
+  if (/ground vehicle soft death/i.test(text)) parts.push("Das Verhalten von Bodenfahrzeugen bei Soft Death wurde erweitert.");
+  if (/creature and plant loot quality/i.test(text)) parts.push("Die Qualität bzw. Verfügbarkeit von Beute bei Kreaturen und Pflanzen wurde angepasst.");
+  if (/weapon attachment availability/i.test(text)) parts.push("Bestimmte Waffenaufsätze sind nun breiter im Loot-Pool verfügbar.");
   if (/cargo distribution|pickup/i.test(text)) parts.push("Die Verteilung von Fracht bei Liefer- und Hauling-Aufträgen wurde überarbeitet.");
   if (/audio/i.test(text)) parts.push("Mehrere Audio-Bereiche wurden erweitert oder überarbeitet.");
-  if (/crash|stability|performance/i.test(text)) parts.push("Der Patch enthält zahlreiche Stabilitäts-, Performance- und Fehlerbehebungen.");
-  return parts.join(" ") || `${version} enthält Änderungen und Fehlerbehebungen laut den offiziellen Patch Notes.`;
+  if (/client crashes|server crashes|stability and performance|bug fixes/i.test(text)) parts.push("Der Patch enthält zahlreiche Fehlerbehebungen sowie Stabilitätsverbesserungen.");
+  return parts.slice(0,5).join(" ") || `${version} enthält Änderungen und Fehlerbehebungen laut den offiziellen Patch Notes.`;
 }
 function fallbackFullSummary(content) {
-  if (!content) return "Die vollständige offizielle Liste der Änderungen ist über den Original-Link verfügbar.";
-  const sentences = content.split(/(?<=[.!?])\s+/).filter(x => x.length > 30).slice(0, 12);
-  return sentences.join(" ").slice(0, 1800) || "Die offiziellen Patch Notes enthalten zahlreiche Änderungen und Fehlerbehebungen. Für die vollständige Liste siehe Originalquelle.";
+  if (!content) return "Die Patch-Notizen konnten technisch noch nicht vollständig aus dem Archiv übernommen werden. Die offizielle Originalquelle ist direkt verlinkt.";
+  const cleaned = content.replace(/\s+/g," ").trim();
+  const headings = cleaned.match(/(?:Features and Gameplay|Gameplay|Bug Fixes|Technical|Stability and performance|Audio|Missions|Ships|Vehicles|Locations|Inventory)[^.!?]{0,220}/gi) || [];
+  const sentences = cleaned.split(/(?<=[.!?])\s+/).filter(x => x.length > 45).slice(0, 20);
+  const intro = headings.slice(0,6).join(" ");
+  return `${intro} ${sentences.join(" ")}`.trim().slice(0, 2600) || "Die offiziellen Patch Notes enthalten zahlreiche Änderungen und Fehlerbehebungen. Für die vollständige Liste siehe Originalquelle.";
 }
 function buildPatchChanges(item) {
   const t=item.content||""; const changes=[];
-  if (/orison relief support/i.test(t)) changes.push({category:"Gameplay", title:"Orison Relief Support", description:"Neue Aufträge rund um den Wiederaufbau und die Unterstützung von Orison."});
-  if (/hauling and delivery cargo distribution/i.test(t)) changes.push({category:"Gameplay", title:"Frachtverteilung", description:"Die Verteilung von Fracht auf mehrere Abholorte wurde überarbeitet."});
-  if (/audio/i.test(t)) changes.push({category:"Audio", title:"Audio-Überarbeitungen", description:"Mehrere Audio-Bereiche wurden erweitert oder überarbeitet."});
-  if (/bug fixes|fixed an issue|stability and performance/i.test(t)) changes.push({category:"Bugfixes", title:"Fehlerbehebungen", description:"Der Patch enthält zahlreiche Fehlerbehebungen sowie Stabilitäts- und Performance-Verbesserungen."});
+  const add=(category,title,description,pattern)=>{ if(pattern.test(t)) changes.push({category,title,description}); };
+  add("Gameplay","Orison Relief Support","Neue Unterstützungs- und Wiederaufbauinhalte rund um Orison.",/orison relief support/i);
+  add("Gameplay","Ground Vehicle Soft Death","Das Soft-Death-Verhalten von Bodenfahrzeugen wurde angepasst bzw. erweitert.",/ground vehicle soft death/i);
+  add("Gameplay","Creature & Plant Loot","Die Beutequalität bzw. Verfügbarkeit bei Kreaturen und Pflanzen wurde angepasst.",/creature and plant loot quality/i);
+  add("Inventar","Waffenaufsätze","Bestimmte Kompensatoren und Stabilisatoren sind nun breiter im allgemeinen Loot-Pool verfügbar.",/weapon attachment availability/i);
+  add("Gameplay","Frachtverteilung","Multi-Pickup-Verträge berücksichtigen die SCU-Menge je Abholort bei der Verteilung.",/hauling and delivery cargo distribution|cargo distribution/i);
+  add("Audio","Audio-Überarbeitungen","Mehrere Schiffs- und gemeinsame Audioarbeiten wurden vorgezogen; zusätzlich wurde Audio für bestimmte Waffen ergänzt.",/audio|sabre series audio/i);
+  add("Bugfixes","Stabilität & Fehlerbehebungen","Der Patch behebt zahlreiche Probleme; laut Patch-Zusammenfassung werden 37 Issues geschlossen, darunter drei Client- und zwei Server-Crashes.",/closes 37 issues|client crashes|server crashes|bug fixes/i);
   return changes;
 }
 
@@ -556,4 +633,4 @@ async function putGithub(env, path, content, message) {
   const r = await fetch(api, { method: "PUT", headers: { ...gh(env.GITHUB_TOKEN), "content-type": "application/json" }, body: JSON.stringify(body) });
   if (!r.ok) throw Error(`GitHub update failed ${r.status}`);
 }
-const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.6.0" });
+const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.6.1" });
