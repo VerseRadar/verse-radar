@@ -2,18 +2,26 @@ const CONFIG = {
   referralUrl: "https://robertsspaceindustries.com/enlist?referral=DEINCODE",
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.6.8"
+  siteVersion: "0.6.9"
 };
 
 async function loadJSON(name){
-  const url = name === "news.json" ? CONFIG.newsEndpoint : CONFIG.dataBase+name;
-  const r=await fetch(url,{cache:"no-store"});
+  const url = name === "news.json" ? CONFIG.newsEndpoint : name === "patches.json" ? "/api/patches" : CONFIG.dataBase+name;
+  let r;
+  try { r=await fetch(url,{cache:"no-store"}); }
+  catch (e) {
+    if(name === "news.json") return loadStaticNews();
+    if(name === "patches.json") return loadStaticPatches();
+    throw e;
+  }
   if(!r.ok) {
     if(name === "news.json") return loadStaticNews();
+    if(name === "patches.json") return loadStaticPatches();
     throw new Error(name+" "+r.status);
   }
   const data=await r.json();
   if(name === "news.json" && !Array.isArray(data)) return loadStaticNews();
+  if(name === "patches.json" && !Array.isArray(data)) return loadStaticPatches();
   return data;
 }
 async function loadStaticNews(){
@@ -21,6 +29,13 @@ async function loadStaticNews(){
   if(!r.ok) throw new Error("news.json "+r.status);
   const data=await r.json();
   if(!Array.isArray(data)) throw new Error("news.json is not an array");
+  return data;
+}
+async function loadStaticPatches(){
+  const r=await fetch(CONFIG.dataBase+"patches.json",{cache:"no-store"});
+  if(!r.ok) throw new Error("patches.json "+r.status);
+  const data=await r.json();
+  if(!Array.isArray(data)) throw new Error("patches.json is not an array");
   return data;
 }
 function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
@@ -31,7 +46,7 @@ function timeDE(v){if(!v)return ""; const d=new Date(v); return Number.isNaN(d.g
 function relative(v){const d=new Date(v), diff=Date.now()-d.getTime(); if(Number.isNaN(d.getTime()))return ""; const h=Math.round(diff/36e5); if(h<1)return "gerade eben"; if(h<24)return `vor ${h} Std.`; const days=Math.round(h/24); return days===1?"gestern":`vor ${days} Tagen`;}
 function sourceLink(n){return n.sourceUrl?`<a class="source" href="${esc(n.sourceUrl)}" target="_blank" rel="noopener noreferrer">Originalquelle ↗</a>`:"";}
 function renderNews(items,limit=3){
-  return items.slice(0,limit).map((n,i)=>`<article class="news-card" data-category="${esc(n.category||'NEWS')}"><div class="news-art art-${i%4}"><span class="art-signal">${esc((n.category||"NEWS").replace(" / "," · "))}</span></div><div class="news-body"><div><span class="tag">${esc(n.category||"NEWS")}</span><span class="date" title="${esc(n.date||"")}">${relative(n.date)||dateDE(n.date)}</span></div><h3>${esc(n.title)}</h3><p>${esc(n.summary)}</p><p class="ai-note">KI-übersetzt & zusammengefasst · ${sourceLink(n)}</p></div></article>`).join("");
+  return items.slice(0,limit).map((n,i)=>`<article class="news-card" data-category="${esc(n.category||'NEWS')}"><div class="news-art art-${i%4}"><span class="art-signal">${esc((n.category||"NEWS").replace(" / "," · "))}</span></div><div class="news-body"><div><span class="tag">${esc(n.category||"NEWS")}</span><span class="date" title="${esc(n.date||"")}">${relative(n.date)||dateDE(n.date)}</span></div><h3>${esc(n.title)}</h3><p>${esc(n.summary)}</p><p class="ai-note">${n.ai === true ? "KI-gestützte Zusammenfassung" : "Kurzbeschreibung"} · ${sourceLink(n)}</p></div></article>`).join("");
 }
 function radarContacts(news,events){
   const root=document.querySelector("#radar-contacts"); if(!root)return;
@@ -48,7 +63,10 @@ function renderPatchChanges(changes){
   return `<div class="patch-changes">${changes.map(c=>`<div class="article"><span class="tag">${esc(c.category||"ÄNDERUNG")}</span><h3>${esc(c.title||"")}</h3><p>${esc(c.description||"")}</p></div>`).join("")}</div>`;
 }
 function renderPatches(items){
-  return items.map(p=>`<article class="article patch-card" id="${encodeURIComponent(p.version)}"><div><span class="tag">PATCH NOTES</span><span class="date">${dateDE(p.date)}</span></div><h2>${esc(p.version)}</h2><p class="patch-lead">${esc(p.summary||"")}</p><h3>Was hat sich gegenüber ${esc(p.previous||"der Vorgängerversion")} geändert?</h3>${renderPatchChanges(p.changes)}<h3>Deutsche Zusammenfassung der Patch Notes</h3><p>${esc(p.fullSummary||"")}</p><p class="ai-note">KI-gestützte Zusammenfassung · Kein offizieller RSI-Text · ${sourceLink({sourceUrl:p.sourceUrl})}</p></article>`).join("");
+  return items.map(p=>`<article class="article patch-card" id="${encodeURIComponent(p.version)}"><div><span class="tag">PATCH NOTES</span><span class="date">${dateDE(p.date)}</span></div><h2>${esc(p.version)}</h2><p class="patch-lead">${esc(p.summary||"")}</p><h3>Wichtige Änderungen in ${esc(p.version)}</h3>${renderPatchChanges(p.changes)}<h3>Deutsche Zusammenfassung der Patch Notes</h3><p>${esc(p.fullSummary||"")}</p><p class="ai-note">${p.ai === true ? "KI-gestützte" : "Regelbasierte"} Zusammenfassung · Kein offizieller RSI-Text · ${sourceLink({sourceUrl:p.sourceUrl})}</p></article>`).join("");
+}
+function renderPatchHistory(items){
+  return items.map(p=>`<article class="article" id="${encodeURIComponent(p.version)}"><span class="tag">PATCH</span><span class="date">${dateDE(p.date)}</span><h2>${esc(p.version)}</h2><p>${esc(p.summary||"")}</p>${p.previous?`<p>Vorgängerversion: ${esc(p.previous)}</p>`:""}<p><a class="source" href="/patches.html#${encodeURIComponent(p.version)}">Zusammenfassung und Änderungen ↗</a> · ${sourceLink(p)}</p></article>`).join("");
 }
 async function home(){
   document.querySelectorAll("#referral-link").forEach(a=>a.href=CONFIG.referralUrl);

@@ -1,5 +1,11 @@
 # Changelog – Verse Radar
 
+## 0.6.9 – Kennzeichnung der Zusammenfassungen
+- News und Patch Notes werden nur bei `ai: true` als KI-gestützt bezeichnet. Regelbasiert erzeugte Patch-Zusammenfassungen sind entsprechend gekennzeichnet; News ohne KI tragen die neutrale Bezeichnung „Kurzbeschreibung“.
+- Startseite und Patch History lesen wie die Patch-Seite die aktuellen Einträge von `/api/patches`, mit Rückfall auf die lokale Datei bei API-Fehlern. Die History verlinkt echte Änderungen und Originalquellen statt einen noch nicht vorhandenen Vergleich zu versprechen.
+- Die Patch-Seite beschreibt die tatsächlich dargestellten Änderungen je Version und verweist für den vollen Wortlaut auf die Originalquellen.
+- Worker- und Frontend-Version aktualisiert; die Patch-Aufbereitung bleibt unverändert auf `summaryVersion=0.6.8`, damit bereits geprüfte Einträge weiterverwendet werden.
+
 ## 0.6.8 – Wiederholte Inhalte präziser einordnen
 - „Tactical Strike Group“ wird nach dem ersten Alpha-4.8-Eintrag nicht mehr allein wegen einer späteren Erwähnung als neuer Inhalt ausgegeben.
 - Das CQ7 Bullpup wird nur bei Alpha 4.9 als neue Waffe ausgewiesen; eine bloße Erwähnung in späteren Patches genügt nicht.

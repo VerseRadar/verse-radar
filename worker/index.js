@@ -1,4 +1,4 @@
-/* Verse Radar 0.6.8 – RSI news + patch notes ingestion
+/* Verse Radar 0.6.9 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -25,7 +25,7 @@ export default {
   async fetch(request, env) {
     const u = new URL(request.url);
     if (u.pathname === "/health") {
-      return json({ ok: true, service: "verse-radar-updater", version: "0.6.8" });
+      return json({ ok: true, service: "verse-radar-updater", version: "0.6.9" });
     }
     if (u.pathname === "/preview") {
       try {
@@ -75,9 +75,9 @@ export default {
     if (u.pathname === "/debug/github") {
       try {
         const d = await githubDiagnostics(env, "public/data/news.json");
-        return json({ ok: true, version: "0.6.8", github: d });
+        return json({ ok: true, version: "0.6.9", github: d });
       } catch (e) {
-        return json({ ok: false, version: "0.6.8", error: e.message }, 500);
+        return json({ ok: false, version: "0.6.9", error: e.message }, 500);
       }
     }
     if (u.pathname === "/api/news") {
@@ -107,7 +107,7 @@ export default {
     }
     // Public website: let Cloudflare Static Assets serve /public.
     if (env.ASSETS) return env.ASSETS.fetch(request);
-    return new Response("Verse Radar 0.6.8", { headers: { "content-type": "text/plain;charset=utf-8" } });
+    return new Response("Verse Radar 0.6.9", { headers: { "content-type": "text/plain;charset=utf-8" } });
   },
   async scheduled(_, env, ctx) {
     // Keep the proven news schedule; patches are published automatically only
@@ -133,7 +133,7 @@ async function fetchRSIItems() {
     try {
       const r = await fetch(url, {
         headers: {
-          "user-agent": "Verse-Radar/0.6.8 (+independent fan site)",
+          "user-agent": "Verse-Radar/0.6.9 (+independent fan site)",
           "accept": "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
           "accept-language": "en-US,en;q=0.9,de;q=0.8"
         }
@@ -156,7 +156,7 @@ async function fetchRSIItems() {
     const apiUrl = "https://api.star-citizen.wiki/api/comm-links?page[size]=50&sort=-id";
     const r = await fetch(apiUrl, {
       headers: {
-        "user-agent": "Verse-Radar/0.6.8 (+independent fan site)",
+        "user-agent": "Verse-Radar/0.6.9 (+independent fan site)",
         "accept": "application/json"
       }
     });
@@ -220,7 +220,7 @@ async function enrichDates(items) {
   // retain ingestion time rather than dropping the story.
   return await Promise.all(items.map(async item => {
     try {
-      const r = await fetch(item.url, { headers: { "user-agent": "Verse-Radar/0.6.8 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
+      const r = await fetch(item.url, { headers: { "user-agent": "Verse-Radar/0.6.9 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
       if (!r.ok) return item;
       const html = await r.text();
       const iso = extractPublishedDate(html);
@@ -381,16 +381,16 @@ async function updateSite(env, { includePatches = true } = {}) {
 
   const patchResult = includePatches ? await updatePatches(env) : null;
   const now = new Date().toISOString();
-  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation: includePatches ? "Cloudflare Worker + RSI Comm-Link + RSI Patch Notes" : "Cloudflare Worker + RSI Comm-Link; Patch-Import pausiert", version: "0.6.8", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length, aiItems: aiCount, patchItems: patchResult?.items.length ?? null, patchAiItems: patchResult?.aiItems ?? null };
+  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation: includePatches ? "Cloudflare Worker + RSI Comm-Link + RSI Patch Notes" : "Cloudflare Worker + RSI Comm-Link; Patch-Import pausiert", version: "0.6.9", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length, aiItems: aiCount, patchItems: patchResult?.items.length ?? null, patchAiItems: patchResult?.aiItems ?? null };
 
   if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) {
-    return { ok: true, version: "0.6.8", published: false, ...meta, note: "RSI-Abholung funktioniert. GitHub Secrets fehlen noch; daher wurde nichts zurückgeschrieben." };
+    return { ok: true, version: "0.6.9", published: false, ...meta, note: "RSI-Abholung funktioniert. GitHub Secrets fehlen noch; daher wurde nichts zurückgeschrieben." };
   }
 
-  await putGithub(env, "public/data/news.json", JSON.stringify(finalNews, null, 2) + "\n", "Verse Radar 0.6.8: update news");
-  if (includePatches) await putGithub(env, "public/data/patches.json", JSON.stringify(patchResult.patches, null, 2) + "\n", "Verse Radar 0.6.8: update patches");
-  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", "Verse Radar 0.6.8: update meta");
-  return { ok: true, version: "0.6.8", published: true, ...meta };
+  await putGithub(env, "public/data/news.json", JSON.stringify(finalNews, null, 2) + "\n", "Verse Radar 0.6.9: update news");
+  if (includePatches) await putGithub(env, "public/data/patches.json", JSON.stringify(patchResult.patches, null, 2) + "\n", "Verse Radar 0.6.9: update patches");
+  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", "Verse Radar 0.6.9: update meta");
+  return { ok: true, version: "0.6.9", published: true, ...meta };
 }
 
 async function updatePatches(env) {
@@ -433,7 +433,7 @@ async function fetchPatchItems() {
   const discovered = [];
   try {
     const apiUrl = "https://api.star-citizen.wiki/api/comm-links?page[size]=100&sort=-id";
-    const r = await fetch(apiUrl, { headers: { "user-agent": "Verse-Radar/0.6.8 (+independent fan site)", "accept": "application/json" } });
+    const r = await fetch(apiUrl, { headers: { "user-agent": "Verse-Radar/0.6.9 (+independent fan site)", "accept": "application/json" } });
     const body = await r.json();
     const records = Array.isArray(body?.data) ? body.data : [];
     for (const record of records) {
@@ -490,7 +490,7 @@ function extractPatchContent(record) {
 async function fetchPatchDetail(id, current = "") {
   try {
     const detail = await fetch(`https://api.star-citizen.wiki/api/comm-links/${id}`, {
-      headers: { "user-agent": "Verse-Radar/0.6.8 (+independent fan site)", "accept": "application/json" }
+      headers: { "user-agent": "Verse-Radar/0.6.9 (+independent fan site)", "accept": "application/json" }
     });
     if (!detail.ok) return current;
     const dj = await detail.json();
@@ -517,7 +517,7 @@ async function fetchWikiUpdatePage(version, current = "") {
       api.searchParams.set("format", "json");
       api.searchParams.set("origin", "*");
       const r = await fetch(api.toString(), {
-        headers: { "user-agent": "Verse-Radar/0.6.8 (+independent fan site)", "accept": "application/json" }
+        headers: { "user-agent": "Verse-Radar/0.6.9 (+independent fan site)", "accept": "application/json" }
       });
       if (r.ok) {
         const body = await r.json();
@@ -533,7 +533,7 @@ async function fetchWikiUpdatePage(version, current = "") {
     try {
       const slug = `Star Citizen ${candidate}`.replace(/\s+/g, "_");
       const url = `https://starcitizen.tools/Update%3A${encodeURIComponent(slug)}`;
-      const r = await fetch(url, { headers: { "user-agent": "Verse-Radar/0.6.8 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
+      const r = await fetch(url, { headers: { "user-agent": "Verse-Radar/0.6.9 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
       if (!r.ok) continue;
       const html = await r.text();
       const main = html.match(/<main[\s\S]*?<\/main>/i)?.[0] || html.match(/<article[\s\S]*?<\/article>/i)?.[0] || html;
@@ -806,4 +806,4 @@ async function putGithub(env, path, content, message) {
   const r = await fetch(api, { method: "PUT", headers: { ...gh(env.GITHUB_TOKEN), "content-type": "application/json" }, body: JSON.stringify(body) });
   if (!r.ok) throw Error(`GitHub update failed ${r.status}`);
 }
-const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.6.8" });
+const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.6.9" });

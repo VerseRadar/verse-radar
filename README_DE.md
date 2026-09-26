@@ -1,4 +1,4 @@
-# Verse Radar 0.6.8
+# Verse Radar 0.6.9
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -25,6 +25,7 @@ Der Worker liest die offizielle RSI Comm-Link-Seite ein, erkennt aktuelle Comm-L
 
 Cron: alle 2 Stunden (`0 */2 * * *`).
 Der manuell aufgerufene Endpunkt `/run` veröffentlicht News und Patches; zuerst `/preview/patches` am echten Worker prüfen.
+Version 0.6.9 korrigiert die Kennzeichnung der Zusammenfassungen und lädt Patch-Daten auf der Startseite und in der History ebenfalls über `/api/patches`. Die bereits geprüfte Patch-Aufbereitung aus 0.6.8 bleibt erhalten (`summaryVersion=0.6.8`).
 
 ## Datenstruktur
 Die Website-Daten liegen ausschließlich unter `public/data/`.
