@@ -1,78 +1,28 @@
 [
   {
     "version": "Alpha 4.10.1",
-    "date": "2026-09-16T18:00:00.000Z",
+    "date": "2026-09-16",
     "previous": "Alpha 4.10",
-    "summary": "Alpha 4.10.1 enthält Änderungen und Fehlerbehebungen laut den offiziellen Patch Notes.",
-    "changes": [],
-    "fullSummary": "Die Patch-Notizen konnten technisch noch nicht vollständig aus dem Archiv übernommen werden. Die offizielle Originalquelle ist direkt verlinkt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21330-Star-Citizen-Alpha-4.10.1",
+    "summary": "Alpha 4.10.1 bringt mit Orison Relief Support neue zeitlich begrenzte Aufträge rund um den Wiederaufbau von Orison. Außerdem wurden unter anderem Frachtverteilung, Audio, Stabilität und zahlreiche Fehler behoben.",
+    "changes": [
+      {"category":"Gameplay","title":"Orison Relief Support","description":"Neue Aufträge unterstützen den Wiederaufbau und die Absicherung von Orison nach dem Angriff der Nine Tails."},
+      {"category":"Gameplay","title":"Frachtverteilung","description":"Die Verteilung von Fracht bei Mehrfach-Abholungen wurde überarbeitet."},
+      {"category":"Audio","title":"Audio-Updates","description":"Mehrere Audio-Bereiche wurden erweitert bzw. überarbeitet."},
+      {"category":"Bugfixes","title":"Stabilität und Fehlerbehebungen","description":"Zahlreiche Probleme wurden behoben; dazu gehören unter anderem Abstürze, Missions-, Fahrzeug-, Inventar- und Umgebungsfehler."}
+    ],
+    "fullSummary": "Alpha 4.10.1 ist ein kleineres Update für Alpha 4.10. Ein Schwerpunkt liegt auf Orison Relief Support: Nach dem Angriff auf Orison stehen neue Aufträge rund um Wiederaufbau, medizinische Versorgung und Sicherheit zur Verfügung. Darüber hinaus wurde die Verteilung von Fracht bei Mehrfach-Abholungen angepasst. Auch Audio-Inhalte wurden erweitert und überarbeitet. Ein großer Teil des Updates besteht aus Fehlerbehebungen und Verbesserungen an Stabilität und Performance, darunter Probleme bei Missionen, Fahrzeugen, Inventar und verschiedenen Orten. Die vollständigen offiziellen Patch Notes mit allen einzelnen Fixes stehen bei RSI zur Verfügung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21330-Star-Citizen-Alpha-4101",
     "ai": false,
     "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
   },
   {
     "version": "Alpha 4.10",
-    "date": "2026-08-26T18:00:00.000Z",
+    "date": "2026-08-26",
     "previous": "Alpha 4.9",
-    "summary": "Alpha 4.10 enthält Änderungen und Fehlerbehebungen laut den offiziellen Patch Notes.",
+    "summary": "Alpha 4.10 brachte den Schwerpunkt rund um Siege of Orison und weitere Änderungen für das Persistent Universe.",
     "changes": [],
-    "fullSummary": "Die Patch-Notizen konnten technisch noch nicht vollständig aus dem Archiv übernommen werden. Die offizielle Originalquelle ist direkt verlinkt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21293-Star-Citizen-Alpha-4.10",
-    "ai": false,
-    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
-  },
-  {
-    "version": "Alpha 4.9",
-    "date": "2026-07-15T18:00:00.000Z",
-    "previous": "Alpha 4.8.3",
-    "summary": "Alpha 4.9 enthält Änderungen und Fehlerbehebungen laut den offiziellen Patch Notes.",
-    "changes": [],
-    "fullSummary": "Die Patch-Notizen konnten technisch noch nicht vollständig aus dem Archiv übernommen werden. Die offizielle Originalquelle ist direkt verlinkt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21245-Star-Citizen-Alpha-4.9",
-    "ai": false,
-    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
-  },
-  {
-    "version": "Alpha 4.8.3",
-    "date": "2026-07-01T16:00:00.000Z",
-    "previous": "Alpha 4.8.1",
-    "summary": "Alpha 4.8.3 enthält Änderungen und Fehlerbehebungen laut den offiziellen Patch Notes.",
-    "changes": [],
-    "fullSummary": "Die Patch-Notizen konnten technisch noch nicht vollständig aus dem Archiv übernommen werden. Die offizielle Originalquelle ist direkt verlinkt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21206-Star-Citizen-Alpha-4.8.3",
-    "ai": false,
-    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
-  },
-  {
-    "version": "Alpha 4.8.1",
-    "date": "2026-06-03T16:00:00.000Z",
-    "previous": "Alpha 4.8",
-    "summary": "Alpha 4.8.1 enthält Änderungen und Fehlerbehebungen laut den offiziellen Patch Notes.",
-    "changes": [],
-    "fullSummary": "Die Patch-Notizen konnten technisch noch nicht vollständig aus dem Archiv übernommen werden. Die offizielle Originalquelle ist direkt verlinkt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21177-Star-Citizen-Alpha-4.8.1",
-    "ai": false,
-    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
-  },
-  {
-    "version": "Alpha 4.8",
-    "date": "2026-05-15T18:00:00.000Z",
-    "previous": "Alpha 4.8: Tactical Strike",
-    "summary": "Alpha 4.8 enthält Änderungen und Fehlerbehebungen laut den offiziellen Patch Notes.",
-    "changes": [],
-    "fullSummary": "Die Patch-Notizen konnten technisch noch nicht vollständig aus dem Archiv übernommen werden. Die offizielle Originalquelle ist direkt verlinkt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21168-Star-Citizen-Alpha-4.8",
-    "ai": false,
-    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
-  },
-  {
-    "version": "Alpha 4.8: Tactical Strike",
-    "date": "2026-05-14T13:00:00.000Z",
-    "previous": null,
-    "summary": "Alpha 4.8: Tactical Strike enthält Änderungen und Fehlerbehebungen laut den offiziellen Patch Notes.",
-    "changes": [],
-    "fullSummary": "Die Patch-Notizen konnten technisch noch nicht vollständig aus dem Archiv übernommen werden. Die offizielle Originalquelle ist direkt verlinkt.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21142-Star-Citizen-Alpha-4.8:-Tactical-Strike",
+    "fullSummary": "Die vollständige deutsche Zusammenfassung wird beim nächsten automatischen Patch-Import aus den verfügbaren Patch-Daten aktualisiert.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/patch-notes",
     "ai": false,
     "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
   }
