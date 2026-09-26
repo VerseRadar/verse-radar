@@ -1,4 +1,4 @@
-# Verse Radar 0.6.1
+# Verse Radar 0.6.6
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -21,8 +21,10 @@ Der Worker liest die offizielle RSI Comm-Link-Seite ein, erkennt aktuelle Comm-L
 - Variable: `GITHUB_REPO` = `VerseRadar/verse-radar`
 - Variable optional: `GITHUB_BRANCH` = `main`
 - Variable optional: `MAX_ITEMS`
+- Variable optional: `PATCH_AUTO_PUBLISH` = `true` erst nach Prüfung der Patch-Vorschau und dem ersten manuellen Import setzen. Ohne diese Variable aktualisiert der Cron weiterhin News, aber keine Patch-Daten.
 
 Cron: alle 2 Stunden (`0 */2 * * *`).
+Der manuell aufgerufene Endpunkt `/run` veröffentlicht News und Patches; zuerst `/preview/patches` am echten Worker prüfen.
 
 ## Datenstruktur
 Die Website-Daten liegen ausschließlich unter `public/data/`.
@@ -38,7 +40,7 @@ Im Browser werden diese Dateien über `/data/...` geladen, weil `public/` bei Cl
 ## Test-Endpunkte
 - `/health` – zeigt die laufende Worker-Version.
 - `/preview` – holt RSI-Beiträge ab, ohne GitHub zu verändern.
-- `/preview/patches` – prüft die erkannte Patch-Notes-Liste ohne GitHub zu verändern.
+- `/preview/patches` – erstellt ohne GitHub-Schreibzugriff die fertig aufbereiteten Patch-Daten einschließlich `changes`, `summary`, `fullSummary` und Vorgängerversion. Erst diese Ausgabe prüfen, bevor `/run` benutzt wird.
 - `/api/patches` – liefert die aktuell gespeicherten Patch Notes für die Website.
 - `/run` – führt den Import aus und schreibt bei vorhandenen GitHub-Zugangsdaten die Daten zurück.
 

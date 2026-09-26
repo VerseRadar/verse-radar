@@ -1,5 +1,13 @@
 # Changelog – Verse Radar
 
+## 0.6.6 – Patch-Vorschau zeigt die veröffentlichbare Ausgabe
+- `/preview/patches` führt nun dieselbe Aufbereitung wie `/run` aus, ohne Dateien in GitHub zu schreiben. Die Vorschau enthält `previous`, `summary`, `changes`, `fullSummary`, `sourceUrl`, `ai` und `summaryVersion`.
+- Eine kompakte `discovery`-Diagnose zeigt Quell-ID und Textlänge, ohne komplette Original-Patch-Notes in der Vorschau auszugeben.
+- Fallback-Erkennung für konkrete ältere Patch-Themen wie Recco Battaglia, Fracht- und Kampfmissionen, Defend Location – Ship Battles V3 sowie XenoThreat ergänzt; ein Punkt wird nur gezeigt, wenn der abgerufene Quelltext dazu passt.
+- Ausgewählte Details zu Orison Relief Support und weiteren Ausrüstungs- und Belohnungsthemen ergänzt.
+- Gespeicherte Zusammenfassungen früherer Versionen werden neu bewertet. News-Import und MediaWiki-Inhaltsabruf bleiben erhalten.
+- Der Zeitplan aktualisiert News weiter, schreibt Patch-Daten jedoch erst nach dem Setzen von `PATCH_AUTO_PUBLISH=true`. `/run` bleibt der manuelle erste Patch-Import nach Prüfung der Vorschau.
+
 ## 0.6.5 – Patch-Zusammenfassungen deutlich verbessert
 - Die echte Patch-Notiz bleibt weiterhin die Datenbasis; 0.6.4 hatte bereits den Content-Fetch repariert.
 - Fallback-Zusammenfassungen wurden für große Patches wie 4.10, 4.10.1 und 4.9 deutlich erweitert.
