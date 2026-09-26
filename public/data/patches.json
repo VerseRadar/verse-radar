@@ -1,29 +1,215 @@
 [
   {
     "version": "Alpha 4.10.1",
-    "date": "2026-09-16",
+    "date": "2026-09-16T18:00:00.000Z",
     "previous": "Alpha 4.10",
-    "summary": "Alpha 4.10.1 bringt mit Orison Relief Support neue zeitlich begrenzte Aufträge rund um den Wiederaufbau von Orison. Außerdem wurden unter anderem Frachtverteilung, Audio, Stabilität und zahlreiche Fehler behoben.",
+    "summary": "Orison Relief Support bringt eine neue Reihe von Wiederaufbau-, Transport-, Herstellungs- und Kampfeinsätzen mit persönlichem Fortschritts- und Belohnungssystem. Mehrere neue Waffen bzw. Ausrüstungsgegenstände wurden hinzugefügt, darunter neue FPS-Waffen und schwere Ausrüstung. Bodenfahrzeuge können nun einen Soft-Death-Zustand erreichen, statt direkt zerstört zu werden. Bei Kreaturen- und Pflanzenbeute gibt es nun unterschiedliche Qualitätsstufen. Bestimmte Waffenaufsätze sind nun breiter im allgemeinen Loot-Pool verfügbar. Die Frachtverteilung bei Multi-Pickup-Aufträgen berücksichtigt nun die SCU-Menge der einzelnen Abholorte. Zusätzlich wurden 37 dokumentierte Korrekturen bzw. Issues geschlossen.",
     "changes": [
-      {"category":"Gameplay","title":"Orison Relief Support","description":"Neue Aufträge unterstützen den Wiederaufbau und die Absicherung von Orison nach dem Angriff der Nine Tails."},
-      {"category":"Gameplay","title":"Frachtverteilung","description":"Die Verteilung von Fracht bei Mehrfach-Abholungen wurde überarbeitet."},
-      {"category":"Audio","title":"Audio-Updates","description":"Mehrere Audio-Bereiche wurden erweitert bzw. überarbeitet."},
-      {"category":"Bugfixes","title":"Stabilität und Fehlerbehebungen","description":"Zahlreiche Probleme wurden behoben; dazu gehören unter anderem Abstürze, Missions-, Fahrzeug-, Inventar- und Umgebungsfehler."}
+      {
+        "category": "Gameplay",
+        "title": "Orison Relief Support",
+        "description": "Neue Wiederaufbau- und Unterstützungsaufträge rund um Orison mit Ressourcen, Herstellung, Transport und Kampf."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Soft Death für Bodenfahrzeuge",
+        "description": "Bodenfahrzeuge können nun deaktiviert werden und bleiben inert, statt direkt zerstört zu werden."
+      },
+      {
+        "category": "Inventar",
+        "title": "Neue Waffen und Ausrüstung",
+        "description": "Neue FPS-Waffen und schwere Ausrüstung erweitern das verfügbare Arsenal."
+      },
+      {
+        "category": "Missionen",
+        "title": "Frachtverteilung",
+        "description": "Multi-Pickup-Aufträge verteilen Fracht nun anhand der SCU-Menge der einzelnen Abholorte."
+      },
+      {
+        "category": "Inventar",
+        "title": "Loot-Verfügbarkeit von Waffenaufsätzen",
+        "description": "Bestimmte Kompensatoren und Stabilisatoren sind nun breiter im allgemeinen Loot-Pool verfügbar."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Kreaturen- und Pflanzenbeute",
+        "description": "Beute von Kreaturen und Pflanzen erhält abgestufte Qualitätsstufen."
+      },
+      {
+        "category": "Technik",
+        "title": "Stabilität und Fehlerbehebungen",
+        "description": "Der Patch enthält zahlreiche Crash-, Stabilitäts- und Performance-Korrekturen."
+      }
     ],
-    "fullSummary": "Alpha 4.10.1 ist ein kleineres Update für Alpha 4.10. Ein Schwerpunkt liegt auf Orison Relief Support: Nach dem Angriff auf Orison stehen neue Aufträge rund um Wiederaufbau, medizinische Versorgung und Sicherheit zur Verfügung. Darüber hinaus wurde die Verteilung von Fracht bei Mehrfach-Abholungen angepasst. Auch Audio-Inhalte wurden erweitert und überarbeitet. Ein großer Teil des Updates besteht aus Fehlerbehebungen und Verbesserungen an Stabilität und Performance, darunter Probleme bei Missionen, Fahrzeugen, Inventar und verschiedenen Orten. Die vollständigen offiziellen Patch Notes mit allen einzelnen Fixes stehen bei RSI zur Verfügung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21330-Star-Citizen-Alpha-4101",
+    "fullSummary": "Im Gameplay bringt der Patch mit Orison Relief Support eine neue Reihe von Wiederaufbau- und Unterstützungsaufträgen. Je nach Auftrag geht es um Ressourcensammlung, Herstellung, Transporte oder Kämpfe; der persönliche Fortschritt schaltet mehrere Belohnungen frei. Bodenfahrzeuge können nun in Soft Death übergehen. Kreaturen- und Pflanzenbeute besitzt nun Qualitätsstufen. Bestimmte Waffenaufsätze wurden in den allgemeinen Loot-Pool aufgenommen. Die Verteilung von Fracht auf mehrere Abholorte wurde korrigiert und berücksichtigt die SCU-Menge je Pickup. Bei Stabilität und Fehlerbehebungen wurden 37 dokumentierte Korrekturen bzw. Issues geschlossen.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21330-Star-Citizen-Alpha-4.10.1",
     "ai": false,
+    "summaryVersion": "0.6.5",
     "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
   },
   {
     "version": "Alpha 4.10",
-    "date": "2026-08-26",
+    "date": "2026-08-26T18:00:00.000Z",
     "previous": "Alpha 4.9",
-    "summary": "Alpha 4.10 brachte den Schwerpunkt rund um Siege of Orison und weitere Änderungen für das Persistent Universe.",
-    "changes": [],
-    "fullSummary": "Die vollständige deutsche Zusammenfassung wird beim nächsten automatischen Patch-Import aus den verfügbaren Patch-Daten aktualisiert.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/patch-notes",
+    "summary": "Siege of Orison wurde als Instancing-Mission überarbeitet und bietet eine geschlossene Mission für Spieler und Gruppe. Recco Battaglia erweitert das Missionsangebot mit storybasierten und wiederholbaren Aufträgen rund um Bergbau und Ressourcenlogistik. Instancing hält unterstützte Inhalte in separaten Instanzen für die jeweilige Gruppe und führt dafür neue Backend- und Skalierungslogik ein. Hydrogen- und Quantum-Treibstoff wurden bei Kapazitäten, Verbrauch und Preisen neu ausbalanciert. Die Schiffsrüstung berücksichtigt ihren Zustand nun bei der Schadensreduktion und Schadensberechnung. Claim-, Liefer- und Expedite-Kosten sowie die Verfügbarkeit verschiedener Fahrzeuge, Waffen und Gegenstände wurden angepasst. Mehrere neue Waffen bzw. Ausrüstungsgegenstände wurden hinzugefügt, darunter neue FPS-Waffen und schwere Ausrüstung.",
+    "changes": [
+      {
+        "category": "Missionen",
+        "title": "Siege of Orison V2",
+        "description": "Die Mission wurde auf Instancing umgestellt und für Gruppen mit Checkpoints und überarbeiteten Gefechten neu aufgebaut."
+      },
+      {
+        "category": "Missionen",
+        "title": "Recco Battaglia",
+        "description": "Neue storybasierte und wiederholbare Aufträge rund um Bergbau, Verteidigung, Suche und Ressourcenlogistik."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Loot und Drop-Raten",
+        "description": "Loot-Caches, Container und Seltenheitsstufen wurden umfassend neu gewichtet."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Treibstoff-Balance",
+        "description": "Hydrogen- und Quantum-Treibstoff wurden bei Kapazität, Verbrauch, Preisen und Refuelling angepasst."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Schiffsarmor",
+        "description": "Die Schadensreduktion durch Rüstung berücksichtigt nun deren aktuellen Zustand."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Claims und Verfügbarkeit",
+        "description": "Claim-/Lieferzeiten, Expedite-Kosten, Munitionspreise und verschiedene Shop-Angebote wurden angepasst."
+      },
+      {
+        "category": "Inventar",
+        "title": "Neue Waffen und Ausrüstung",
+        "description": "Neue FPS-Waffen und schwere Ausrüstung erweitern das verfügbare Arsenal."
+      },
+      {
+        "category": "Technik",
+        "title": "Instancing",
+        "description": "Geschlossene Instanzen für unterstützte Inhalte werden durch neue Backend- und Skalierungslogik ermöglicht."
+      },
+      {
+        "category": "Technik",
+        "title": "Performance & Streaming",
+        "description": "Physik, Rendering, Partikel, Streaming und Speicherverwaltung wurden an mehreren Stellen optimiert."
+      },
+      {
+        "category": "VR",
+        "title": "Experimentelle VR-Unterstützung",
+        "description": "Headtracking, Stereo-Cursor, Rendering und OpenXR wurden weiterentwickelt."
+      },
+      {
+        "category": "Technik",
+        "title": "Stabilität und Fehlerbehebungen",
+        "description": "Der Patch enthält zahlreiche Crash-, Stabilitäts- und Performance-Korrekturen."
+      }
+    ],
+    "fullSummary": "Siege of Orison wurde als Instancing-Inhalt überarbeitet. Die Mission läuft in einer geschlossenen Instanz für die eigene Gruppe, nutzt Checkpoints und wurde bei Plattformen, Gegnern und Belohnungen angepasst. Mit Recco Battaglia kommt ein weiterer Missionsgeber hinzu. Ihre Aufträge führen durch Bergbau-, Verteidigungs-, Such- und Bergungsinhalte und schalten über Reputation weitere Verträge und Belohnungen frei. Die Loot-Generierung wurde umfassend angepasst: Caches und Container enthalten mehr Gegenstände, Seltenheitsstufen wurden neu gewichtet und bestimmte Gegenstände erhalten eigene Loot-Quellen. Bei Hydrogen- und Quantum-Treibstoff wurden Kapazitäten, Verbrauch, Preise und die darauf abgestimmten Refuelling-Missionen neu ausbalanciert. Die Schiffsrüstung wurde technisch angepasst: Schadensreduktion greift nur noch bei vorhandener Rüstungsintegrität, und der Zustand der Rüstung beeinflusst die Schadensaufnahme. Claim- und Lieferzeiten orientieren sich stärker am Wert des Fahrzeugs. Auch Ausrüstung, Expedite-Gebühren, Munitionspreise und Shop-Angebote wurden angepasst. Instancing wird technisch durch einen neuen Broker und zusätzliche Skalierungsmechanismen unterstützt. Serverlast, Instanzverwaltung, Streaming und einige Performance-Bereiche wurden ebenfalls überarbeitet. Für Performance und Streaming wurden unter anderem Physik- und Rendering-Abläufe, Partikeleffekte, Speicherverwaltung und die Darstellung in Levski optimiert. Die experimentelle VR-Unterstützung erhält Verbesserungen für Headtracking, Stereo-Cursor, Kioske, Wasser-Rendering und OpenXR. Bei Stabilität und Fehlerbehebungen wurden 479 dokumentierte Korrekturen bzw. Issues geschlossen.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21293-Star-Citizen-Alpha-4.10",
     "ai": false,
+    "summaryVersion": "0.6.5",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.9",
+    "date": "2026-07-15T18:00:00.000Z",
+    "previous": "Alpha 4.8.3",
+    "summary": "Recco Battaglia erweitert das Missionsangebot mit storybasierten und wiederholbaren Aufträgen rund um Bergbau und Ressourcenlogistik. Mehrere neue Waffen bzw. Ausrüstungsgegenstände wurden hinzugefügt, darunter neue FPS-Waffen und schwere Ausrüstung. Die experimentelle VR-Unterstützung wurde bei Headtracking, Cursor, Rendering und OpenXR erweitert. Der Patch enthält zahlreiche Stabilitäts-, Crash- und Performance-Korrekturen.",
+    "changes": [
+      {
+        "category": "Missionen",
+        "title": "Recco Battaglia",
+        "description": "Neue storybasierte und wiederholbare Aufträge rund um Bergbau, Verteidigung, Suche und Ressourcenlogistik."
+      },
+      {
+        "category": "Inventar",
+        "title": "Neue Waffen und Ausrüstung",
+        "description": "Neue FPS-Waffen und schwere Ausrüstung erweitern das verfügbare Arsenal."
+      },
+      {
+        "category": "VR",
+        "title": "Experimentelle VR-Unterstützung",
+        "description": "Headtracking, Stereo-Cursor, Rendering und OpenXR wurden weiterentwickelt."
+      },
+      {
+        "category": "Technik",
+        "title": "Stabilität und Fehlerbehebungen",
+        "description": "Der Patch enthält zahlreiche Crash-, Stabilitäts- und Performance-Korrekturen."
+      }
+    ],
+    "fullSummary": "Mit Recco Battaglia kommt ein weiterer Missionsgeber hinzu. Ihre Aufträge führen durch Bergbau-, Verteidigungs-, Such- und Bergungsinhalte und schalten über Reputation weitere Verträge und Belohnungen frei. Die experimentelle VR-Unterstützung erhält Verbesserungen für Headtracking, Stereo-Cursor, Kioske, Wasser-Rendering und OpenXR. Zusätzlich enthält der Patch zahlreiche Stabilitäts-, Crash- und Performance-Fixes.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21245-Star-Citizen-Alpha-4.9",
+    "ai": false,
+    "summaryVersion": "0.6.5",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.8.3",
+    "date": "2026-07-01T16:00:00.000Z",
+    "previous": "Alpha 4.8.1",
+    "summary": "Alpha 4.8.3 enthält Gameplay-, Technik- und Fehlerbehebungsänderungen laut den offiziellen Patch Notes.",
+    "changes": [],
+    "fullSummary": "Alpha 4.8.3 enthält Gameplay-, Technik-, Missions- und Fehlerbehebungsänderungen. Die vollständige Liste ist über die offizielle Originalquelle abrufbar.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21206-Star-Citizen-Alpha-4.8.3",
+    "ai": false,
+    "summaryVersion": "0.6.5",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.8.1",
+    "date": "2026-06-03T16:00:00.000Z",
+    "previous": "Alpha 4.8",
+    "summary": "Alpha 4.8.1 enthält Gameplay-, Technik- und Fehlerbehebungsänderungen laut den offiziellen Patch Notes.",
+    "changes": [],
+    "fullSummary": "Alpha 4.8.1 enthält Gameplay-, Technik-, Missions- und Fehlerbehebungsänderungen. Die vollständige Liste ist über die offizielle Originalquelle abrufbar.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21177-Star-Citizen-Alpha-4.8.1",
+    "ai": false,
+    "summaryVersion": "0.6.5",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.8",
+    "date": "2026-05-15T18:00:00.000Z",
+    "previous": "Alpha 4.8: Tactical Strike",
+    "summary": "Mehrere neue Waffen bzw. Ausrüstungsgegenstände wurden hinzugefügt, darunter neue FPS-Waffen und schwere Ausrüstung. Die experimentelle VR-Unterstützung wurde bei Headtracking, Cursor, Rendering und OpenXR erweitert. Der Patch enthält zahlreiche Stabilitäts-, Crash- und Performance-Korrekturen.",
+    "changes": [
+      {
+        "category": "Inventar",
+        "title": "Neue Waffen und Ausrüstung",
+        "description": "Neue FPS-Waffen und schwere Ausrüstung erweitern das verfügbare Arsenal."
+      },
+      {
+        "category": "VR",
+        "title": "Experimentelle VR-Unterstützung",
+        "description": "Headtracking, Stereo-Cursor, Rendering und OpenXR wurden weiterentwickelt."
+      },
+      {
+        "category": "Technik",
+        "title": "Stabilität und Fehlerbehebungen",
+        "description": "Der Patch enthält zahlreiche Crash-, Stabilitäts- und Performance-Korrekturen."
+      }
+    ],
+    "fullSummary": "Die experimentelle VR-Unterstützung erhält Verbesserungen für Headtracking, Stereo-Cursor, Kioske, Wasser-Rendering und OpenXR. Zusätzlich enthält der Patch zahlreiche Stabilitäts-, Crash- und Performance-Fixes.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21168-Star-Citizen-Alpha-4.8",
+    "ai": false,
+    "summaryVersion": "0.6.5",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.8: Tactical Strike",
+    "date": "2026-05-14T13:00:00.000Z",
+    "previous": null,
+    "summary": "Alpha 4.8: Tactical Strike enthält Gameplay-, Technik- und Fehlerbehebungsänderungen laut den offiziellen Patch Notes.",
+    "changes": [],
+    "fullSummary": "Die Patch-Notizen konnten technisch noch nicht vollständig aus dem Archiv übernommen werden. Die offizielle Originalquelle ist direkt verlinkt.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21142-Star-Citizen-Alpha-4.8:-Tactical-Strike",
+    "ai": false,
+    "summaryVersion": "0.6.5",
     "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
   }
 ]
