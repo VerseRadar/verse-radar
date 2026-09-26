@@ -1,4 +1,4 @@
-# Verse Radar 0.6.7
+# Verse Radar 0.6.8
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 

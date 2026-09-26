@@ -1,4 +1,4 @@
-/* Verse Radar 0.6.7 – RSI news + patch notes ingestion
+/* Verse Radar 0.6.8 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -25,7 +25,7 @@ export default {
   async fetch(request, env) {
     const u = new URL(request.url);
     if (u.pathname === "/health") {
-      return json({ ok: true, service: "verse-radar-updater", version: "0.6.7" });
+      return json({ ok: true, service: "verse-radar-updater", version: "0.6.8" });
     }
     if (u.pathname === "/preview") {
       try {
@@ -75,9 +75,9 @@ export default {
     if (u.pathname === "/debug/github") {
       try {
         const d = await githubDiagnostics(env, "public/data/news.json");
-        return json({ ok: true, version: "0.6.7", github: d });
+        return json({ ok: true, version: "0.6.8", github: d });
       } catch (e) {
-        return json({ ok: false, version: "0.6.7", error: e.message }, 500);
+        return json({ ok: false, version: "0.6.8", error: e.message }, 500);
       }
     }
     if (u.pathname === "/api/news") {
@@ -107,7 +107,7 @@ export default {
     }
     // Public website: let Cloudflare Static Assets serve /public.
     if (env.ASSETS) return env.ASSETS.fetch(request);
-    return new Response("Verse Radar 0.6.7", { headers: { "content-type": "text/plain;charset=utf-8" } });
+    return new Response("Verse Radar 0.6.8", { headers: { "content-type": "text/plain;charset=utf-8" } });
   },
   async scheduled(_, env, ctx) {
     // Keep the proven news schedule; patches are published automatically only
@@ -133,7 +133,7 @@ async function fetchRSIItems() {
     try {
       const r = await fetch(url, {
         headers: {
-          "user-agent": "Verse-Radar/0.6.7 (+independent fan site)",
+          "user-agent": "Verse-Radar/0.6.8 (+independent fan site)",
           "accept": "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
           "accept-language": "en-US,en;q=0.9,de;q=0.8"
         }
@@ -156,7 +156,7 @@ async function fetchRSIItems() {
     const apiUrl = "https://api.star-citizen.wiki/api/comm-links?page[size]=50&sort=-id";
     const r = await fetch(apiUrl, {
       headers: {
-        "user-agent": "Verse-Radar/0.6.7 (+independent fan site)",
+        "user-agent": "Verse-Radar/0.6.8 (+independent fan site)",
         "accept": "application/json"
       }
     });
@@ -220,7 +220,7 @@ async function enrichDates(items) {
   // retain ingestion time rather than dropping the story.
   return await Promise.all(items.map(async item => {
     try {
-      const r = await fetch(item.url, { headers: { "user-agent": "Verse-Radar/0.6.7 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
+      const r = await fetch(item.url, { headers: { "user-agent": "Verse-Radar/0.6.8 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
       if (!r.ok) return item;
       const html = await r.text();
       const iso = extractPublishedDate(html);
@@ -381,16 +381,16 @@ async function updateSite(env, { includePatches = true } = {}) {
 
   const patchResult = includePatches ? await updatePatches(env) : null;
   const now = new Date().toISOString();
-  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation: includePatches ? "Cloudflare Worker + RSI Comm-Link + RSI Patch Notes" : "Cloudflare Worker + RSI Comm-Link; Patch-Import pausiert", version: "0.6.7", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length, aiItems: aiCount, patchItems: patchResult?.items.length ?? null, patchAiItems: patchResult?.aiItems ?? null };
+  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation: includePatches ? "Cloudflare Worker + RSI Comm-Link + RSI Patch Notes" : "Cloudflare Worker + RSI Comm-Link; Patch-Import pausiert", version: "0.6.8", fetchedItems: items.length, newItems: news.filter(n => !known.has(n.id)).length, aiItems: aiCount, patchItems: patchResult?.items.length ?? null, patchAiItems: patchResult?.aiItems ?? null };
 
   if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) {
-    return { ok: true, version: "0.6.7", published: false, ...meta, note: "RSI-Abholung funktioniert. GitHub Secrets fehlen noch; daher wurde nichts zurückgeschrieben." };
+    return { ok: true, version: "0.6.8", published: false, ...meta, note: "RSI-Abholung funktioniert. GitHub Secrets fehlen noch; daher wurde nichts zurückgeschrieben." };
   }
 
-  await putGithub(env, "public/data/news.json", JSON.stringify(finalNews, null, 2) + "\n", "Verse Radar 0.6.7: update news");
-  if (includePatches) await putGithub(env, "public/data/patches.json", JSON.stringify(patchResult.patches, null, 2) + "\n", "Verse Radar 0.6.7: update patches");
-  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", "Verse Radar 0.6.7: update meta");
-  return { ok: true, version: "0.6.7", published: true, ...meta };
+  await putGithub(env, "public/data/news.json", JSON.stringify(finalNews, null, 2) + "\n", "Verse Radar 0.6.8: update news");
+  if (includePatches) await putGithub(env, "public/data/patches.json", JSON.stringify(patchResult.patches, null, 2) + "\n", "Verse Radar 0.6.8: update patches");
+  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", "Verse Radar 0.6.8: update meta");
+  return { ok: true, version: "0.6.8", published: true, ...meta };
 }
 
 async function updatePatches(env) {
@@ -405,7 +405,7 @@ async function updatePatches(env) {
     const item = unique[i];
     const previous = unique[i + 1]?.version || null;
     const old = existing.find(x => x.version === item.version && x.sourceUrl === item.sourceUrl);
-    if (old && old.summaryVersion === "0.6.7" && old.summary && old.fullSummary && Array.isArray(old.changes) && old.changes.length) {
+    if (old && old.summaryVersion === "0.6.8" && old.summary && old.fullSummary && Array.isArray(old.changes) && old.changes.length) {
       patches.push({ ...old, previous });
       continue;
     }
@@ -422,7 +422,7 @@ async function updatePatches(env) {
       fullSummary: ai?.fullSummary || item.fallbackFullSummary,
       sourceUrl: item.sourceUrl,
       ai: Boolean(ai),
-      summaryVersion: "0.6.7",
+      summaryVersion: "0.6.8",
       note: "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
     });
   }
@@ -433,7 +433,7 @@ async function fetchPatchItems() {
   const discovered = [];
   try {
     const apiUrl = "https://api.star-citizen.wiki/api/comm-links?page[size]=100&sort=-id";
-    const r = await fetch(apiUrl, { headers: { "user-agent": "Verse-Radar/0.6.7 (+independent fan site)", "accept": "application/json" } });
+    const r = await fetch(apiUrl, { headers: { "user-agent": "Verse-Radar/0.6.8 (+independent fan site)", "accept": "application/json" } });
     const body = await r.json();
     const records = Array.isArray(body?.data) ? body.data : [];
     for (const record of records) {
@@ -490,7 +490,7 @@ function extractPatchContent(record) {
 async function fetchPatchDetail(id, current = "") {
   try {
     const detail = await fetch(`https://api.star-citizen.wiki/api/comm-links/${id}`, {
-      headers: { "user-agent": "Verse-Radar/0.6.7 (+independent fan site)", "accept": "application/json" }
+      headers: { "user-agent": "Verse-Radar/0.6.8 (+independent fan site)", "accept": "application/json" }
     });
     if (!detail.ok) return current;
     const dj = await detail.json();
@@ -517,7 +517,7 @@ async function fetchWikiUpdatePage(version, current = "") {
       api.searchParams.set("format", "json");
       api.searchParams.set("origin", "*");
       const r = await fetch(api.toString(), {
-        headers: { "user-agent": "Verse-Radar/0.6.7 (+independent fan site)", "accept": "application/json" }
+        headers: { "user-agent": "Verse-Radar/0.6.8 (+independent fan site)", "accept": "application/json" }
       });
       if (r.ok) {
         const body = await r.json();
@@ -533,7 +533,7 @@ async function fetchWikiUpdatePage(version, current = "") {
     try {
       const slug = `Star Citizen ${candidate}`.replace(/\s+/g, "_");
       const url = `https://starcitizen.tools/Update%3A${encodeURIComponent(slug)}`;
-      const r = await fetch(url, { headers: { "user-agent": "Verse-Radar/0.6.7 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
+      const r = await fetch(url, { headers: { "user-agent": "Verse-Radar/0.6.8 (+independent fan site)", "accept": "text/html,application/xhtml+xml" } });
       if (!r.ok) continue;
       const html = await r.text();
       const main = html.match(/<main[\s\S]*?<\/main>/i)?.[0] || html.match(/<article[\s\S]*?<\/article>/i)?.[0] || html;
@@ -599,6 +599,15 @@ function validDate(v) { const d = new Date(v); return Number.isNaN(d.getTime()) 
 function sentenceList(parts, max=6) {
   return parts.filter(Boolean).slice(0, max).join(" ");
 }
+// A keyword in later bug fixes does not mean that a feature was introduced again.
+// These two named additions have a known first release in the available archive.
+function debutedIn(version, feature) {
+  return feature === "tactical-strike-group" ? version === "Alpha 4.8" :
+         feature === "cq7-bullpup" ? version === "Alpha 4.9" : false;
+}
+function newGearMention(content) {
+  return /new fps weapon|arlington rifle|vendetta hmg|super heavy armor/i.test(content);
+}
 function fallbackPatchSummary(version, content) {
   const t = content || "";
   const parts = [];
@@ -609,7 +618,7 @@ function fallbackPatchSummary(version, content) {
   if (/hydrogen & quantum fuel rebalance/i.test(t)) parts.push("Hydrogen- und Quantum-Treibstoff wurden bei Kapazitäten, Verbrauch und Preisen neu ausbalanciert.");
   if (/vehicle armor update/i.test(t)) parts.push("Die Schiffsrüstung berücksichtigt ihren Zustand nun bei der Schadensreduktion und Schadensberechnung.");
   if (/pricing, claims, & availability/i.test(t)) parts.push("Claim-, Liefer- und Expedite-Kosten sowie die Verfügbarkeit verschiedener Fahrzeuge, Waffen und Gegenstände wurden angepasst.");
-  if (/new fps weapon|arlington rifle|cq7.*bullpup|vendetta hmg|super heavy armor/i.test(t)) parts.push("Mehrere neue Waffen bzw. Ausrüstungsgegenstände wurden hinzugefügt, darunter neue FPS-Waffen und schwere Ausrüstung.");
+  if (newGearMention(t)) parts.push("Mehrere neue Waffen bzw. Ausrüstungsgegenstände wurden hinzugefügt, darunter neue FPS-Waffen und schwere Ausrüstung.");
   if (/virtual reality updates|experimental vr|openxr/i.test(t)) parts.push("Die experimentelle VR-Unterstützung wurde bei Headtracking, Cursor, Rendering und OpenXR erweitert.");
   if (/ground vehicle soft death/i.test(t)) parts.push("Bodenfahrzeuge können nun einen Soft-Death-Zustand erreichen, statt direkt zerstört zu werden.");
   if (/creature and plant loot quality/i.test(t)) parts.push("Bei Kreaturen- und Pflanzenbeute gibt es nun unterschiedliche Qualitätsstufen.");
@@ -619,10 +628,10 @@ function fallbackPatchSummary(version, content) {
   if (/freight elevator kiosk/i.test(t)) parts.push("Die Bedienoberfläche des Frachtaufzugs wurde überarbeitet.");
   if (/combat mission rebalance|combat missions rebalance/i.test(t)) parts.push("Kampfmissionen und ihre Balance wurden angepasst.");
   if (/mining laser.{0,80}20%|20%.{0,80}mining laser/i.test(t)) parts.push("Die Leistung von Mining-Lasern wurde angepasst.");
-  if (/cq7.{0,25}bullpup/i.test(t)) parts.push("Das CQ7 Bullpup erweitert das Waffenangebot.");
+  if (debutedIn(version, "cq7-bullpup") && /cq7.{0,25}bullpup/i.test(t)) parts.push("Das CQ7 Bullpup erweitert das Waffenangebot.");
   if (/defend location.{0,60}ship battles v3/i.test(t)) parts.push("Defend Location – Ship Battles V3 verbindet Verteidigungs- und Eskortaufträge mit neuen Gegnerwellen.");
   if (/return of xenothreat|xenothreat returns/i.test(t)) parts.push("Return of XenoThreat bringt die XenoThreat-Bedrohung als Event zurück.");
-  if (/tactical strike group/i.test(t)) parts.push("Die Tactical Strike Group erweitert das Missionsangebot.");
+  if (debutedIn(version, "tactical-strike-group") && /tactical strike group/i.test(t)) parts.push("Die Tactical Strike Group erweitert das Missionsangebot.");
   const m = t.match(/closes\s+(\d+)\s+(?:bug fixes|issues)/i);
   if (m) parts.push(`Zusätzlich wurden ${m[1]} dokumentierte Korrekturen bzw. Issues geschlossen.`);
   else if (/stability and performance|client crashes|server crashes/i.test(t)) parts.push("Der Patch enthält zahlreiche Stabilitäts-, Crash- und Performance-Korrekturen.");
@@ -634,7 +643,7 @@ function fallbackFullSummary(version, content) {
   const parts = [];
   if (/orison relief support/i.test(t)) parts.push("Im Gameplay bringt der Patch mit Orison Relief Support eine neue Reihe von Wiederaufbau- und Unterstützungsaufträgen. Je nach Auftrag geht es um Ressourcensammlung, Herstellung, Transporte oder Kämpfe; der persönliche Fortschritt schaltet mehrere Belohnungen frei.");
   if (/siege of orison v2/i.test(t)) parts.push("Siege of Orison wurde als Instancing-Inhalt überarbeitet. Die Mission läuft in einer geschlossenen Instanz für die eigene Gruppe, nutzt Checkpoints und wurde bei Plattformen, Gegnern und Belohnungen angepasst.");
-  if (/recco battaglia/i.test(t)) parts.push("Mit Recco Battaglia kommt ein weiterer Missionsgeber hinzu. Ihre Aufträge führen durch Bergbau-, Verteidigungs-, Such- und Bergungsinhalte und schalten über Reputation weitere Verträge und Belohnungen frei.");
+  if (/recco battaglia/i.test(t)) parts.push(`${version === "Alpha 4.9" ? "Mit Recco Battaglia kommt ein weiterer Missionsgeber hinzu." : "Die Auftragsreihe um Recco Battaglia wird fortgeführt."} Ihre Aufträge führen durch Bergbau-, Verteidigungs-, Such- und Bergungsinhalte und schalten über Reputation weitere Verträge und Belohnungen frei.`);
   if (/loot generation & drop rates/i.test(t)) parts.push("Die Loot-Generierung wurde umfassend angepasst: Caches und Container enthalten mehr Gegenstände, Seltenheitsstufen wurden neu gewichtet und bestimmte Gegenstände erhalten eigene Loot-Quellen.");
   if (/hydrogen & quantum fuel rebalance/i.test(t)) parts.push("Bei Hydrogen- und Quantum-Treibstoff wurden Kapazitäten, Verbrauch, Preise und die darauf abgestimmten Refuelling-Missionen neu ausbalanciert.");
   if (/vehicle armor update/i.test(t)) parts.push("Die Schiffsrüstung wurde technisch angepasst: Schadensreduktion greift nur noch bei vorhandener Rüstungsintegrität, und der Zustand der Rüstung beeinflusst die Schadensaufnahme.");
@@ -652,11 +661,11 @@ function fallbackFullSummary(version, content) {
   if (/ordnance cargo holder/i.test(t)) parts.push("Ein Ordnance Cargo Holder ermöglicht zusätzliche Abläufe beim Transport von Munition. Die Details und Einschränkungen stehen in den offiziellen Patch Notes.");
   if (/freight elevator kiosk/i.test(t)) parts.push("Beim Freight Elevator Kiosk wurden Bedienung und Darstellung angepasst.");
   if (/combat mission rebalance|combat missions rebalance/i.test(t)) parts.push("Kampfmissionen wurden bei Schwierigkeit und Ablauf neu abgestimmt.");
-  if (/cq7.{0,25}bullpup/i.test(t)) parts.push("Das CQ7 Bullpup kommt als weitere FPS-Waffe hinzu.");
+  if (debutedIn(version, "cq7-bullpup") && /cq7.{0,25}bullpup/i.test(t)) parts.push("Das CQ7 Bullpup kommt als weitere FPS-Waffe hinzu.");
   if (/grenade hud marker/i.test(t)) parts.push("HUD-Marker machen Granaten im Kampf besser erkennbar.");
   if (/defend location.{0,60}ship battles v3/i.test(t)) parts.push("Defend Location – Ship Battles V3 kombiniert Verteidigung und Eskorte. Unterschiedliche Schauplätze und Schwierigkeitsgrade sowie Gegner wie Ace Pilots beeinflussen Missionsablauf, Reputation und Belohnungen.");
   if (/return of xenothreat|xenothreat returns/i.test(t)) parts.push("Return of XenoThreat steht als Event im Mittelpunkt dieses Updates.");
-  if (/tactical strike group/i.test(t)) parts.push("Die Tactical Strike Group ergänzt das Missionsangebot.");
+  if (debutedIn(version, "tactical-strike-group") && /tactical strike group/i.test(t)) parts.push("Die Tactical Strike Group ergänzt das Missionsangebot.");
   const m = t.match(/closes\s+(\d+)\s+(?:bug fixes|issues)/i);
   if (m) parts.push(`Bei Stabilität und Fehlerbehebungen wurden ${m[1]} dokumentierte Korrekturen bzw. Issues geschlossen.`);
   else if (/stability and performance/i.test(t)) parts.push("Zusätzlich enthält der Patch zahlreiche Stabilitäts-, Crash- und Performance-Fixes.");
@@ -667,13 +676,13 @@ function buildPatchChanges(item) {
   const add = (category,title,description,pattern) => { if (pattern.test(t)) changes.push({category,title,description}); };
   add("Gameplay","Orison Relief Support","Neue Wiederaufbau- und Unterstützungsaufträge rund um Orison mit Ressourcen, Herstellung, Transport und Kampf.",/orison relief support/i);
   add("Missionen","Siege of Orison V2","Die Mission wurde auf Instancing umgestellt und für Gruppen mit Checkpoints und überarbeiteten Gefechten neu aufgebaut.",/siege of orison v2/i);
-  add("Missionen","Recco Battaglia","Neue storybasierte und wiederholbare Aufträge rund um Bergbau, Verteidigung, Suche und Ressourcenlogistik.",/recco battaglia/i);
+  add("Missionen","Recco Battaglia",item.version === "Alpha 4.9" ? "Neue storybasierte und wiederholbare Aufträge rund um Bergbau, Verteidigung, Suche und Ressourcenlogistik." : "Die Auftragsreihe umfasst Story- und wiederholbare Verträge rund um Bergbau, Verteidigung, Suche und Ressourcenlogistik.",/recco battaglia/i);
   add("Gameplay","Loot und Drop-Raten","Loot-Caches, Container und Seltenheitsstufen wurden umfassend neu gewichtet.",/loot generation & drop rates/i);
   add("Schiffe & Fahrzeuge","Treibstoff-Balance","Hydrogen- und Quantum-Treibstoff wurden bei Kapazität, Verbrauch, Preisen und Refuelling angepasst.",/hydrogen & quantum fuel rebalance/i);
   add("Schiffe & Fahrzeuge","Schiffsarmor","Die Schadensreduktion durch Rüstung berücksichtigt nun deren aktuellen Zustand.",/vehicle armor update/i);
   add("Schiffe & Fahrzeuge","Claims und Verfügbarkeit","Claim-/Lieferzeiten, Expedite-Kosten, Munitionspreise und verschiedene Shop-Angebote wurden angepasst.",/pricing, claims, & availability/i);
   add("Schiffe & Fahrzeuge","Soft Death für Bodenfahrzeuge","Bodenfahrzeuge können nun deaktiviert werden und bleiben inert, statt direkt zerstört zu werden.",/ground vehicle soft death/i);
-  add("Inventar","Neue Waffen und Ausrüstung","Neue FPS-Waffen und schwere Ausrüstung erweitern das verfügbare Arsenal.",/new fps weapon|arlington rifle|cq7.*bullpup|vendetta hmg|super heavy armor/i);
+  if (newGearMention(t)) changes.push({category:"Inventar",title:"Neue Waffen und Ausrüstung",description:"Neue FPS-Waffen und schwere Ausrüstung erweitern das verfügbare Arsenal."});
   add("Technik","Instancing","Geschlossene Instanzen für unterstützte Inhalte werden durch neue Backend- und Skalierungslogik ermöglicht.",/instancing/i);
   add("Technik","Performance & Streaming","Physik, Rendering, Partikel, Streaming und Speicherverwaltung wurden an mehreren Stellen optimiert.",/performance & streaming/i);
   add("VR","Experimentelle VR-Unterstützung","Headtracking, Stereo-Cursor, Rendering und OpenXR wurden weiterentwickelt.",/virtual reality updates|experimental vr|openxr/i);
@@ -684,11 +693,11 @@ function buildPatchChanges(item) {
   add("Herstellung","TH-01 Propulsor","Der TH-01 Propulsor erhält eine Herstellungsmöglichkeit.",/th-01 propulsor/i);
   add("Missionen","Defend Location – Ship Battles V3","Verteidigung und Eskorte werden in mehreren Schwierigkeitsgraden kombiniert.",/defend location.{0,60}ship battles v3/i);
   add("Events","Return of XenoThreat","Das XenoThreat-Event kehrt zurück.",/return of xenothreat|xenothreat returns/i);
-  add("Missionen","Tactical Strike Group","Neue Einsätze der Tactical Strike Group.",/tactical strike group/i);
+  if (debutedIn(item.version, "tactical-strike-group")) add("Missionen","Tactical Strike Group","Neue Einsätze der Tactical Strike Group.",/tactical strike group/i);
   add("Fracht","Ordnance Cargo Holder","Munition kann über den neuen Cargo Holder transportiert werden.",/ordnance cargo holder/i);
   add("Fracht","Freight Elevator Kiosk","Bedienung und Anzeige des Frachtaufzugs wurden angepasst.",/freight elevator kiosk/i);
   add("Missionen","Kampfmissionen","Schwierigkeit und Abläufe von Kampfeinsätzen wurden neu abgestimmt.",/combat mission rebalance|combat missions rebalance/i);
-  add("Waffen","CQ7 Bullpup","Die neue FPS-Waffe erweitert das Arsenal.",/cq7.{0,25}bullpup/i);
+  if (debutedIn(item.version, "cq7-bullpup")) add("Waffen","CQ7 Bullpup","Die neue FPS-Waffe erweitert das Arsenal.",/cq7.{0,25}bullpup/i);
   add("UI","Granaten-Marker","HUD-Marker erleichtern das Erkennen von Granaten.",/grenade hud marker/i);
   add("Technik","Stabilität und Fehlerbehebungen","Der Patch enthält zahlreiche Crash-, Stabilitäts- und Performance-Korrekturen.",/stability and performance|client crashes|server crashes|bug fixes/i);
   return changes.slice(0,12);
@@ -797,4 +806,4 @@ async function putGithub(env, path, content, message) {
   const r = await fetch(api, { method: "PUT", headers: { ...gh(env.GITHUB_TOKEN), "content-type": "application/json" }, body: JSON.stringify(body) });
   if (!r.ok) throw Error(`GitHub update failed ${r.status}`);
 }
-const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.6.7" });
+const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.6.8" });

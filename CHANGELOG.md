@@ -1,5 +1,12 @@
 # Changelog – Verse Radar
 
+## 0.6.8 – Wiederholte Inhalte präziser einordnen
+- „Tactical Strike Group“ wird nach dem ersten Alpha-4.8-Eintrag nicht mehr allein wegen einer späteren Erwähnung als neuer Inhalt ausgegeben.
+- Das CQ7 Bullpup wird nur bei Alpha 4.9 als neue Waffe ausgewiesen; eine bloße Erwähnung in späteren Patches genügt nicht.
+- Recco Battaglia wird bei Alpha 4.10 als fortgeführte Auftragsreihe statt als erstmals eingeführter Missionsgeber beschrieben.
+- Gespeicherte 0.6.7-Zusammenfassungen werden mit `summaryVersion=0.6.8` neu erzeugt. Automatische Patch-Veröffentlichung bleibt deaktiviert.
+
+
 ## 0.6.7 – Patch-Aliasse und fehlende Quelltexte
 - Titelvarianten mit derselben numerischen Version werden als ein Patch behandelt; „Alpha 4.8: Tactical Strike“ kann nicht mehr fälschlich als Vorgänger von Alpha 4.8 erscheinen.
 - Einträge ohne auswertbaren Quelltext werden nicht als allgemeine Patch-Zusammenfassung veröffentlicht. Fehlen alle brauchbaren Quellen, meldet die Vorschau einen Fehler.
