@@ -1,5 +1,10 @@
 # Changelog – Verse Radar
 
+## 0.9.0 – Archivlücke zwischen Alpha 4.3 und 4.0 schließen
+- Offizielle Patch-Notes-Links und Veröffentlichungsdaten für Alpha 4.2.1, 4.2, 4.1.1 und 4.1 ergänzt.
+- Versionseigene Änderungspunkte zu Resource Drive, Storm Breaker, Schiffsmissionen und Orbital Assault.
+- Unvollständige Quelltexte führen weiterhin nicht zu einem neuen Archiv-Eintrag.
+
 ## 0.8.9 – Patch-History bis Alpha 4.3 vorbereiten
 - Offizielle Patch-Notes-Links, Veröffentlichungsdaten und konkrete Änderungspunkte für Alpha 4.3, 4.3.1 und 4.3.2 ergänzt.
 - Neue Einträge erscheinen nur bei ausreichend passendem Quelltext.

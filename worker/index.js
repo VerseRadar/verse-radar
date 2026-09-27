@@ -1,4 +1,4 @@
-/* Verse Radar 0.8.9 – RSI news + patch notes ingestion
+/* Verse Radar 0.9.0 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -15,7 +15,7 @@ const MAX = 20;
 const PATCH_PAGE_SIZE = 100;
 const PATCH_PAGES_PER_IMPORT = 2;
 const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
-const VERSION = "0.8.9";
+const VERSION = "0.9.0";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -31,7 +31,11 @@ const PATCH_SEEDS = [
   { version: "Alpha 4.4", id: 20899, date: "2025-11-19T00:00:00.000Z" },
   { version: "Alpha 4.3.2", id: 20852, date: "2025-10-16T00:00:00.000Z" },
   { version: "Alpha 4.3.1", id: 20777, date: "2025-09-18T00:00:00.000Z" },
-  { version: "Alpha 4.3", id: 20728, date: "2025-08-16T00:00:00.000Z" }
+  { version: "Alpha 4.3", id: 20728, date: "2025-08-16T00:00:00.000Z" },
+  { version: "Alpha 4.2.1", id: 20702, date: "2025-07-17T00:00:00.000Z" },
+  { version: "Alpha 4.2", id: 20638, date: "2025-06-19T00:00:00.000Z" },
+  { version: "Alpha 4.1.1", id: 20598, date: "2025-05-13T00:00:00.000Z" },
+  { version: "Alpha 4.1", id: 20522, date: "2025-03-27T00:00:00.000Z" }
 ];
 const VERSION_RE = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?$/;
 const PATCH_NOTES_URL = "https://robertsspaceindustries.com/en/patch-notes";
@@ -772,7 +776,7 @@ function normalizePatchVersion(v) {
   return String(v || "").replace(/\.0(?=\b)/g, "").replace(/\s+/g, " ").trim();
 }
 function officialPatchUrl(id, title) {
-  const verifiedSlugs = new Map([[21070,"47"],[20969,"46"],[20934,"450"],[20899,"440"],[20852,"432"],[20777,"431"],[20728,"430"]]);
+  const verifiedSlugs = new Map([[21070,"47"],[20969,"46"],[20934,"450"],[20899,"440"],[20852,"432"],[20777,"431"],[20728,"430"],[20702,"421"],[20638,"42"],[20598,"411"],[20522,"41"]]);
   if (verifiedSlugs.has(id)) return `https://robertsspaceindustries.com/en/comm-link/Patch-Notes/${id}-Star-Citizen-Alpha-${verifiedSlugs.get(id)}`;
   const slug = String(title || "Star Citizen Patch Notes").trim()
     .replace(/^Star Citizen\s*/i, "Star-Citizen-")
@@ -925,6 +929,50 @@ const ARCHIVE_HIGHLIGHTS = {
       ["Gameplay","Leitern", "Neue Bewegungs- und Ausstiegsmöglichkeiten verbessern die Nutzung von Leitern.", /ladder improvements/i],
       ["Gameplay","Persönliche Hangars", "Am gewählten Heimatort erfolgt der Einstieg direkt im eigenen instanzierten Hangar.", /personal instanced hangar spawning/i],
       ["Technik","Fehlerbehebungen", "Rund 100 Korrekturen zu Problemen aus Alpha 4.2.1 sind dokumentiert.", /approximately 100 bugfixes/i]
+    ]
+  },
+  "Alpha 4.2.1": {
+    required: /resource drive[\s\S]*ship escort/i,
+    changes: [
+      ["Events","Resource Drive", "Ein zeitlich begrenztes Event erweitert die laufende Geschichte um die Regen-Krise.", /new time-limited event:\s*resource drive/i],
+      ["Missionen","Schiffs-Eskorte", "Neue Aufträge drehen sich um die Begleitung bedrohter Schiffe.", /new mission type:\s*ship escort/i],
+      ["Gameplay","Wikelo-Aufträge", "Rezepte und Belohnungen bei Wikelo wurden neu abgestimmt.", /wikelo recipe updates/i],
+      ["Schiffe & Fahrzeuge","Flugverhalten", "Mehrere Schiffe erhalten Änderungen an ihrer Flugbalance.", /ship flight tuning changes/i],
+      ["Waffen","VOLT Pulse", "Die VOLT Pulse Laser Pistol erweitert die FPS-Waffen.", /volt pulse laser pistol/i],
+      ["Technik","Fehlerbehebungen", "Knapp 160 Korrekturen zu Problemen aus Alpha 4.2 sind dokumentiert.", /nearly 160 bugfixes/i]
+    ]
+  },
+  "Alpha 4.2": {
+    required: /storm breaker[\s\S]*new environmental hazard:\s*radiation/i,
+    changes: [
+      ["Gameplay","Storm Breaker", "Neue Sandbox-Orte um ASD-Forschung und Stürme erweitern die Regen-Krise.", /new persistent sandbox activity:\s*storm breaker/i],
+      ["Orte","ASD-Anlagen", "Datenzentren, Shuttle-Stationen und Forschungseinrichtungen werden erkundbar.", /asd data centers[\s\S]*asd research facilities/i],
+      ["Gameplay","Strahlung", "Gefährliche Strahlungszonen erfordern Schutzkleidung und angepasste Routen.", /new environmental hazard:\s*radiation/i],
+      ["Wetter","Dynamischer Regen", "Regen reagiert an unterstützten Orten auf das Wetter.", /dynamic rain/i],
+      ["Inventar","Ausrüstungstausch", "Beim Wechsel von Rüstung werden außen befestigte Gegenstände nach Möglichkeit übernommen.", /equipment swapping hierarchy/i],
+      ["Schiffe & Fahrzeuge","Prowler Utility", "Der Esperia Prowler Utility ergänzt die Fahrzeugauswahl.", /prowler utility/i]
+    ]
+  },
+  "Alpha 4.1.1": {
+    required: /ship battle missions v1[\s\S]*hunt the polaris/i,
+    changes: [
+      ["Missionen","Schiffsgefechte", "Neue Patrouillen- und Gefechtsaufträge erweitern den Raumkampf.", /ship battle missions v1/i],
+      ["Missionen","Hunt the Polaris", "Eine serverweite Mission führt auf die Jagd nach einer gestohlenen Polaris.", /hunt the polaris/i],
+      ["Orte","Asteroiden-Basen", "Neue Bergbau-Basen in Asteroidenfeldern dienen als Schauplätze für Missionen.", /asteroid cluster mining base/i],
+      ["Gameplay","Quantum-Reise zum eigenen Schiff", "Spieler können ein verlassenes, noch funktionsfähiges eigenes Schiff direkt als Reiseziel wählen.", /unattended vehicle quantum travel/i],
+      ["Fracht","ARGO RAFT", "Die Frachtkapazität der RAFT steigt durch ein neues Raster auf 192 SCU.", /argo raft cargo improvements/i],
+      ["Schiffe & Fahrzeuge","Großschiffe", "Die Flugbalance von Polaris, 890 Jump und Reclaimer wurde angepasst.", /capital ship flight adjustments/i]
+    ]
+  },
+  "Alpha 4.1": {
+    required: /align\s*&\s*mine[\s\S]*drake golem/i,
+    changes: [
+      ["Gameplay","Align & Mine", "Eine neue dauerhafte Sandbox-Aktivität verbindet Ausrichtung und Bergbau.", /align\s*&\s*mine/i],
+      ["Orte","Hathor-Anlagen", "Neue Alignment-Anlagen und Orbitalplattformen kommen hinzu.", /hathor[\s\S]*orbital platforms/i],
+      ["Gameplay","Bergbau und Item Recovery", "Bodenfahrzeug- und FPS-Bergbau sowie Item Recovery erhalten neue Funktionen.", /ground vehicle[\s\S]*fps mining updates/i],
+      ["Schiffe & Fahrzeuge","Neue Fahrzeuge", "Drake Golem und Argo ATLS GEO ergänzen die Auswahl.", /drake golem[\s\S]*argo atls geo/i],
+      ["Waffen","VOLT Parallax", "Das VOLT Parallax-Gewehr erweitert das Arsenal.", /volt[\s\S]*parallax/i],
+      ["Technik","Streaming", "Streaming und Verzögerungen im Spielbetrieb wurden überarbeitet.", /streaming radius improvements/i]
     ]
   }
 };

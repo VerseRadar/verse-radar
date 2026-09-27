@@ -33,6 +33,7 @@ let alpha47DetailAvailable = false;
 let archiveSeedDetailsAvailable = false;
 let archivePartialDetails = false;
 let archive43DetailsAvailable = false;
+let archive41DetailsAvailable = false;
 const externalPatch = { version: 'Alpha 4.6', previous: null, sourceUrl: 'https://robertsspaceindustries.com/external', summary: 'Parallel gespeicherter Patch' };
 
 globalThis.fetch = async (input, init = {}) => {
@@ -67,6 +68,15 @@ globalThis.fetch = async (input, init = {}) => {
       20728: 'Onyx Facilities Mission Distribution Tech Updates Light Fighter Flight Tuning Changes Dynamic Snow Ladder Improvements Personal Instanced Hangar Spawning approximately 100 bugfixes. '
     }[Number(url.pathname.split('/').at(-1))];
     return Response.json({data:{content:content.repeat(5)}});
+  }
+  if (archive41DetailsAvailable && url.host === 'api.star-citizen.wiki' && /^\/api\/comm-links\/(20702|20638|20598|20522)$/.test(url.pathname)) {
+    const content = {
+      20702: 'New Time-Limited Event: Resource Drive New Mission Type: Ship Escort Wikelo Recipe Updates Ship Flight Tuning Changes New FPS Weapon: Volt Pulse Laser Pistol nearly 160 bugfixes. ',
+      20638: 'New Persistent Sandbox Activity: Storm Breaker ASD Data Centers ASD Research Facilities New Environmental Hazard: Radiation Dynamic Rain Equipment Swapping Hierarchy Prowler Utility. ',
+      20598: 'Ship Battle Missions V1 Hunt The Polaris Asteroid Cluster Mining Base Unattended Vehicle Quantum Travel Argo Raft Cargo Improvements Capital Ship Flight Adjustments. ',
+      20522: 'Align & Mine Hathor Alignment Facilities and Orbital Platforms Ground Vehicle and FPS Mining Updates Drake Golem Argo ATLS GEO VOLT rifle Parallax Streaming Radius Improvements. '
+    }[Number(url.pathname.split('/').at(-1))];
+    return Response.json({data:{content:content.repeat(6)}});
   }
   if (archivePartialDetails && url.host === 'starcitizen.tools' && url.pathname === '/api.php') {
     const page = url.searchParams.get('page');
@@ -224,6 +234,14 @@ archive43DetailsAvailable = true;
 const olderPreview = await (await request('/preview/patches')).json();
 for (const [version, suffix] of [['Alpha 4.3.2','20852-Star-Citizen-Alpha-432'],['Alpha 4.3.1','20777-Star-Citizen-Alpha-431'],['Alpha 4.3','20728-Star-Citizen-Alpha-430']]) {
   const item = olderPreview.items.find(p => p.version === version);
+  assert.ok(item, `missing ${version}`);
+  assert.ok(item.sourceUrl.endsWith(suffix));
+  assert.ok(item.changes.length >= 4);
+}
+archive41DetailsAvailable = true;
+const gapPreview = await (await request('/preview/patches')).json();
+for (const [version, suffix] of [['Alpha 4.2.1','20702-Star-Citizen-Alpha-421'],['Alpha 4.2','20638-Star-Citizen-Alpha-42'],['Alpha 4.1.1','20598-Star-Citizen-Alpha-411'],['Alpha 4.1','20522-Star-Citizen-Alpha-41']]) {
+  const item = gapPreview.items.find(p => p.version === version);
   assert.ok(item, `missing ${version}`);
   assert.ok(item.sourceUrl.endsWith(suffix));
   assert.ok(item.changes.length >= 4);
