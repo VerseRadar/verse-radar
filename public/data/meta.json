@@ -1,30 +1,13 @@
 {
-  "updatedAt": "2026-09-27T21:54:19.538Z",
+  "updatedAt": "2026-09-26T19:57:39.584Z",
   "source": "https://robertsspaceindustries.com/en/comm-link?sort=publish_new",
   "patchSource": "https://robertsspaceindustries.com/en/patch-notes",
-  "mode": "live",
-  "automation": "Cloudflare Worker + RSI Patch Notes; News-Import pausiert",
-  "version": "0.9.9",
-  "fetchedItems": null,
-  "newItems": null,
-  "refreshedItems": null,
-  "aiItems": null,
-  "newsItems": null,
-  "patchItems": 80,
-  "patchNewItems": 7,
-  "patchNextPage": 29,
-  "patchBackfillComplete": false,
-  "patchDeferredSeedItems": 0,
-  "patchDeferredPageItems": 0,
-  "patchHistoricalCandidates": 81,
-  "patchHistoricalDeferredItems": 23,
-  "patchHistoricalUnusableItems": 1,
-  "patchHistoricalUnusableVersions": [
-    {
-      "version": "Alpha 3.11.1a",
-      "reason": "Patchtext nicht ausreichend auswertbar"
-    }
-  ],
-  "patchHistoricalMissingItems": 24,
+  "mode": "live-snapshot",
+  "automation": "News und Patch Notes bis zur neuen Vorschau manuell",
+  "version": "0.6.9",
+  "fetchedItems": 20,
+  "newItems": 20,
+  "aiItems": 0,
+  "patchItems": 6,
   "patchAiItems": 0
 }

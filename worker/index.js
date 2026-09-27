@@ -1,4 +1,4 @@
-/* Verse Radar 0.9.9 – RSI news + patch notes ingestion
+/* Verse Radar 0.9.10 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -22,7 +22,7 @@ const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
 const PATCH_BACKFILL_PATH = "public/data/patch-backfill-control.json";
 const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "0.9.9";
+const VERSION = "0.9.10";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -87,7 +87,9 @@ const HISTORICAL_SHORT_RELEASES = {
     ]
   },
   "Alpha 3.11.1a": {
-    marker: /\bhot\s*fix 3\.11\.1a\b/i, minimum: 2,
+    // The Wiki places "Hot Fix 3.11.1a" before the Patch notes heading;
+    // cleanPatchText removes that introduction. Verify parse.title below.
+    marker: null, minimum: 2,
     sourceUrl: "https://robertsspaceindustries.com/spectrum/community/SC/forum/190048/thread/star-citizen-alpha-3-11-1-live-6538054-patch-notes",
     changes: [
       ["Schiffe & Fahrzeuge", "Schiffe auf Planeten", "Ausgeschaltete Schiffe sollten nicht mehr durch Planetenoberflächen fallen.", /\bships to fall through planet surfaces when powered off\b/i],
@@ -662,7 +664,7 @@ async function updateSite(env, { includeNews = true, includePatches = true } = {
   const patchResult = includePatches ? await updatePatches(env) : null;
   const now = new Date().toISOString();
   const automation = includeNews && includePatches ? "Cloudflare Worker + RSI Comm-Link + RSI Patch Notes" : includeNews ? "Cloudflare Worker + RSI Comm-Link; Patch-Import pausiert" : "Cloudflare Worker + RSI Patch Notes; News-Import pausiert";
-  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation, version: VERSION, fetchedItems: newsResult?.fetchedItems ?? null, newItems: newsResult?.newItems ?? null, refreshedItems: newsResult?.refreshedItems ?? null, aiItems: newsResult?.aiItems ?? null, newsItems: newsResult?.news.length ?? null, patchItems: patchResult?.patches.length ?? null, patchNewItems: patchResult?.newItems ?? null, patchNextPage: patchResult?.nextState.nextPage ?? null, patchBackfillComplete: patchResult?.nextState.complete ?? null, patchDeferredSeedItems: patchResult?.deferredSeedItems ?? null, patchDeferredPageItems: patchResult?.deferredPageItems ?? null, patchHistoricalCandidates: patchResult?.historicalCandidates ?? null, patchHistoricalDeferredItems: patchResult?.historicalDeferredItems ?? null, patchHistoricalUnusableItems: patchResult?.historicalUnusableItems ?? null, patchHistoricalUnusableVersions: patchResult?.historicalDiagnostics.filter(item => !item.eligible).map(({ version, reason }) => ({ version, reason })) ?? null, patchHistoricalMissingItems: null, patchAiItems: patchResult?.aiItems ?? null };
+  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation, version: VERSION, fetchedItems: newsResult?.fetchedItems ?? null, newItems: newsResult?.newItems ?? null, refreshedItems: newsResult?.refreshedItems ?? null, aiItems: newsResult?.aiItems ?? null, newsItems: newsResult?.news.length ?? null, patchItems: patchResult?.patches.length ?? null, patchNewItems: patchResult?.newItems ?? null, patchNextPage: patchResult?.nextState.nextPage ?? null, patchBackfillComplete: patchResult?.nextState.complete ?? null, patchDeferredSeedItems: patchResult?.deferredSeedItems ?? null, patchDeferredPageItems: patchResult?.deferredPageItems ?? null, patchHistoricalCandidates: patchResult?.historicalCandidates ?? null, patchHistoricalDeferredItems: patchResult?.historicalDeferredItems ?? null, patchHistoricalUnusableItems: patchResult?.historicalUnusableItems ?? null, patchHistoricalUnusableVersions: patchResult?.historicalDiagnostics.filter(item => !item.eligible).map(({ version, reason, sourceContentLength, matchedChanges }) => ({ version, reason, sourceContentLength, matchedChanges })) ?? null, patchHistoricalMissingItems: null, patchAiItems: patchResult?.aiItems ?? null };
 
   if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) {
     return { ok: true, version: VERSION, published: false, ...meta, note: "GitHub Secrets fehlen; nichts zurückgeschrieben." };
@@ -774,7 +776,7 @@ async function updatePatches(env) {
       sourceUrl: item.sourceUrl,
       sourceType: item.sourceType || "Patch Notes",
       ai: Boolean(ai),
-      summaryVersion: Object.hasOwn(HISTORICAL_SHORT_RELEASES, item.version) ? "0.9.9" : item.historical ? "0.9.6" : "0.6.8",
+      summaryVersion: Object.hasOwn(HISTORICAL_SHORT_RELEASES, item.version) ? VERSION : item.historical ? "0.9.6" : "0.6.8",
       note: item.sourceType === "Community Archive"
         ? "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
         : item.sourceType === "RSI Release Info"
@@ -933,6 +935,7 @@ async function fetchPatchItems(state, existingVersions) {
     historicalDiagnostics.push({ version: patch.version, eligible,
       sourceType: item?.sourceType || null, sourceContentLength: item?.content?.length || 0,
       sourceUrl: item?.sourceUrl || null,
+      matchedChanges: eligible || !item?.content ? undefined : historicalPatchChanges(item.content, patch.version).map(change => change.title),
       reason: eligible ? undefined : item?.unusableReason || "Patchtext nicht ausreichend auswertbar" });
     if (eligible) discovered.push(item);
     else { historicalUnusableItems++; firstUnusableIndex ??= index; }
@@ -1045,6 +1048,7 @@ async function fetchHistoricalPatch(patch) {
   try { body = await response.json(); } catch (_) { return { unusableReason: "Wiki-Detail liefert kein JSON" }; }
   const html = body?.parse?.text?.["*"];
   if (typeof html !== "string") return { unusableReason: `Wiki-Detail ohne Patchtext${body?.error?.code ? ` (${body.error.code})` : ""}` };
+  if (patch.version === "Alpha 3.11.1a" && !body.parse.title) return { unusableReason: "Wiki-Detail ohne Versionskennung" };
   if (body.parse.title && body.parse.title.replace(/_/g, " ") !== patch.title) return { unusableReason: "Wiki-Detail verweist auf andere Version" };
   const raw = strip(html);
   const dateMatch = raw.match(/\bbuild\s+released\s+on\s*(\d{4}-\d{2}-\d{2})\b/i)
@@ -1371,7 +1375,7 @@ function archiveHighlights(version, content) {
 function historicalPatchChanges(content, version = "") {
   const shortRelease = HISTORICAL_SHORT_RELEASES[version];
   if (shortRelease) {
-    if (!shortRelease.marker.test(content)) return [];
+    if (shortRelease.marker && !shortRelease.marker.test(content)) return [];
     return shortRelease.changes.filter(([, , , pattern]) => pattern.test(content))
       .map(([category, title, description]) => ({ category, title, description }));
   }

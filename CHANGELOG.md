@@ -1,5 +1,10 @@
 # Changelog – Verse Radar
 
+## 0.9.10 – Hotfix 3.11.1a korrekt zuordnen
+- Beim Bereinigen des Wiki-Texts wird die vor dem Patchabschnitt stehende Versionsüberschrift entfernt. 0.9.9 verlangte für 3.11.1a anschließend fälschlich genau diese Überschrift im verbleibenden Patchtext.
+- Die Version wird nun am Titel der Wiki-API-Antwort geprüft; die Zusammenfassung verlangt weiterhin mindestens zwei konkret belegte Korrekturen aus den Patch Notes.
+- Ein Regressionstest bildet das Abschneiden der Überschrift nach und prüft, dass 3.11.1a trotzdem übernommen wird. Laufstatus und vorhandenes Patch-Archiv bleiben beim Update erhalten.
+
 ## 0.9.9 – Drei kurze historische Patch Notes auswerten
 - Alpha 3.17.5: Red Festival und aktualisierte Mondneujahr-Umschläge anhand der Wiki-Archivseite erkennen.
 - Alpha 3.17.4: Drake Corsair und behobenen Serverabsturz aus den kurzen Patch Notes übernehmen.

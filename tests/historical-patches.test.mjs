@@ -49,12 +49,12 @@ globalThis.fetch = async (input, options = {}) => {
     const shortNotes = {
       '3.17.5': 'Alpha Patch 3.17.5 LIVE Feature Updates. The Lunar New Year envelope (Year of the Rooster for 2953) returns for the Red Festival.',
       '3.17.4': 'Alpha Patch 3.17.4 LIVE New features. Added New Ship: Drake Corsair. Technical: Fixed 1 Server Crash. Known issues with unrelated ships remain.',
-      '3.11.1a': 'Hot Fix 3.11.1a Patch notes. Fixed an issue causing ships to fall through planet surfaces when powered off. Female Characters should now have correct sit animations for the under counter seat in the Nomad. Paints should now be able to be applied to the Sabre Comet. Illegal Cargo text will no longer show up in trading kiosks without illegal cargo. Fixed a Server Deadlock. Fixed a Backend Service Crash.'
+      '3.11.1a': 'Fixed an issue causing ships to fall through planet surfaces when powered off. Female Characters should now have correct sit animations for the under counter seat in the Nomad. Paints should now be able to be applied to the Sabre Comet. Illegal Cargo text will no longer show up in trading kiosks without illegal cargo. Fixed a Server Deadlock. Fixed a Backend Service Crash.'
     };
     if (Object.hasOwn(shortNotes, version)) {
       const releaseDate = { '3.17.5': '2023-01-18', '3.17.4': '2022-11-17', '3.11.1a': '2020-11-19' }[version];
       const header = 'Delete the USER folder if display issues occur after updating. Database Reset: No. Long Term Persistence: Enabled. Starting aUEC: 20000. ';
-      return Response.json({ parse: { title, text: { '*': `<div>Star Citizen build released on ${releaseDate}.</div><h2>Patch notes</h2><p>${header.repeat(3)}${shortNotes[version]}</p>` } } });
+      return Response.json({ parse: { title, text: { '*': `<div>Star Citizen build released on ${releaseDate}. ${version === '3.11.1a' ? 'Hot Fix 3.11.1a' : ''}</div><h2>Patch notes <span>edit</span></h2><p>${header.repeat(3)}${shortNotes[version]}</p>` } } });
     }
     const official = version === '3.22.1'
       ? 'https://robertsspaceindustries.com/comm-link//19783-Star-Citizen-Alpha-3221'
@@ -143,7 +143,7 @@ for (const version of ['3.17.5', '3.17.4', '3.11.1a']) {
   const item = fullShort.items.find(i => i.version === `Alpha ${version}`);
   assert.ok(item, version);
   assert.match(item.sourceUrl, /robertsspaceindustries\.com\/spectrum/);
-  assert.equal(item.summaryVersion, '0.9.9');
+  assert.equal(item.summaryVersion, '0.9.10');
   assert.ok(item.changes.length >= 1);
 }
 assert.ok(fullShort.items.find(i => i.version === 'Alpha 3.17.5').changes.some(c => c.title === 'Red Festival 2953'));
