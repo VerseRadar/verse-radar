@@ -1,4 +1,4 @@
-/* Verse Radar 0.9.4 – RSI news + patch notes ingestion
+/* Verse Radar 0.9.5 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -19,7 +19,7 @@ const PATCH_DETAILS_PER_IMPORT = 2;
 const PATCH_SEEDS_PER_IMPORT = 2;
 const HISTORICAL_PATCHES_PER_IMPORT = 8;
 const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
-const VERSION = "0.9.4";
+const VERSION = "0.9.5";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -46,6 +46,24 @@ const PATCH_SEEDS = [
   { version: "Alpha 4.8.2", id: 0, date: "2026-06-17T00:00:00.000Z", sourceType: "Content Update", sourceUrl: "https://starcitizen.tools/Update:Star_Citizen_Alpha_4.8.2" },
   { version: "Alpha 4.7.2", id: 0, date: "2026-04-22T00:00:00.000Z", sourceType: "Content Update", sourceUrl: "https://robertsspaceindustries.com/en/comm-link/transmission/21125-Star-Citizen-Alpha-472" },
   { version: "Alpha 4.7.1", id: 0, date: "2026-04-08T00:00:00.000Z", sourceType: "Content Update", sourceUrl: "https://starcitizen.tools/Update:Star_Citizen_Alpha_4.7.1" }
+];
+// The published 3.x category was checked as a complete list of 80 releases.
+// Keep this historical index locally: the Wiki categorymembers API can return
+// an empty list even though its public category page lists the releases.
+const HISTORICAL_VERSIONS = [
+  "3.0.0", "3.0.1", "3.1.0", "3.1.1", "3.1.2", "3.1.3", "3.1.4",
+  "3.2.0", "3.2.1", "3.2.2", "3.3.0", "3.3.5", "3.3.6", "3.3.7",
+  "3.4.0", "3.4.1", "3.4.2", "3.4.3", "3.5.0", "3.5.1",
+  "3.6.0", "3.6.1", "3.6.2", "3.7.0", "3.7.1", "3.7.2",
+  "3.8.0", "3.8.1", "3.8.2", "3.9.0", "3.9.1",
+  "3.10.0", "3.10.1", "3.10.2", "3.11.0", "3.11.0a", "3.11.0b", "3.11.0c", "3.11.1", "3.11.1a",
+  "3.12.0", "3.12.0a", "3.12.0b", "3.12.1", "3.13.0", "3.13.0a", "3.13.1",
+  "3.14.0", "3.14.1", "3.15.0", "3.15.1", "3.16.0", "3.16.1",
+  "3.17.0", "3.17.1", "3.17.2", "3.17.3", "3.17.4", "3.17.5",
+  "3.18.0", "3.18.1", "3.18.2", "3.19.0", "3.19.1",
+  "3.20.0", "3.20.0a", "3.20.0b", "3.21.0", "3.21.1",
+  "3.22.0", "3.22.0a", "3.22.1", "3.23.0", "3.23.1", "3.23.1a",
+  "3.24.0", "3.24.1", "3.24.2", "3.24.2a", "3.24.3"
 ];
 const VERSION_RE = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?$/;
 const PATCH_NOTES_URL = "https://robertsspaceindustries.com/en/patch-notes";
@@ -624,7 +642,7 @@ async function updatePatches(env) {
       sourceUrl: item.sourceUrl,
       sourceType: item.sourceType || "Patch Notes",
       ai: Boolean(ai),
-      summaryVersion: item.historical ? "0.9.4" : "0.6.8",
+      summaryVersion: item.historical ? "0.9.5" : "0.6.8",
       note: item.sourceType === "Community Archive"
         ? "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
         : item.sourceType === "RSI Release Info"
@@ -773,10 +791,11 @@ async function fetchPatchItems(state, existingVersions) {
     checked++;
     lastCheckedIndex = index;
     const item = await fetchHistoricalPatch(patch);
-    const eligible = Boolean(item && publishablePatch(item.version, item.content));
+    const eligible = Boolean(item?.content && publishablePatch(item.version, item.content));
     historicalDiagnostics.push({ version: patch.version, eligible,
       sourceType: item?.sourceType || null, sourceContentLength: item?.content?.length || 0,
-      sourceUrl: item?.sourceUrl || null });
+      sourceUrl: item?.sourceUrl || null,
+      reason: eligible ? undefined : item?.unusableReason || "Patchtext nicht ausreichend auswertbar" });
     if (eligible) discovered.push(item);
     else historicalUnusableItems++;
   }
@@ -870,20 +889,10 @@ async function fetchWikiUpdatePage(version, current = "") {
   return current;
 }
 
-async function listHistoricalPatches() {
+function listHistoricalPatches() {
   if (!HISTORICAL_PATCHES_PER_IMPORT) return [];
-  const api = new URL("https://starcitizen.tools/api.php");
-  for (const [key, value] of Object.entries({ action: "query", list: "categorymembers",
-    cmtitle: "Category:Patch Notes", cmtype: "page", cmlimit: "500", format: "json" })) api.searchParams.set(key, value);
-  const response = await fetch(api.toString(), { headers: { "user-agent": `Verse-Radar/${VERSION} (+independent fan site)`, "accept": "application/json" } });
-  if (!response.ok) throw Error(`3.x-Quellenindex: HTTP ${response.status}; Import abgebrochen.`);
-  const body = await response.json();
-  if (!Array.isArray(body?.query?.categorymembers) || body.continue) throw Error("3.x-Quellenindex unvollständig; Import abgebrochen.");
-  const result = body.query.categorymembers
-    .filter(page => /^Update:Star Citizen Alpha 3\.\d+(?:\.\d+)?[a-z]?$/i.test(page.title || ""))
-    .map(page => ({ title: page.title, version: page.title.replace(/^Update:Star Citizen /i, "") }));
-  if (!result.length) throw Error("Keine 3.x-Patchseiten im Quellenindex; Import abgebrochen.");
-  return result.sort(comparePatchVersionsDesc);
+  return HISTORICAL_VERSIONS.map(version => ({ title: `Update:Star Citizen Alpha ${version}`,
+    version: `Alpha ${version}` })).sort(comparePatchVersionsDesc);
 }
 
 async function fetchHistoricalPatch(patch) {
@@ -891,16 +900,17 @@ async function fetchHistoricalPatch(patch) {
   for (const [key, value] of Object.entries({ action: "parse", page: patch.title,
     prop: "text", format: "json" })) api.searchParams.set(key, value);
   const response = await fetch(api.toString(), { headers: { "user-agent": `Verse-Radar/${VERSION} (+independent fan site)`, "accept": "application/json" } });
-  if (!response.ok) return null;
-  const body = await response.json();
+  if (!response.ok) return { unusableReason: `Wiki-Detail HTTP ${response.status}` };
+  let body;
+  try { body = await response.json(); } catch (_) { return { unusableReason: "Wiki-Detail liefert kein JSON" }; }
   const html = body?.parse?.text?.["*"];
-  if (typeof html !== "string") return null;
-  if (body.parse.title && body.parse.title.replace(/_/g, " ") !== patch.title) return null;
+  if (typeof html !== "string") return { unusableReason: `Wiki-Detail ohne Patchtext${body?.error?.code ? ` (${body.error.code})` : ""}` };
+  if (body.parse.title && body.parse.title.replace(/_/g, " ") !== patch.title) return { unusableReason: "Wiki-Detail verweist auf andere Version" };
   const raw = strip(html);
   const dateMatch = raw.match(/\bbuild\s+released\s+on\s*(\d{4}-\d{2}-\d{2})\b/i)
     || raw.match(/\bReleased\s+(\d{4}-\d{2}-\d{2})\b/i);
   const date = dateMatch && validDate(dateMatch[1]);
-  if (!date) return null;
+  if (!date) return { unusableReason: "Erscheinungsdatum im Wiki-Detail nicht erkennbar" };
   const wikiUrl = `https://starcitizen.tools/${patch.title.replace(/ /g, "_")}`;
   const sourceUrl = historicalOfficialLink(html) || wikiUrl;
   const sourceType = /\/comm-link\/Patch-Notes\/\d+-/i.test(sourceUrl) ? "Patch Notes" :

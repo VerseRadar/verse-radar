@@ -1,5 +1,11 @@
 # Changelog – Verse Radar
 
+## 0.9.5 – 3.x-Quellenindex korrigiert
+- Der Wiki-API-Index lieferte trotz vorhandener Archivseiten keine 3.x-Einträge. Die 80 in der öffentlich sichtbaren Patch-Kategorie aufgeführten 3.x-Versionen sind nun direkt im Worker hinterlegt.
+- Jede einzelne Patchseite wird weiterhin vor einer Übernahme geprüft; bestehende 4.x-Archiveinträge bleiben unangetastet.
+- Die Diagnose nennt bei nicht lesbaren Details die Ursache, etwa einen fehlenden Patchtext oder ein nicht erkennbares Erscheinungsdatum.
+- Test deckt ausdrücklich einen leeren API-Index und die Wiederaufnahme nach einem fehlerhaften Detail ab.
+
 ## 0.9.4 – 3.x-Archiv aus überprüfbaren Patchseiten erschließen
 - Das vollständige 3.x-Verzeichnis der Star Citizen Wiki wird zur Versionssuche verwendet; pro Aufruf werden höchstens acht noch fehlende Patchseiten geprüft.
 - Datum, Patchtext und Original-Link werden einzeln geprüft. Wo kein eigener RSI-Patch-Notes-Link belegt ist, führt der Eintrag sichtbar gekennzeichnet zum Community-Archiv.

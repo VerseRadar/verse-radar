@@ -1,4 +1,4 @@
-# Verse Radar 0.9.4
+# Verse Radar 0.9.5
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -42,6 +42,7 @@ Version 0.9.1 ergänzt 4.0, 4.0.1 und 4.0.2 sowie 4.7.1, 4.7.2 und 4.8.2. Die dr
 Version 0.9.2 erkennt Alpha 4.0 auch dann, wenn die Detail-API nur den verkürzten Text mit Wipe, Pyro und Server Meshing liefert. Die zusätzlichen Änderungspunkte sind anhand der vollständigen Wiki-Patchseite und des offiziellen RSI-Patchlinks geprüft.
 Version 0.9.3 begrenzt Quellabrufe pro Aufruf, damit der Patch-Import im Anfragebudget von Cloudflare Workers Free bleibt. Bereits gespeicherte Versionen werden nicht erneut abgerufen. In der kompakten Vorschau zeigen `deferredSeedItems` und `deferredPageItems` die zunächst zurückgestellten Quellen. Ein Aufruf veröffentlicht maximal zwei fehlende fest hinterlegte Versionen und maximal zwei neue Detailfunde aus dem Seitenarchiv. Für die übrigen 4.x-Einträge denselben Ablauf aus Vorschau und `/run/patches` wiederholen, bis beide `deferred`-Werte null sind und `newItems` null ist. Ein zuvor gescheiterter Lauf kann das Archiv bereits teilweise gespeichert haben; deshalb zuerst mit der Vorschau den GitHub-Stand neu prüfen.
 Version 0.9.4 ergänzt die dort gelisteten 3.x-Quellen aus dem Star Citizen Wiki und prüft pro Aufruf maximal acht fehlende historische Versionen. Die Quellenprüfung setzt einen datierten und auswertbaren Patchtext voraus. Wo der archivierte Eintrag einen nachweisbaren RSI-Patch-Notes-Link enthält, wird dieser verwendet. Andernfalls trägt der Eintrag einen als `Community Archive` gekennzeichneten Wiki-Link. Zusätze wie `a` und `b` bleiben eigenständige Versionen. `historicalCandidates` zählt die im Quellenverzeichnis gefundenen 3.x-Versionen; `historicalDeferredItems` zeigt die noch nicht abgefragten Seiten, `historicalUnusableItems` fehlende oder unvollständige Inhalte aus diesem Durchgang. Für die ganze 3.x-History sind wegen des Cloudflare-Anfragelimits mehrere geprüfte `/run/patches`-Aufrufe erforderlich; eine neue ZIP ist dafür nicht jedes Mal nötig. `backfillComplete` bezieht sich weiterhin auf den getrennten Comm-Link-Seitencursor und ist kein Fertigsignal für 3.x.
+Version 0.9.5 behebt einen leeren 3.x-Quellenindex der Wiki-API: Die 80 öffentlich gelisteten historischen Versionsnummern sind jetzt fest im Worker hinterlegt. Für die Inhalte, Daten und Original-Links werden die einzelnen Wiki-Patchseiten weiterhin live geprüft. Eine nicht lesbare Patchseite erscheint mit `reason` in `historicalDiagnostics` und wird nicht veröffentlicht.
 Der lokale Datenstand enthält 13 redaktionelle News und sechs ältere Patches als Rückfall bei API-Ausfall. Bei dieser Update-ZIP bleiben die vorhandenen GitHub-Patchdaten maßgeblich.
 
 ## Datenstruktur

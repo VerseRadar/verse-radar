@@ -10,8 +10,8 @@ const saved = new Map([
   [archivePath, { sha: 'archive-1', data: existingVersions.map(version => ({ version: `Alpha ${version}`, sourceUrl: 'https://example.test/official', summary: 'Bestehender Inhalt' })) }],
   [statePath, { sha: 'state-1', data: { nextPage: 13, complete: false } }]
 ]);
-const historicalVersions = ['3.24.3','3.24.2a','3.24.2','3.24.1','3.24.0','3.23.1a','3.23.1','3.23.0','3.22.1','3.22.0a'];
 let calls = [];
+let brokenVersion = null;
 globalThis.fetch = async (input, options = {}) => {
   const url = new URL(String(input));
   const method = options.method || 'GET';
@@ -35,12 +35,14 @@ globalThis.fetch = async (input, options = {}) => {
       : [{ id: page * 100, title: 'Other Comm-Link' }] });
   }
   if (url.host === 'starcitizen.tools' && url.pathname === '/api.php' && url.searchParams.get('action') === 'query') {
-    return Response.json({ query: { categorymembers: historicalVersions.map(version => ({ title: `Update:Star Citizen Alpha ${version}` })) } });
+    // Regression for the observed empty categorymembers response in 0.9.4.
+    return Response.json({ query: { categorymembers: [] } });
   }
   if (url.host === 'starcitizen.tools' && url.pathname === '/api.php' && url.searchParams.get('action') === 'parse') {
     const title = url.searchParams.get('page');
     const version = title?.match(/Alpha (3\.\d+(?:\.\d+)?[a-z]?)/)?.[1];
     if (!version) throw Error(`Unexpected title ${title}`);
+    if (version === brokenVersion) return Response.json({ error: { code: 'missingtitle' } });
     const official = version === '3.22.1'
       ? 'https://robertsspaceindustries.com/comm-link//19783-Star-Citizen-Alpha-3221'
       : `https://robertsspaceindustries.com/en/comm-link/Patch-Notes/20001-Star-Citizen-Alpha-${version.replaceAll('.', '')}`;
@@ -58,9 +60,10 @@ const preview = await invoke('/preview/patches?diagnostic=1');
 assert.equal(preview.ok, true);
 assert.equal(preview.count, 31);
 assert.equal(preview.newItems, 8);
-assert.equal(preview.historicalCandidates, 10);
-assert.equal(preview.historicalDeferredItems, 2);
+assert.equal(preview.historicalCandidates, 80);
+assert.equal(preview.historicalDeferredItems, 72);
 assert.equal(preview.historicalUnusableItems, 0);
+assert.equal(calls.some(c => new URL(c.url).searchParams.get('action') === 'query'), false);
 assert.ok(calls.length < 50);
 assert.equal(preview.historicalDiagnostics.find(p => p.version === 'Alpha 3.22.1'), undefined);
 assert.equal(saved.get(archivePath).data.length, 23);
@@ -70,7 +73,7 @@ const first = await invoke('/run/patches');
 assert.equal(first.ok, true);
 assert.equal(first.patchItems, 31);
 assert.equal(first.patchNewItems, 8);
-assert.equal(first.patchHistoricalDeferredItems, 2);
+assert.equal(first.patchHistoricalDeferredItems, 72);
 assert.ok(calls.length < 50);
 assert.equal(saved.get(statePath).data.historicalNextIndex, 8);
 assert.ok(saved.get(archivePath).data.some(item => item.version === 'Alpha 3.23.1a'));
@@ -78,11 +81,20 @@ assert.ok(saved.get(archivePath).data.some(item => item.version === 'Alpha 3.23.
 assert.equal(saved.get(archivePath).data.find(item => item.version === 'Alpha 3.24.2').sourceType, 'Patch Notes');
 
 calls = [];
+brokenVersion = '3.22.1';
+const badSource = await invoke('/preview/patches?diagnostic=1');
+assert.equal(badSource.ok, true);
+assert.equal(badSource.historicalUnusableItems, 1);
+assert.match(badSource.historicalDiagnostics.find(item => item.version === 'Alpha 3.22.1').reason, /missingtitle/);
+assert.equal(saved.get(statePath).data.historicalNextIndex, 8);
+
+calls = [];
+brokenVersion = null;
 const second = await invoke('/preview/patches?diagnostic=1');
-assert.equal(second.count, 33);
-assert.equal(second.newItems, 2);
-assert.equal(second.historicalDeferredItems, 0);
-assert.equal(second.historicalDiagnostics.length, 2);
+assert.equal(second.count, 39);
+assert.equal(second.newItems, 8);
+assert.equal(second.historicalDeferredItems, 64);
+assert.equal(second.historicalDiagnostics.length, 8);
 assert.equal(second.historicalDiagnostics.find(item => item.version === 'Alpha 3.22.1').sourceType, 'Community Archive');
 assert.ok(calls.length < 50);
 
