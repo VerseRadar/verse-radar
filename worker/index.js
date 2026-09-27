@@ -1,4 +1,4 @@
-/* Verse Radar 0.8.7 – RSI news + patch notes ingestion
+/* Verse Radar 0.8.8 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -15,7 +15,7 @@ const MAX = 20;
 const PATCH_PAGE_SIZE = 100;
 const PATCH_PAGES_PER_IMPORT = 2;
 const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
-const VERSION = "0.8.7";
+const VERSION = "0.8.8";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -666,9 +666,16 @@ async function fetchPatchItems(state) {
     const title = `Star Citizen ${seed.version}`;
     const sourceUrl = officialPatchUrl(seed.id, title);
     let content = cleanPatchText(await fetchPatchDetail(seed.id, ""));
-    if (content.length < 500) content = cleanPatchText(await fetchWikiUpdatePage(seed.version, content));
+    if (!publishablePatch(seed.version, content)) {
+      // A detail record may be long yet omit whole feature sections. Check
+      // the full wiki update before deciding that a major patch is unusable.
+      const wikiContent = cleanPatchText(await fetchWikiUpdatePage(seed.version, ""));
+      if (publishablePatch(seed.version, wikiContent) || wikiContent.length > content.length) content = wikiContent;
+    }
     seedDiagnostics.push({ version: seed.version, sourceId: seed.id, sourceContentLength: content.length,
-      eligible: publishablePatch(seed.version, content) });
+      eligible: publishablePatch(seed.version, content),
+      matchedChanges: Object.hasOwn(ARCHIVE_HIGHLIGHTS, seed.version)
+        ? (archiveHighlights(seed.version, content) || []).map(change => change.title) : undefined });
     discovered.push({ version: seed.version, date: seed.date, sourceUrl, sourceId: seed.id, content, fallbackSummary: fallbackPatchSummary(seed.version, content), fallbackFullSummary: fallbackFullSummary(seed.version, content) });
   }
 

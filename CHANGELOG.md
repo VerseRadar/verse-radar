@@ -1,5 +1,10 @@
 # Changelog – Verse Radar
 
+## 0.8.8 – Archivdaten beim Update erhalten
+- Die Update-ZIP enthält keine ältere `public/data/patches.json` mehr. Der veröffentlichte GitHub-Stand soll bei der Installation erhalten bleiben.
+- Für 4.5 und 4.4 wird bei unvollständigen API-Detailtexten zusätzlich die vollständige Wiki-Patchseite geprüft.
+- `seedDiagnostics.matchedChanges` zeigt erkannte Änderungspunkte für ältere Versionen.
+
 ## 0.8.7 – Ältere Patch Notes erschließen
 - Für Alpha 4.6, 4.5 und 4.4 sind die offiziellen Patch-Notes-IDs, Veröffentlichungsdaten und passende deutsche Änderungspunkte hinterlegt.
 - Die drei Einträge brauchen auswertbare Wiki-Patchtexte mit mehreren belegten Hauptpunkten; Quelllücken erscheinen unter `seedDiagnostics`.

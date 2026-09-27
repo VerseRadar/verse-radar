@@ -1,4 +1,4 @@
-# Verse Radar 0.8.7
+# Verse Radar 0.8.8
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -35,12 +35,13 @@ Version 0.8.4 prüft die offiziell gelistete Alpha 4.7 (ID 21070) zusätzlich di
 Version 0.8.5 ergänzt für Alpha 4.7 eine ausführlichere deutsche Aufbereitung von Missionen, Inventar, Crafting, Bergbau, Schiffen, Nyx und VR. Das Datum ist anhand der Wiki-Patchseite auf den 25.03.2026 gesetzt. Vor der Veröffentlichung `/preview/patches` prüfen.
 Version 0.8.6 verwendet für Alpha 4.7 den tatsächlichen RSI-Link mit dem URL-Ende `Alpha-47`.
 Version 0.8.7 prüft die offiziell verlinkten Alpha-Versionen 4.6, 4.5 und 4.4 zusätzlich über Wiki-Patchtexte. Die Community-API liefert dafür teils `SCW/...-API`-Platzhalter statt der Original-URLs. Gezielte deutsche Änderungspunkte werden nur angelegt, wenn die wesentlichen Quellabschnitte vorhanden sind; andernfalls bleibt der Eintrag in der Diagnose sichtbar, wird jedoch nicht veröffentlicht. Vor `/run/patches` die neuen Einträge in `/preview/patches` auf Inhalt und RSI-Link prüfen.
-Der beigelegte statische Datenstand enthält 13 redaktionelle News und alle sechs geprüften Patches als Rückfall bei API-Ausfall. Der Datumsstand ist der bestätigte Erstimport vom 26.09.2026.
+Version 0.8.8 holt für 4.5 und 4.4 zusätzlich den vollständigen Wiki-Patchtext, falls der API-Detailtext wichtige Abschnitte auslässt. `seedDiagnostics.matchedChanges` zeigt die erkannten Punkte. Die Update-ZIP enthält weder `public/data/patches.json` noch die Fortschrittsdatei: Beide vorhandenen GitHub-Dateien bei Updates behalten. Die vorherigen ZIPs enthielten einen alten Stand mit sechs Patches, der bei einer vollständigen Dateiübernahme den veröffentlichten siebten Eintrag überschreiben konnte.
+Der lokale Datenstand enthält 13 redaktionelle News und sechs ältere Patches als Rückfall bei API-Ausfall. Bei dieser Update-ZIP bleiben die vorhandenen GitHub-Patchdaten maßgeblich.
 
 ## Datenstruktur
 Die Website-Daten liegen ausschließlich unter `public/data/`.
 - `public/data/news.json`
-- `public/data/patches.json`
+- `public/data/patches.json` (vorhandenen GitHub-Stand behalten; nicht in der Update-ZIP)
 - `public/data/patch-archive-state.json` (vom Worker gespeicherter Fortschritt; nicht in der ZIP enthalten)
 - `public/data/deals.json`
 - `public/data/events.json`

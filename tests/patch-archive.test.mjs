@@ -31,6 +31,7 @@ let archiveConflictOnce = false;
 let archiveConflictAlways = false;
 let alpha47DetailAvailable = false;
 let archiveSeedDetailsAvailable = false;
+let archivePartialDetails = false;
 const externalPatch = { version: 'Alpha 4.6', previous: null, sourceUrl: 'https://robertsspaceindustries.com/external', summary: 'Parallel gespeicherter Patch' };
 
 globalThis.fetch = async (input, init = {}) => {
@@ -52,7 +53,20 @@ globalThis.fetch = async (input, init = {}) => {
       20934: 'Engineering Gameplay Ship Armor Fire Hazards Loot Refresh & Collector Updates Ore Refining Economic Balance Physicalized Helmets Virtual Reality Support (Experimental) Vulkan Graphics and Settings Overhaul over 150 bug and crash fixes.',
       20899: 'Welcome To Nyx The Return to Levski Sworn Enemies Operation Interstellar Hauling Nyx Mission Pack External Station Freight Elevators TripleDown Boomtube Streaming Improvements and Environment Performance Optimizations over 180 bug and crash fixes.'
     }[Number(url.pathname.split('/').at(-1))];
-    return Response.json({ data: { content: content.repeat(4) } });
+    const id = Number(url.pathname.split('/').at(-1));
+    const partial = archivePartialDetails && id !== 20969
+      ? (id === 20934 ? 'Engineering Gameplay ship repairs. ' : 'Welcome To Nyx with Levski. ').repeat(30)
+      : content.repeat(4);
+    return Response.json({ data: { content: partial } });
+  }
+  if (archivePartialDetails && url.host === 'starcitizen.tools' && url.pathname === '/api.php') {
+    const page = url.searchParams.get('page');
+    const content = page?.endsWith('4.5.0')
+      ? 'Patch notes edit Engineering Gameplay Ship Armor Fire Hazards Loot Refresh & Collector Updates Ore Refining Economic Balance Physicalized Helmets Virtual Reality Support (Experimental) Vulkan Graphics and Settings Overhaul over 150 bug and crash fixes. '.repeat(4)
+      : page?.endsWith('4.4.0')
+      ? 'Patch notes edit Welcome To Nyx The Return to Levski Sworn Enemies Operation Interstellar Hauling Nyx Mission Pack External Station Freight Elevators TripleDown Boomtube Streaming Improvements and Environment Performance Optimizations over 180 bug and crash fixes. '.repeat(4)
+      : '';
+    return Response.json({parse: {text: {'*': content}}});
   }
   if (url.host === 'api.github.com' && url.pathname.includes('/contents/')) {
     const path = url.pathname.split('/contents/')[1];
@@ -191,5 +205,9 @@ for (const [version, date, suffix] of [
   assert.ok(item.sourceUrl.endsWith(suffix));
   assert.ok(item.changes.length >= 4);
 }
+archivePartialDetails = true;
+const wikiFallback = await (await request('/preview/patches?diagnostic=1')).json();
+assert.equal(wikiFallback.seedDiagnostics.find(p => p.version === 'Alpha 4.5').eligible, true);
+assert.equal(wikiFallback.seedDiagnostics.find(p => p.version === 'Alpha 4.4').eligible, true);
 
 console.log('Patch-Archiv: Vorschau, Nachladen, Fehlerschutz und Cursor-Recovery: OK');
