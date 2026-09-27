@@ -1,9 +1,9 @@
 {
-  "status": "running",
+  "status": "paused",
   "lastRun": null,
-  "sessionId": "c0746db7-0132-4207-9681-b553fea97fdb",
+  "sessionId": "d5efdc2c-ce27-4c93-b2f4-16c0798b3a7a",
   "leaseId": null,
   "leaseUntil": null,
   "lastError": null,
-  "changedAt": "2026-09-27T20:16:15.713Z"
+  "changedAt": "2026-09-27T20:19:50.556Z"
 }
