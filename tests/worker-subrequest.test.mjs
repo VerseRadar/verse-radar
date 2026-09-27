@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const source = await readFile(new URL('../worker/index.js', import.meta.url), 'utf8');
-const worker = (await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`)).default;
+const worker = (await import(`data:text/javascript;base64,${Buffer.from(source.replace('const HISTORICAL_PATCHES_PER_IMPORT = 8;', 'const HISTORICAL_PATCHES_PER_IMPORT = 0;')).toString('base64')}`)).default;
 const versions = ['4.10.1', '4.10', '4.9', '4.8.3', '4.8.1', '4.8', '4.7', '4.6', '4.5', '4.4', '4.3.2', '4.3.1', '4.3'];
 const archive = 'public/data/patches.json';
 const state = 'public/data/patch-archive-state.json';

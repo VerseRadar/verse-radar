@@ -72,18 +72,6 @@
     "summaryVersion": "0.7.0"
   },
   {
-    "id": "cb3e6218",
-    "title": "Pirate Week 2026 | Star Citizen",
-    "category": "EVENT",
-    "date": "2026-09-09T16:00:00.000Z",
-    "summary": "RSI-Beitrag mit dem Titel „Pirate Week 2026 | Star Citizen“. Die Einzelheiten stehen in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21285-pirate-week-2026-star-citizen",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
-    "summaryVersion": "0.7.0"
-  },
-  {
     "id": "efc22de2",
     "title": "This Week in Star Citizen",
     "category": "NEWS",
@@ -156,84 +144,12 @@
     "summaryVersion": "0.7.0"
   },
   {
-    "id": "86955b0b",
-    "title": "Behind the Ships",
-    "category": "SCHIFFE",
-    "date": "2026-08-26T18:00:00.000Z",
-    "summary": "RSI-Beitrag mit dem Titel „Behind the Ships“. Die Einzelheiten stehen in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21289-behind-the-ships",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
-    "summaryVersion": "0.7.0"
-  },
-  {
     "id": "472a46c",
     "title": "This Week in Star Citizen",
     "category": "NEWS",
     "date": "2026-08-24T22:00:00.000Z",
     "summary": "RSI veröffentlicht einen neuen Wochenüberblick zu Star Citizen. Die konkreten Themen stehen in der Originalmeldung.",
     "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21296-this-week-in-star-citizen",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
-    "summaryVersion": "0.7.0"
-  },
-  {
-    "id": "c4a31090",
-    "title": "This Week in Star Citizen",
-    "category": "NEWS",
-    "date": "2026-08-17T21:00:00.000Z",
-    "summary": "RSI veröffentlicht einen neuen Wochenüberblick zu Star Citizen. Die konkreten Themen stehen in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21292-this-week-in-star-citizen",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
-    "summaryVersion": "0.7.0"
-  },
-  {
-    "id": "13f20ec5",
-    "title": "Roadmap Roundup - August 12, 2026",
-    "category": "ROADMAP",
-    "date": "2026-08-13T00:00:00.000Z",
-    "summary": "RSI veröffentlicht „Roadmap Roundup - August 12, 2026“. Welche Punkte des Entwicklungsplans besprochen werden, steht in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21284-roadmap-roundup-august-12-2026",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
-    "summaryVersion": "0.7.0"
-  },
-  {
-    "id": "60a397b2",
-    "title": "This Week in Star Citizen",
-    "category": "NEWS",
-    "date": "2026-08-10T23:00:00.000Z",
-    "summary": "RSI veröffentlicht einen neuen Wochenüberblick zu Star Citizen. Die konkreten Themen stehen in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21287-this-week-in-star-citizen",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
-    "summaryVersion": "0.7.0"
-  },
-  {
-    "id": "f6fa6b69",
-    "title": "Star Citizen Monthly Report: July 2026",
-    "category": "NEWS",
-    "date": "2026-08-05T21:00:00.000Z",
-    "summary": "Monatsbericht zur Entwicklung von Star Citizen für July 2026. Die behandelten Arbeiten stehen in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21281-star-citizen-monthly-report-july-2026",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
-    "summaryVersion": "0.7.0"
-  },
-  {
-    "id": "5c4dde90",
-    "title": "This Week in Star Citizen",
-    "category": "NEWS",
-    "date": "2026-08-03T21:00:00.000Z",
-    "summary": "RSI veröffentlicht einen neuen Wochenüberblick zu Star Citizen. Die konkreten Themen stehen in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21278-this-week-in-star-citizen",
     "source": "RSI Comm-Link",
     "ai": false,
     "summaryBasis": "Titel",

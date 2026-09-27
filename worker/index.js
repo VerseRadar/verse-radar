@@ -1,4 +1,4 @@
-/* Verse Radar 0.9.3 – RSI news + patch notes ingestion
+/* Verse Radar 0.9.4 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -17,8 +17,9 @@ const PATCH_PAGES_PER_IMPORT = 2;
 // Leave headroom for GitHub reads/writes, redirects and retries on Workers Free.
 const PATCH_DETAILS_PER_IMPORT = 2;
 const PATCH_SEEDS_PER_IMPORT = 2;
+const HISTORICAL_PATCHES_PER_IMPORT = 8;
 const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
-const VERSION = "0.9.3";
+const VERSION = "0.9.4";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -86,6 +87,10 @@ export default {
             patchAutoPublishEnabled: env.PATCH_AUTO_PUBLISH === "true",
             deferredSeedItems: result.deferredSeedItems,
             deferredPageItems: result.deferredPageItems,
+            historicalCandidates: result.historicalCandidates,
+            historicalDeferredItems: result.historicalDeferredItems,
+            historicalUnusableItems: result.historicalUnusableItems,
+            historicalDiagnostics: result.historicalDiagnostics,
             seedDiagnostics: result.seedDiagnostics });
         }
         return json({
@@ -99,6 +104,9 @@ export default {
           backfillComplete: result.nextState.complete,
           deferredSeedItems: result.deferredSeedItems,
           deferredPageItems: result.deferredPageItems,
+          historicalCandidates: result.historicalCandidates,
+          historicalDeferredItems: result.historicalDeferredItems,
+          historicalUnusableItems: result.historicalUnusableItems,
           published: false,
           pageDiagnostics: result.pageDiagnostics,
           items: result.patches,
@@ -506,7 +514,7 @@ async function updateSite(env, { includeNews = true, includePatches = true } = {
   const patchResult = includePatches ? await updatePatches(env) : null;
   const now = new Date().toISOString();
   const automation = includeNews && includePatches ? "Cloudflare Worker + RSI Comm-Link + RSI Patch Notes" : includeNews ? "Cloudflare Worker + RSI Comm-Link; Patch-Import pausiert" : "Cloudflare Worker + RSI Patch Notes; News-Import pausiert";
-  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation, version: VERSION, fetchedItems: newsResult?.fetchedItems ?? null, newItems: newsResult?.newItems ?? null, refreshedItems: newsResult?.refreshedItems ?? null, aiItems: newsResult?.aiItems ?? null, newsItems: newsResult?.news.length ?? null, patchItems: patchResult?.patches.length ?? null, patchNewItems: patchResult?.newItems ?? null, patchNextPage: patchResult?.nextState.nextPage ?? null, patchBackfillComplete: patchResult?.nextState.complete ?? null, patchDeferredSeedItems: patchResult?.deferredSeedItems ?? null, patchDeferredPageItems: patchResult?.deferredPageItems ?? null, patchAiItems: patchResult?.aiItems ?? null };
+  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation, version: VERSION, fetchedItems: newsResult?.fetchedItems ?? null, newItems: newsResult?.newItems ?? null, refreshedItems: newsResult?.refreshedItems ?? null, aiItems: newsResult?.aiItems ?? null, newsItems: newsResult?.news.length ?? null, patchItems: patchResult?.patches.length ?? null, patchNewItems: patchResult?.newItems ?? null, patchNextPage: patchResult?.nextState.nextPage ?? null, patchBackfillComplete: patchResult?.nextState.complete ?? null, patchDeferredSeedItems: patchResult?.deferredSeedItems ?? null, patchDeferredPageItems: patchResult?.deferredPageItems ?? null, patchHistoricalCandidates: patchResult?.historicalCandidates ?? null, patchHistoricalDeferredItems: patchResult?.historicalDeferredItems ?? null, patchHistoricalUnusableItems: patchResult?.historicalUnusableItems ?? null, patchAiItems: patchResult?.aiItems ?? null };
 
   if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) {
     return { ok: true, version: VERSION, published: false, ...meta, note: "GitHub Secrets fehlen; nichts zurückgeschrieben." };
@@ -526,12 +534,12 @@ async function updateSite(env, { includeNews = true, includePatches = true } = {
 
 function validateArchiveEntries(entries) {
   if (!Array.isArray(entries) || entries.some(x => !x || typeof x.version !== "string" || !x.version || !x.sourceUrl)) throw Error("Gespeichertes Patch-Archiv ungültig; Import abgebrochen.");
-  const keys = entries.map(x => versionParts(x.version).join("."));
+  const keys = entries.map(x => patchKey(x.version));
   if (new Set(keys).size !== keys.length) throw Error("Doppelte Versionen im gespeicherten Patch-Archiv; Import abgebrochen.");
 }
 
 function correctLegacyLink(entry) {
-  const key = versionParts(entry.version).join(".");
+  const key = patchKey(entry.version);
   const corrected = LEGACY_RELEASE_LINKS.get(key);
   return corrected && /\/Patch-Notes\//i.test(entry.sourceUrl)
     ? { ...entry, sourceUrl: corrected, sourceType: "Release Info" } : entry;
@@ -544,9 +552,9 @@ async function publishPatchArchive(env, proposed) {
     validateArchiveEntries(latest.data);
     // GitHub can change while the source pages are fetched. Keep every entry
     // currently in the repository, and append only genuinely new versions.
-    const merged = new Map(latest.data.map(p => [versionParts(p.version).join("."), correctLegacyLink(p)]));
+    const merged = new Map(latest.data.map(p => [patchKey(p.version), correctLegacyLink(p)]));
     for (const p of proposed) {
-      const key = versionParts(p.version).join(".");
+      const key = patchKey(p.version);
       if (!merged.has(key)) merged.set(key, p);
     }
     const sorted = [...merged.values()].sort(comparePatchVersionsDesc);
@@ -565,8 +573,14 @@ async function publishPatchCursor(env, desired) {
   for (let attempt = 0; attempt < 3; attempt++) {
     const latest = await getGithubJSONStrict(env, PATCH_STATE_PATH, { allowMissing: true });
     const current = parsePatchState(latest.data);
-    const next = { nextPage: Math.max(current.nextPage, desired.nextPage), complete: current.complete || desired.complete };
-    if (latest.data && current.nextPage === next.nextPage && current.complete === next.complete) return;
+    // A second invocation may already have advanced the historical cursor.
+    // A wrapped cursor (end of 3.x list -> start) must still be writable.
+    const historicalNextIndex = current.historicalNextIndex === desired.historicalStartIndex
+      ? desired.historicalNextIndex : current.historicalNextIndex;
+    const next = { nextPage: Math.max(current.nextPage, desired.nextPage),
+      complete: current.complete || desired.complete, historicalNextIndex };
+    if (latest.data && current.nextPage === next.nextPage && current.complete === next.complete &&
+        current.historicalNextIndex === next.historicalNextIndex) return;
     try {
       await putGithub(env, PATCH_STATE_PATH, JSON.stringify(next, null, 2) + "\n", `Verse Radar ${VERSION}: advance patch archive`, latest.sha);
       return;
@@ -584,15 +598,15 @@ async function updatePatches(env) {
   const existing = archive.data;
   validateArchiveEntries(existing);
   const state = parsePatchState(stateFile.data);
-  const existingVersions = new Set(existing.map(x => versionParts(x.version).join(".")));
-  const { items, scannedPages, nextState, pageDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems } = await fetchPatchItems(state, existingVersions);
+  const existingVersions = new Set(existing.map(x => patchKey(x.version)));
+  const { items, scannedPages, nextState, pageDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems, historicalCandidates, historicalDeferredItems, historicalUnusableItems, historicalDiagnostics } = await fetchPatchItems(state, existingVersions);
   const unique = dedupePatchItems(items).sort(comparePatchVersionsDesc);
-  const byVersion = new Map(existing.map(x => [versionParts(x.version).join("."), correctLegacyLink(x)]));
+  const byVersion = new Map(existing.map(x => [patchKey(x.version), correctLegacyLink(x)]));
   let aiItems = 0;
 
   for (let i = 0; i < unique.length; i++) {
     const item = unique[i];
-    const key = versionParts(item.version).join(".");
+    const key = patchKey(item.version);
     // Never replace a stored version because a later crawl has incomplete or
     // differently formatted source data.
     if (byVersion.has(key)) continue;
@@ -610,20 +624,27 @@ async function updatePatches(env) {
       sourceUrl: item.sourceUrl,
       sourceType: item.sourceType || "Patch Notes",
       ai: Boolean(ai),
-      summaryVersion: "0.6.8",
-      note: item.sourceType === "Content Update"
+      summaryVersion: item.historical ? "0.9.4" : "0.6.8",
+      note: item.sourceType === "Community Archive"
+        ? "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+        : item.sourceType === "RSI Release Info"
+        ? "Deutsche Zusammenfassung aus dem archivierten Patchtext; der Original-Link führt zu einer offiziellen RSI-Veröffentlichung."
+        : item.sourceType === "Content Update"
         ? "Deutsche Zusammenfassung des nummerierten Content-Updates aus dem Community-Archiv; der Quelllink ist gekennzeichnet. Kein eigenständiger RSI-Patch-Notes-Link."
         : "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
     });
   }
   const patches = [...byVersion.values()].sort(comparePatchVersionsDesc).map((p, i, all) => ({ ...p, previous: all[i + 1]?.version || null }));
-  return { patches, items: unique, newItems: patches.length - existing.length, aiItems, scannedPages, nextState, pageDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems, archiveSha: archive.sha, stateSha: stateFile.sha };
+  return { patches, items: unique, newItems: patches.length - existing.length, aiItems, scannedPages, nextState, pageDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems, historicalCandidates, historicalDeferredItems, historicalUnusableItems, historicalDiagnostics, archiveSha: archive.sha, stateSha: stateFile.sha };
 }
 
 function parsePatchState(value) {
-  if (value == null) return { nextPage: 1, complete: false };
-  if (!value || !Number.isSafeInteger(value.nextPage) || value.nextPage < 1 || typeof value.complete !== "boolean") throw Error("Patch-Archivstand ungültig; Import abgebrochen.");
-  return { nextPage: value.nextPage, complete: value.complete };
+  if (value == null) return { nextPage: 1, complete: false, historicalNextIndex: 0 };
+  if (!value || !Number.isSafeInteger(value.nextPage) || value.nextPage < 1 || typeof value.complete !== "boolean" ||
+      (value.historicalNextIndex != null && (!Number.isSafeInteger(value.historicalNextIndex) || value.historicalNextIndex < 0)))
+    throw Error("Patch-Archivstand ungültig; Import abgebrochen.");
+  return { nextPage: value.nextPage, complete: value.complete,
+    historicalNextIndex: value.historicalNextIndex ?? 0 };
 }
 
 async function fetchPatchItems(state, existingVersions) {
@@ -635,6 +656,10 @@ async function fetchPatchItems(state, existingVersions) {
   let deferredPageItems = 0;
   let firstDeferredPage = null;
   let recognizedPatchNotes = 0;
+  let historicalCandidates = 0;
+  let historicalDeferredItems = 0;
+  let historicalUnusableItems = 0;
+  const historicalDiagnostics = [];
   const pages = state.complete ? [1] : [...new Set([1, ...Array.from({ length: PATCH_PAGES_PER_IMPORT }, (_, i) => state.nextPage + i)])];
   let lastPage = null;
   let reachedEnd = false;
@@ -678,7 +703,7 @@ async function fetchPatchItems(state, existingVersions) {
       const id = Number(record?.id); if (!id) continue;
       const version = normalizePatchVersion(title.replace(/^Star Citizen /i, "").trim());
       recognizedPatchNotes++;
-      if (existingVersions.has(versionParts(version).join("."))) continue;
+      if (existingVersions.has(patchKey(version))) continue;
       if (fetchedDetails >= PATCH_DETAILS_PER_IMPORT) {
         deferredPageItems++;
         firstDeferredPage ??= page;
@@ -701,7 +726,7 @@ async function fetchPatchItems(state, existingVersions) {
   for (const seed of [...PATCH_SEEDS].sort(comparePatchVersionsDesc)) {
     const already = discovered.some(x => x.version === seed.version);
     if (already) continue;
-    if (existingVersions.has(versionParts(seed.version).join("."))) {
+    if (existingVersions.has(patchKey(seed.version))) {
       seedDiagnostics.push({ version: seed.version, sourceId: seed.id, alreadyStored: true });
       continue;
     }
@@ -727,6 +752,35 @@ async function fetchPatchItems(state, existingVersions) {
     discovered.push({ version: seed.version, date: seed.date, sourceUrl, sourceType: seed.sourceType || "Patch Notes", sourceId: seed.id, content, fallbackSummary: fallbackPatchSummary(seed.version, content), fallbackFullSummary: fallbackFullSummary(seed.version, content) });
   }
 
+  // The comm-link mirror assigns placeholder links to many 3.x notes. Read
+  // the indexed wiki originals and publish only pages with a date and text.
+  const historical = await listHistoricalPatches();
+  historicalCandidates = historical.length;
+  const discoveredKeys = new Set(discovered.map(item => patchKey(item.version)));
+  let checked = 0;
+  let lastCheckedIndex = historical.length ? state.historicalNextIndex % historical.length : 0;
+  let firstDeferredIndex = null;
+  const historicalStartIndex = lastCheckedIndex;
+  for (let offset = 0; offset < historical.length; offset++) {
+    const index = (historicalStartIndex + offset) % historical.length;
+    const patch = historical[index];
+    if (existingVersions.has(patchKey(patch.version)) || discoveredKeys.has(patchKey(patch.version))) continue;
+    if (checked >= HISTORICAL_PATCHES_PER_IMPORT) {
+      historicalDeferredItems++;
+      firstDeferredIndex ??= index;
+      continue;
+    }
+    checked++;
+    lastCheckedIndex = index;
+    const item = await fetchHistoricalPatch(patch);
+    const eligible = Boolean(item && publishablePatch(item.version, item.content));
+    historicalDiagnostics.push({ version: patch.version, eligible,
+      sourceType: item?.sourceType || null, sourceContentLength: item?.content?.length || 0,
+      sourceUrl: item?.sourceUrl || null });
+    if (eligible) discovered.push(item);
+    else historicalUnusableItems++;
+  }
+
   if (!discovered.length && !existingVersions.size) throw Error("Keine Patch Notes erkannt.");
   // A title variant (e.g. "Alpha 4.8: Tactical Strike") is not a separate
   // predecessor of the same numbered release. Never publish empty source text
@@ -737,7 +791,9 @@ async function fetchPatchItems(state, existingVersions) {
   const complete = !firstDeferredPage && (state.complete || reachedEnd || (lastPage !== null && lastScanned >= lastPage));
   const nextPage = firstDeferredPage || (complete ? Math.max(lastScanned, state.nextPage) : lastScanned + 1);
   return { items: unique, scannedPages, pageDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems,
-    nextState: { nextPage, complete } };
+    historicalCandidates, historicalDeferredItems, historicalUnusableItems, historicalDiagnostics,
+    nextState: { nextPage, complete,
+      historicalStartIndex, historicalNextIndex: firstDeferredIndex ?? (historical.length ? (lastCheckedIndex + 1) % historical.length : 0) } };
 }
 
 function extractPatchContent(record) {
@@ -814,8 +870,63 @@ async function fetchWikiUpdatePage(version, current = "") {
   return current;
 }
 
+async function listHistoricalPatches() {
+  if (!HISTORICAL_PATCHES_PER_IMPORT) return [];
+  const api = new URL("https://starcitizen.tools/api.php");
+  for (const [key, value] of Object.entries({ action: "query", list: "categorymembers",
+    cmtitle: "Category:Patch Notes", cmtype: "page", cmlimit: "500", format: "json" })) api.searchParams.set(key, value);
+  const response = await fetch(api.toString(), { headers: { "user-agent": `Verse-Radar/${VERSION} (+independent fan site)`, "accept": "application/json" } });
+  if (!response.ok) throw Error(`3.x-Quellenindex: HTTP ${response.status}; Import abgebrochen.`);
+  const body = await response.json();
+  if (!Array.isArray(body?.query?.categorymembers) || body.continue) throw Error("3.x-Quellenindex unvollständig; Import abgebrochen.");
+  const result = body.query.categorymembers
+    .filter(page => /^Update:Star Citizen Alpha 3\.\d+(?:\.\d+)?[a-z]?$/i.test(page.title || ""))
+    .map(page => ({ title: page.title, version: page.title.replace(/^Update:Star Citizen /i, "") }));
+  if (!result.length) throw Error("Keine 3.x-Patchseiten im Quellenindex; Import abgebrochen.");
+  return result.sort(comparePatchVersionsDesc);
+}
+
+async function fetchHistoricalPatch(patch) {
+  const api = new URL("https://starcitizen.tools/api.php");
+  for (const [key, value] of Object.entries({ action: "parse", page: patch.title,
+    prop: "text", format: "json" })) api.searchParams.set(key, value);
+  const response = await fetch(api.toString(), { headers: { "user-agent": `Verse-Radar/${VERSION} (+independent fan site)`, "accept": "application/json" } });
+  if (!response.ok) return null;
+  const body = await response.json();
+  const html = body?.parse?.text?.["*"];
+  if (typeof html !== "string") return null;
+  if (body.parse.title && body.parse.title.replace(/_/g, " ") !== patch.title) return null;
+  const raw = strip(html);
+  const dateMatch = raw.match(/\bbuild\s+released\s+on\s*(\d{4}-\d{2}-\d{2})\b/i)
+    || raw.match(/\bReleased\s+(\d{4}-\d{2}-\d{2})\b/i);
+  const date = dateMatch && validDate(dateMatch[1]);
+  if (!date) return null;
+  const wikiUrl = `https://starcitizen.tools/${patch.title.replace(/ /g, "_")}`;
+  const sourceUrl = historicalOfficialLink(html) || wikiUrl;
+  const sourceType = /\/comm-link\/Patch-Notes\/\d+-/i.test(sourceUrl) ? "Patch Notes" :
+    /\/comm-link\/transmission\/\d+-/i.test(sourceUrl) ? "RSI Release Info" : "Community Archive";
+  const content = cleanPatchText(raw);
+  return { version: patch.version, date, sourceUrl, sourceType, historical: true,
+    sourceId: Number(html.match(/api\.star-citizen\.wiki\/comm-links\/(\d+)/i)?.[1] || 0),
+    content, fallbackSummary: fallbackPatchSummary(patch.version, content),
+    fallbackFullSummary: fallbackFullSummary(patch.version, content) };
+}
+
+function historicalOfficialLink(html) {
+  for (const anchor of html.matchAll(/<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi)) {
+    if (!/full patch notes/i.test(strip(anchor[2]))) continue;
+    try {
+      const url = new URL(anchor[1].replace(/&amp;/g, "&"), "https://starcitizen.tools");
+      if (/^(?:www\.)?robertsspaceindustries\.com$/i.test(url.hostname) &&
+          /^\/(?:en\/)?comm-link\/(?:Patch-Notes|transmission)\/\d+-/i.test(url.pathname)) return url.href;
+    } catch (_) {}
+  }
+  return null;
+}
+
 function normalizePatchVersion(v) {
-  return String(v || "").replace(/\.0(?=\b)/g, "").replace(/\s+/g, " ").trim();
+  const version = String(v || "").replace(/\s+/g, " ").trim();
+  return /^Alpha 3\./i.test(version) ? version : version.replace(/\.0(?=\b)/g, "");
 }
 function officialPatchUrl(id, title) {
   const verifiedSlugs = new Map([[21070,"47"],[20969,"46"],[20934,"450"],[20899,"440"],[20852,"432"],[20777,"431"],[20728,"430"],[20702,"421"],[20638,"42"],[20598,"411"],[20522,"41"],[20445,"402"],[20418,"401"],[20360,"40"]]);
@@ -850,15 +961,23 @@ function versionParts(version) {
   const p = m[1].split(".").map(Number);
   return [p[0]||0,p[1]||0,p[2]||0];
 }
+function patchKey(version) {
+  const numeric = versionParts(version).join(".");
+  const suffix = String(version || "").match(/\d+(?:\.\d+){1,2}([a-z])\b/i)?.[1]?.toLowerCase() || "";
+  return numeric + suffix;
+}
 function comparePatchVersionsDesc(a,b) {
   const av=versionParts(a.version), bv=versionParts(b.version);
   for(let i=0;i<3;i++){ if(av[i]!==bv[i]) return bv[i]-av[i]; }
+  const as = patchKey(a.version).match(/[a-z]$/)?.[0] || "";
+  const bs = patchKey(b.version).match(/[a-z]$/)?.[0] || "";
+  if (as !== bs) return bs.localeCompare(as);
   return new Date(b.date)-new Date(a.date);
 }
 function dedupePatchItems(items) {
   const map = new Map();
   for (const item of items) {
-    const key = versionParts(item.version).join(".");
+    const key = patchKey(item.version);
     const old = map.get(key);
     if (!old ||
         (item.content.length >= 500 && old.content.length < 500) ||
@@ -1084,8 +1203,50 @@ function archiveHighlights(version, content) {
   return spec.changes.filter(([, , , pattern]) => pattern.test(content))
     .map(([category,title,description]) => ({category,title,description}));
 }
+function historicalPatchChanges(content) {
+  const main = content.match(/features and gameplay[\s\S]*?(?=bug fixes|technical updates|known issues|$)/i)?.[0] || content;
+  const rules = [
+    ["Gameplay", "Bergbau", "Bergbau und Rohstoffgewinnung werden erweitert oder angepasst.", /\bmining gameplay\b|\bnew mining\b|\bmining v2\b/i],
+    ["Gameplay", "Salvage", "Bergung und Verwertung von Schiffswracks werden erweitert.", /\bstructural salvage\b|\bsalvage gameplay\b|\bvehicle salvage\b/i],
+    ["Gameplay", "Schiff zu Schiff betanken", "Schiffe können andere Schiffe direkt mit Treibstoff versorgen.", /\bship.to.ship refueling\b|\brefueling gameplay\b/i],
+    ["Gameplay", "Bergbau-Werkzeuge", "Neue Werkzeuge oder Anbauteile erweitern den Bergbau.", /\bmining gadgets\b|\bmining modules\b/i],
+    ["Gameplay", "Gegenstände verkaufen", "Gesammelte Gegenstände können an Shops verkauft werden.", /\bsell items\b|\bselling items\b/i],
+    ["Gameplay", "Fracht und Hangars", "Frachtverwaltung und persönliche Hangars werden überarbeitet.", /\bpersistent hangars\b|\bpersonal hangars\b|\bfreight elevator\b|\bcargo hauling\b/i],
+    ["Schiffe & Fahrzeuge", "Master Modes", "Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes.", /\bmaster modes\b/i],
+    ["Technik", "Persistent Entity Streaming", "Gegenstände und Veränderungen werden durch Persistent Entity Streaming dauerhaft gespeichert.", /\bpersistent entity streaming\b/i],
+    ["Technik", "Server Crash Recovery", "Nach Serverfehlern wird die Spielsitzung wiederhergestellt.", /\bserver crash recovery\b/i],
+    ["Technik", "Object Container Streaming", "Object Container Streaming verbessert das Nachladen von Spielinhalten.", /\bobject container streaming\b/i],
+    ["Technik", "Vulkan-Grafik", "Vulkan ergänzt die Grafikschnittstellen des Spiels.", /\bvulkan renderer\b|\bvulkan graphics\b/i],
+    ["Gameplay", "Inventar", "Der Zugriff auf Inventar und Ausrüstung wird angepasst.", /\bpersonal inventory\b|\bphysicalized inventory\b|\binventory rework\b/i],
+    ["Charakter", "Charaktereditor", "Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt.", /\bcharacter creator dna\b|\bcharacter customizer\b|\bnew hair and beard styles\b/i],
+    ["Schiffe & Fahrzeuge", "Schiffsanzeigen", "HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet.", /\bvehicle hud\b.{0,20}\bmfd\b|\bmfd.*rework\b/i],
+    ["Schiffe & Fahrzeuge", "Zeus Mk II", "Die Zeus Mk II wird als neues Schiff ergänzt.", /\badded new ships[\s\S]{0,150}\bzeus mk ii\b/i],
+    ["Schiffe & Fahrzeuge", "Quantum-Reisen", "Tempo, Treibstoffverbrauch oder Bedienung der Quantum-Reise werden angepasst.", /\bquantum travel polish\b|\bquantum travel update\b/i],
+    ["Orte", "Neue Höhlen", "Neue Höhlentypen erweitern erkundbare Schauplätze.", /\bnew caves\b|\bcave system archetypes\b/i],
+    ["Orte", "Hurston", "Hurston und seine Monde erweitern das Stanton-System.", /\bhurston and its moons\b|\bhurston moons\b/i],
+    ["Orte", "ArcCorp", "ArcCorp ergänzt weitere Landeflächen und Orte.", /\barccorp and its moons\b|\bplanet arccorp\b/i],
+    ["Orte", "MicroTech", "MicroTech erweitert die begehbaren Planeten in Stanton.", /\bmicrotech planet\b|\bplanet microtech\b/i],
+    ["Orte", "Crusader", "Crusader und Orison erweitern die Spielwelt.", /\borison landing zone\b|\bcrusader and orison\b/i],
+    ["Missionen", "Siege of Orison", "Das Event rund um Orison erhält neue Kampfeinsätze.", /\bsiege of orison\b/i],
+    ["Missionen", "XenoThreat", "Die XenoThreat-Missionen und ihre Abläufe werden angepasst.", /\bxenothreat\b/i],
+    ["Gameplay", "Medizinisches Gameplay", "Verletzungen, Behandlung und Wiederbelebung erhalten neue Funktionen.", /\bmedical gameplay\b|\bmedical system\b/i],
+    ["Gameplay", "Ernährung und Überleben", "Hunger, Durst und weitere Überlebensmechaniken werden eingeführt oder angepasst.", /\bplayer status system\b|\bhunger and thirst\b/i],
+    ["Gameplay", "Handel", "Warenhandel und Verkaufsabläufe erhalten Änderungen.", /\bcommodity trading\b|\bplayer trading\b|\btrading app\b/i],
+    ["Gameplay", "Rufsystem", "Der Ruf bei Fraktionen beeinflusst weitere Aufträge.", /\breputation system\b|\breputation v2\b/i],
+    ["Schiffe & Fahrzeuge", "Greycat ROC", "Der Greycat ROC erweitert den Fahrzeugbergbau.", /\bgreycat roc\b/i],
+    ["Schiffe & Fahrzeuge", "Drake Cutlass Blue", "Die Cutlass Blue wird zur Schiffsauswahl hinzugefügt.", /\bdrake cutlass blue\b/i],
+    ["Gameplay", "Arena Commander", "Arena Commander erhält neue Spielmodi oder Anpassungen.", /\barena commander.*(?:new mode|experimental mode|game mode)\b/i]
+  ];
+  const changes = rules.filter(([, , , pattern]) => pattern.test(main))
+    .map(([category, title, description]) => ({ category, title, description }));
+  if (/\bbug fixes\b|\bfixed\b|\bclient crashes\b|\bserver crashes\b/i.test(content))
+    changes.push({ category: "Technik", title: "Fehlerbehebungen", description: "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten." });
+  return changes.slice(0, 9);
+}
 function publishablePatch(version, content) {
   if (content.length < 500) return false;
+  if (/^Alpha 3\./.test(version)) return historicalPatchChanges(content).length > 0 &&
+    /\bpatch notes\b|\bfeatures and gameplay\b|\bbug fixes\b/i.test(content);
   if (Object.hasOwn(ARCHIVE_HIGHLIGHTS, version)) {
     return (archiveHighlights(version, content)?.length || 0) >= minimumHighlights(version);
   }
@@ -1096,6 +1257,7 @@ function minimumHighlights(version) {
 }
 function fallbackPatchSummary(version, content) {
   const t = content || "";
+  if (/^Alpha 3\./.test(version)) return `${version}: ${historicalPatchChanges(t).slice(0, 6).map(x => x.description).join(" ")}`;
   if (alpha47Content(version, t)) return "Alpha 4.7 erweitert Nyx mit Operation Breaker Stations: In den Stationen warten Kämpfe, Rätsel und abbaubare Rohstoffe. Das Inventar wurde mit zwei Fenstern und Zugriff auf nahe Container überarbeitet. Crafting startet mit dem Item Fabricator, Bauplänen und Materialqualität, die sich auf hergestellte Gegenstände auswirkt. Dazu kommen die RSI Aurora Mk II, Änderungen an Schilden, Rüstung und Radar sowie weitere Anlaufstellen in Nyx. Experimentelle VR-Funktionen und zahlreiche Fehlerkorrekturen runden das Update ab.";
   const highlights = archiveHighlights(version, t);
   if (highlights?.length >= minimumHighlights(version)) return highlights.map(x => x.description).join(" ");
@@ -1129,6 +1291,7 @@ function fallbackPatchSummary(version, content) {
 function fallbackFullSummary(version, content) {
   if (!content) return "Die Patch-Notizen konnten technisch noch nicht vollständig aus dem Archiv übernommen werden. Die offizielle Originalquelle ist direkt verlinkt.";
   const t = content;
+  if (/^Alpha 3\./.test(version)) return `${version} enthält folgende dokumentierte Änderungen: ${historicalPatchChanges(t).map(x => x.description).join(" ")} Die verlinkte Quelle enthält die vollständigen Patch Notes.`;
   if (alpha47Content(version, t)) return "Alpha 4.7 bringt Operation Breaker Stations nach Nyx. In diesen Aufträgen kämpfen sich Spieler durch Gegner und Gefahren, lösen Rätsel und nehmen eine Bergbaustation wieder in Betrieb, um an Rohstoffe im Asteroiden zu gelangen. Stationen können exklusiv oder gemeinsam zugänglich sein. Das Inventar erhält eine neue Oberfläche mit zwei Fenstern. Nahe Container, Rucksäcke und Körper erscheinen als auswählbare Tabs; Suche, Sortierung und Filter helfen beim Umlagern und Ausrüsten. Das neue Crafting nutzt den Item Fabricator und Baupläne. Gesammelte und abgebaute Materialien besitzen Qualitätswerte, die die Werte des hergestellten Gegenstands beeinflussen. Auch die Verteilung von abbaubaren Rohstoffen wurde angepasst. Bei Schiffen kommt die RSI Aurora Mk II hinzu. Schilde und Rüstung wurden neu abgestimmt; Radar-Komponenten und radarbasierte Zielhilfe verändern die technischen Möglichkeiten der Fahrzeuge. In Nyx bieten People's Service Stations zusätzliche Anlaufstellen und mögliche Heimatorte. Die experimentelle VR-Unterstützung erhält Verbesserungen bei Cursor, Oberfläche und Rendering. Laut Patch Notes wurden seit Alpha 4.6 zudem über 150 Fehler und Abstürze korrigiert.";
   const highlights = archiveHighlights(version, t);
   if (highlights?.length >= minimumHighlights(version)) return `${version} umfasst folgende Änderungen: ${highlights.map(x => x.description).join(" ")} Weitere Details stehen in der verlinkten Quelle.`;
@@ -1165,6 +1328,7 @@ function fallbackFullSummary(version, content) {
 }
 function buildPatchChanges(item) {
   const t = item.content || ""; const changes = [];
+  if (item.historical) return historicalPatchChanges(t);
   if (alpha47Content(item.version, t)) return alpha47Changes(t);
   const highlights = archiveHighlights(item.version, t);
   if (highlights?.length >= minimumHighlights(item.version)) return highlights;

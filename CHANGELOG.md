@@ -1,5 +1,12 @@
 # Changelog – Verse Radar
 
+## 0.9.4 – 3.x-Archiv aus überprüfbaren Patchseiten erschließen
+- Das vollständige 3.x-Verzeichnis der Star Citizen Wiki wird zur Versionssuche verwendet; pro Aufruf werden höchstens acht noch fehlende Patchseiten geprüft.
+- Datum, Patchtext und Original-Link werden einzeln geprüft. Wo kein eigener RSI-Patch-Notes-Link belegt ist, führt der Eintrag sichtbar gekennzeichnet zum Community-Archiv.
+- Nachträge wie `3.23.1a` bleiben eigenständige Versionen und werden nicht mit `3.23.1` zusammengeführt.
+- Die Diagnose zeigt `historicalCandidates`, `historicalDeferredItems`, `historicalUnusableItems` und Details der gerade geprüften Quellen.
+- Neue 3.x-Zusammenfassungen greifen konkrete Themen aus dem Quelltext auf. Nicht lesbare Seiten werden nicht veröffentlicht.
+
 ## 0.9.3 – Worker-Anfragelimit beim Patch-Import beachten
 - Bereits archivierte Versionen werden bei der Quellprüfung übersprungen.
 - Pro Aufruf höchstens zwei neue Patch-Details und zwei zusätzliche Archivversionen aus den festen Quellen prüfen; offene Versionen folgen bei den nächsten Aufrufen.
