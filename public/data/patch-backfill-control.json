@@ -1,5 +1,5 @@
 {
-  "status": "paused",
+  "status": "running",
   "lastRun": {
     "at": "2026-09-27T20:54:16.255Z",
     "patchItems": 73,
@@ -24,9 +24,9 @@
       }
     ]
   },
-  "sessionId": "0d51430e-98c3-4260-9128-f824f93ae0e8",
+  "sessionId": "829aea3c-7ada-4c6b-b00f-2744fd37d15a",
   "leaseId": null,
   "leaseUntil": null,
-  "lastError": "3 historische Quelle(n) unbrauchbar; bitte prüfen.",
-  "changedAt": "2026-09-27T20:54:21.061Z"
+  "lastError": null,
+  "changedAt": "2026-09-27T21:54:09.937Z"
 }
