@@ -1821,7 +1821,7 @@
   {
     "version": "Alpha 3.15.0",
     "date": "2021-11-10T00:00:00.000Z",
-    "previous": null,
+    "previous": "Alpha 3.14.1",
     "summary": "Alpha 3.15.0: Nach Serverfehlern wird die Spielsitzung wiederhergestellt. Der Zugriff auf Inventar und Ausrüstung wird angepasst. Die XenoThreat-Missionen und ihre Abläufe werden angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
     "changes": [
       {
@@ -1847,6 +1847,178 @@
     ],
     "fullSummary": "Alpha 3.15.0 enthält folgende dokumentierte Änderungen: Nach Serverfehlern wird die Spielsitzung wiederhergestellt. Der Zugriff auf Inventar und Ausrüstung wird angepasst. Die XenoThreat-Missionen und ihre Abläufe werden angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
     "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.15.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.14.1",
+    "date": "2021-08-19T00:00:00.000Z",
+    "previous": "Alpha 3.14.0",
+    "summary": "Alpha 3.14.1: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.14.1 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.14.1",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.14.0",
+    "date": "2021-08-06T00:00:00.000Z",
+    "previous": "Alpha 3.13.1",
+    "summary": "Alpha 3.14.0: Crusader und Orison erweitern die Spielwelt. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Orte",
+        "title": "Crusader",
+        "description": "Crusader und Orison erweitern die Spielwelt."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.14.0 enthält folgende dokumentierte Änderungen: Crusader und Orison erweitern die Spielwelt. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.14.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.13.1",
+    "date": "2021-05-20T00:00:00.000Z",
+    "previous": "Alpha 3.13.0a",
+    "summary": "Alpha 3.13.1: Der Greycat ROC erweitert den Fahrzeugbergbau. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Greycat ROC",
+        "description": "Der Greycat ROC erweitert den Fahrzeugbergbau."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.13.1 enthält folgende dokumentierte Änderungen: Der Greycat ROC erweitert den Fahrzeugbergbau. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.13.1",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.13.0a",
+    "date": "2021-04-27T00:00:00.000Z",
+    "previous": "Alpha 3.13.0",
+    "summary": "Alpha 3.13.0a: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.13.0a enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.13.0a",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.13.0",
+    "date": "2021-04-22T00:00:00.000Z",
+    "previous": "Alpha 3.12.1",
+    "summary": "Alpha 3.13.0: Der Greycat ROC erweitert den Fahrzeugbergbau. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Greycat ROC",
+        "description": "Der Greycat ROC erweitert den Fahrzeugbergbau."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.13.0 enthält folgende dokumentierte Änderungen: Der Greycat ROC erweitert den Fahrzeugbergbau. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.13.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.12.1",
+    "date": "2021-02-04T00:00:00.000Z",
+    "previous": "Alpha 3.12.0b",
+    "summary": "Alpha 3.12.1: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.12.1 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.12.1",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.12.0b",
+    "date": "2021-01-11T00:00:00.000Z",
+    "previous": "Alpha 3.12.0a",
+    "summary": "Alpha 3.12.0b: Der Zugriff auf Inventar und Ausrüstung wird angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Gameplay",
+        "title": "Inventar",
+        "description": "Der Zugriff auf Inventar und Ausrüstung wird angepasst."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.12.0b enthält folgende dokumentierte Änderungen: Der Zugriff auf Inventar und Ausrüstung wird angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.12.0b",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.12.0a",
+    "date": "2020-12-23T00:00:00.000Z",
+    "previous": null,
+    "summary": "Alpha 3.12.0a: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.12.0a enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.12.0a",
     "sourceType": "Community Archive",
     "ai": false,
     "summaryVersion": "0.9.6",
