@@ -1,4 +1,4 @@
-/* Verse Radar 0.9.6 – RSI news + patch notes ingestion
+/* Verse Radar 0.9.7 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -19,7 +19,10 @@ const PATCH_DETAILS_PER_IMPORT = 2;
 const PATCH_SEEDS_PER_IMPORT = 2;
 const HISTORICAL_PATCHES_PER_IMPORT = 8;
 const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
-const VERSION = "0.9.6";
+const PATCH_BACKFILL_PATH = "public/data/patch-backfill-control.json";
+const PATCH_BACKFILL_CRON = "*/2 * * * *";
+const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
+const VERSION = "0.9.7";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -76,6 +79,17 @@ export default {
     const u = new URL(request.url);
     if (u.pathname === "/health") {
       return json({ ok: true, service: "verse-radar-updater", version: VERSION });
+    }
+    if (u.pathname === "/backfill") return backfillPage();
+    if (u.pathname === "/backfill/status" || u.pathname === "/backfill/start" || u.pathname === "/backfill/stop") {
+      if (!env.RUN_SECRET) return json({ ok: false, error: "Für die Importsteuerung RUN_SECRET als Worker-Secret einrichten." }, 503);
+      if (request.headers.get("x-run-secret") !== env.RUN_SECRET) return json({ ok: false, error: "Unauthorized" }, 401);
+      if (u.pathname !== "/backfill/status" && request.method !== "POST") return json({ ok: false, error: "POST erforderlich" }, 405);
+      if (u.pathname === "/backfill/status" && request.method !== "GET") return json({ ok: false, error: "GET erforderlich" }, 405);
+      try {
+        if (u.pathname === "/backfill/status") return json({ ok: true, version: VERSION, ...parseBackfillControl((await getGithubJSONStrict(env, PATCH_BACKFILL_PATH, { allowMissing: true })).data) });
+        return json({ ok: true, version: VERSION, ...(await setBackfillControl(env, u.pathname === "/backfill/start" ? "running" : "paused")) });
+      } catch (e) { return json({ ok: false, error: e.message }, 500); }
     }
     if (u.pathname === "/preview") {
       try {
@@ -192,7 +206,11 @@ export default {
     if (env.ASSETS) return env.ASSETS.fetch(request);
     return new Response(`Verse Radar ${VERSION}`, { headers: { "content-type": "text/plain;charset=utf-8" } });
   },
-  async scheduled(_, env, ctx) {
+  async scheduled(event, env, ctx) {
+    if (event?.cron === PATCH_BACKFILL_CRON) {
+      await runBackfillTick(env);
+      return;
+    }
     // Both data types require a reviewed preview before scheduled publishing.
     const includeNews = env.NEWS_AUTO_PUBLISH === "true";
     const includePatches = env.PATCH_AUTO_PUBLISH === "true";
@@ -201,6 +219,86 @@ export default {
 };
 
 const json = (x, s = 200) => new Response(JSON.stringify(x, null, 2), { status: s, headers: { "content-type": "application/json;charset=utf-8", "cache-control": "no-store" } });
+
+function parseBackfillControl(data) {
+  if (data == null) return { status: "paused", lastRun: null };
+  if (!data || !["running", "paused", "completed"].includes(data.status)) throw Error("Importsteuerung ungültig; automatischer Import angehalten.");
+  return data;
+}
+
+async function setBackfillControl(env, status) {
+  if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) throw Error("GitHub-Konfiguration fehlt; automatischer Import nicht gestartet.");
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const latest = await getGithubJSONStrict(env, PATCH_BACKFILL_PATH, { allowMissing: true });
+    const current = parseBackfillControl(latest.data);
+    const next = { ...current, status, sessionId: crypto.randomUUID(), leaseId: null, leaseUntil: null,
+      lastError: null, changedAt: new Date().toISOString() };
+    try {
+      await putGithub(env, PATCH_BACKFILL_PATH, JSON.stringify(next, null, 2) + "\n", `Verse Radar ${VERSION}: ${status} patch backfill`, latest.sha);
+      return next;
+    } catch (e) { if (e.status !== 409 || attempt === 2) throw e; }
+  }
+}
+
+async function finishBackfillTick(env, sessionId, leaseId, result, error) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const latest = await getGithubJSONStrict(env, PATCH_BACKFILL_PATH);
+    const current = parseBackfillControl(latest.data);
+    if (current.status !== "running" || current.sessionId !== sessionId || current.leaseId !== leaseId) return;
+    const complete = !error && result.patchBackfillComplete && result.patchHistoricalMissingItems === 0 &&
+      result.patchDeferredSeedItems === 0 && result.patchDeferredPageItems === 0;
+    const missingAtEnd = !error && result.patchBackfillComplete && result.patchHistoricalDeferredItems === 0 &&
+      result.patchHistoricalMissingItems > 0;
+    const reason = error?.message || (result.patchHistoricalUnusableItems > 0
+      ? `${result.patchHistoricalUnusableItems} historische Quelle(n) unbrauchbar; bitte prüfen.`
+      : missingAtEnd ? `${result.patchHistoricalMissingItems} historische Version(en) fehlen; bitte prüfen.` : null);
+    const next = { ...current, status: complete ? "completed" : reason ? "paused" : "running",
+      leaseId: null, leaseUntil: null, changedAt: new Date().toISOString(), lastError: reason,
+      lastRun: result ? { at: result.updatedAt, patchItems: result.patchItems,
+        newItems: result.patchNewItems, nextPage: result.patchNextPage,
+        backfillComplete: result.patchBackfillComplete, historicalMissingItems: result.patchHistoricalMissingItems,
+        historicalDeferredItems: result.patchHistoricalDeferredItems } : current.lastRun };
+    try {
+      await putGithub(env, PATCH_BACKFILL_PATH, JSON.stringify(next, null, 2) + "\n", `Verse Radar ${VERSION}: patch backfill progress`, latest.sha);
+      return;
+    } catch (e) { if (e.status !== 409 || attempt === 2) throw e; }
+  }
+}
+
+async function runBackfillTick(env) {
+  if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) return;
+  const latest = await getGithubJSONStrict(env, PATCH_BACKFILL_PATH, { allowMissing: true });
+  const control = parseBackfillControl(latest.data);
+  if (control.status !== "running" || (control.leaseUntil && Date.parse(control.leaseUntil) > Date.now())) return;
+  const leaseId = crypto.randomUUID();
+  const locked = { ...control, leaseId, leaseUntil: new Date(Date.now() + PATCH_BACKFILL_LEASE_MS).toISOString() };
+  try {
+    await putGithub(env, PATCH_BACKFILL_PATH, JSON.stringify(locked, null, 2) + "\n", `Verse Radar ${VERSION}: claim patch backfill`, latest.sha);
+  } catch (e) {
+    if (e.status === 409) return; // Another cron invocation already owns this batch.
+    throw e;
+  }
+  let result = null;
+  let error = null;
+  try {
+    result = await updateSite(env, { includeNews: false, includePatches: true });
+    if (!result.published) throw Error("GitHub-Veröffentlichung fehlgeschlagen; Import angehalten.");
+  } catch (e) { error = e; }
+  await finishBackfillTick(env, control.sessionId, leaseId, result, error);
+  if (error) throw error;
+}
+
+function backfillPage() {
+  return new Response(`<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Verse Radar · Patch-Archiv</title>
+<style>body{max-width:650px;margin:4rem auto;padding:0 1rem;background:#09141c;color:#eef5f4;font:16px/1.5 system-ui}h1{font-size:1.8rem}input,button{padding:.75rem;border-radius:.5rem;border:1px solid #62948d;font:inherit}input{background:#101f29;color:white;max-width:100%;width:22rem}button{cursor:pointer;background:#315e57;color:white;margin:.6rem .6rem 0 0}button:hover{background:#40796f}pre{white-space:pre-wrap;word-break:break-word;background:#101f29;border-radius:.6rem;padding:1rem}</style>
+<h1>Patch-Archiv automatisch füllen</h1><p>Start führt etwa alle zwei Minuten einen Importblock aus. Bei einem Fehler hält der Import an. Der Status bleibt nach dem Schließen der Seite erhalten.</p>
+<label for="secret">RUN_SECRET</label><br><input id="secret" type="password" autocomplete="off" placeholder="Worker-Secret eingeben"><br><button id="start">Starten</button><button id="stop">Anhalten</button><button id="refresh">Status prüfen</button>
+<pre id="status">Secret eingeben und „Status prüfen“ wählen.</pre><script>
+const secret=document.getElementById('secret'),out=document.getElementById('status');
+async function call(action){if(!secret.value){out.textContent='Bitte zuerst RUN_SECRET eingeben.';return}try{const response=await fetch('/backfill/'+action,{method:action==='status'?'GET':'POST',headers:{'x-run-secret':secret.value}});const data=await response.json();out.textContent=JSON.stringify(data,null,2)}catch(error){out.textContent=error.message}}
+for(const action of ['start','stop','status'])document.getElementById(action==='status'?'refresh':action).addEventListener('click',()=>call(action));
+</script></html>`, { headers: { "content-type": "text/html;charset=utf-8", "cache-control": "no-store", "referrer-policy": "no-referrer" } });
+}
 
 async function fetchRSIItems() {
   // Primary: current RSI HTML. In some server-side requests RSI returns the
@@ -532,7 +630,7 @@ async function updateSite(env, { includeNews = true, includePatches = true } = {
   const patchResult = includePatches ? await updatePatches(env) : null;
   const now = new Date().toISOString();
   const automation = includeNews && includePatches ? "Cloudflare Worker + RSI Comm-Link + RSI Patch Notes" : includeNews ? "Cloudflare Worker + RSI Comm-Link; Patch-Import pausiert" : "Cloudflare Worker + RSI Patch Notes; News-Import pausiert";
-  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation, version: VERSION, fetchedItems: newsResult?.fetchedItems ?? null, newItems: newsResult?.newItems ?? null, refreshedItems: newsResult?.refreshedItems ?? null, aiItems: newsResult?.aiItems ?? null, newsItems: newsResult?.news.length ?? null, patchItems: patchResult?.patches.length ?? null, patchNewItems: patchResult?.newItems ?? null, patchNextPage: patchResult?.nextState.nextPage ?? null, patchBackfillComplete: patchResult?.nextState.complete ?? null, patchDeferredSeedItems: patchResult?.deferredSeedItems ?? null, patchDeferredPageItems: patchResult?.deferredPageItems ?? null, patchHistoricalCandidates: patchResult?.historicalCandidates ?? null, patchHistoricalDeferredItems: patchResult?.historicalDeferredItems ?? null, patchHistoricalUnusableItems: patchResult?.historicalUnusableItems ?? null, patchAiItems: patchResult?.aiItems ?? null };
+  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation, version: VERSION, fetchedItems: newsResult?.fetchedItems ?? null, newItems: newsResult?.newItems ?? null, refreshedItems: newsResult?.refreshedItems ?? null, aiItems: newsResult?.aiItems ?? null, newsItems: newsResult?.news.length ?? null, patchItems: patchResult?.patches.length ?? null, patchNewItems: patchResult?.newItems ?? null, patchNextPage: patchResult?.nextState.nextPage ?? null, patchBackfillComplete: patchResult?.nextState.complete ?? null, patchDeferredSeedItems: patchResult?.deferredSeedItems ?? null, patchDeferredPageItems: patchResult?.deferredPageItems ?? null, patchHistoricalCandidates: patchResult?.historicalCandidates ?? null, patchHistoricalDeferredItems: patchResult?.historicalDeferredItems ?? null, patchHistoricalUnusableItems: patchResult?.historicalUnusableItems ?? null, patchHistoricalMissingItems: null, patchAiItems: patchResult?.aiItems ?? null };
 
   if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) {
     return { ok: true, version: VERSION, published: false, ...meta, note: "GitHub Secrets fehlen; nichts zurückgeschrieben." };
@@ -543,6 +641,8 @@ async function updateSite(env, { includeNews = true, includePatches = true } = {
     // merely repeats a page; it can never skip unsaved older versions.
     const savedPatches = await publishPatchArchive(env, patchResult.patches);
     meta.patchItems = savedPatches.length;
+    const storedVersions = new Set(savedPatches.map(p => patchKey(p.version)));
+    meta.patchHistoricalMissingItems = HISTORICAL_VERSIONS.filter(v => !storedVersions.has(patchKey(`Alpha ${v}`))).length;
     await publishPatchCursor(env, patchResult.nextState);
   }
   if (includeNews) await putGithub(env, "public/data/news.json", JSON.stringify(newsResult.news, null, 2) + "\n", `Verse Radar ${VERSION}: update news`);

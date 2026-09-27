@@ -1,5 +1,11 @@
 # Changelog – Verse Radar
 
+## 0.9.7 – Automatischer Patch-Archivimport
+- Neuer Zwei-Minuten-Cron für die Patch-History; der bisherige Zwei-Stunden-Cron bleibt erhalten.
+- `/backfill` zeigt Start, Stopp und Status. Das Worker-Secret `RUN_SECRET` schützt die Steuerung; das Secret steht nicht in der URL.
+- Start und Fortschritt werden in einer neuen GitHub-Steuerdatei gespeichert. Gleichzeitige Cron-Aufrufe teilen sich eine Sperre; ein Fehler pausiert den Import mit Fehlermeldung.
+- Fertigmeldung erst nach dem letzten Archivblatt und allen 81 bekannten 3.x-Versionen. Gespeicherte Patchdaten und Fortschrittsdateien bleiben beim Update erhalten.
+
 ## 0.9.6 – Eigenständigen Hotfix 3.17.2a ergänzen
 - Die Comm-Link-Suche meldet Alpha 3.17.2a, die 80er-Liste der Wiki-Patchkategorie führt sie jedoch nicht als eigene Update-Seite.
 - Der Hotfix erhält einen separaten Eintrag mit dem offiziellen RSI-Spectrum-Link, dem datierten Archivtext und eigenen Änderungspunkten zu Kampfhilfe-Aufträgen, Kiosken, Esperia Blade und Fehlerbehebungen.

@@ -1,4 +1,4 @@
-# Verse Radar 0.9.6
+# Verse Radar 0.9.7
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -17,15 +17,22 @@ Der Worker liest die offizielle RSI Comm-Link-Seite ein, erkennt aktuelle Comm-L
 ### Cloudflare Variablen/Secrets
 - Secret: `OPENAI_API_KEY` (optional)
 - Secret: `GITHUB_TOKEN` (für automatisches Zurückschreiben)
-- Secret optional: `RUN_SECRET`
+- Secret: `RUN_SECRET` (für die neue Steuerungsseite erforderlich; für die älteren `/run`-Aufrufe optional)
 - Variable: `GITHUB_REPO` = `VerseRadar/verse-radar`
 - Variable optional: `GITHUB_BRANCH` = `main`
 - Variable optional: `MAX_ITEMS`
 - Variable optional: `NEWS_AUTO_PUBLISH` = `true` **erst nach Prüfung von `/preview/news` und einem erfolgreichen manuellen `/run/news` setzen**. Bis dahin pausiert der automatische News-Import; Patch-Automatik bleibt separat durch `PATCH_AUTO_PUBLISH` gesteuert.
 - Variable optional: `PATCH_AUTO_PUBLISH` = `true` erst nach Prüfung der Patch-Vorschau und dem ersten manuellen Import setzen. Diese Variable steuert nur den automatischen Patch-Import.
 
-Cron: alle 2 Stunden (`0 */2 * * *`).
-Ohne `NEWS_AUTO_PUBLISH=true` und ohne `PATCH_AUTO_PUBLISH=true` schreibt der Cron keine Daten. Der manuelle Endpunkt `/run/news` veröffentlicht nur News; `/run` veröffentlicht News und Patches. Falls `RUN_SECRET` gesetzt ist, benötigen beide Endpunkte den gewohnten Schlüssel.
+Cron: bisheriger Zwei-Stunden-Takt (`0 */2 * * *`) und neuer Zwei-Minuten-Takt (`*/2 * * * *`). Der neue Takt schreibt nur nach Start über `/backfill` Patchdaten; News bleiben davon unberührt. Ohne `NEWS_AUTO_PUBLISH=true` und ohne `PATCH_AUTO_PUBLISH=true` schreibt der Zwei-Stunden-Cron keine Daten. Der manuelle Endpunkt `/run/news` veröffentlicht nur News; `/run` veröffentlicht News und Patches. Falls `RUN_SECRET` gesetzt ist, benötigen die manuellen Endpunkte den Schlüssel.
+
+### Patch-History automatisch fertigstellen (0.9.7)
+1. Das Cloudflare Worker-Secret `RUN_SECRET` einmalig auf einen eigenen langen Wert setzen. Wenn du schon einen Wert gesetzt hast, diesen weiterverwenden. Danach benötigen die bisherigen manuellen `/run/patches`-Links `?key=DEIN_WERT`.
+2. Update 0.9.7 mit `wrangler.toml` veröffentlichen; im Cloudflare-Dashboard prüfen, dass **beide** Cron-Trigger aktiv sind, insbesondere `*/2 * * * *`. Bei Änderungen kann die Aktivierung bis zu 15 Minuten dauern.
+3. `/backfill` auf deiner Worker-Adresse öffnen, das Secret eingeben und **Starten** klicken. Die Seite kann geschlossen werden. **Status prüfen** zeigt zuletzt gespeicherte Einträge, neue Einträge, Archivseite und noch fehlende 3.x-Versionen. **Anhalten** pausiert; **Starten** setzt fort.
+4. Bei einer Fehlermeldung hält der Import an. Den angezeigten vollständigen Status zur Prüfung schicken. Sobald alle 81 bekannten 3.x-Versionen gespeichert und alle Archivseiten durchsucht sind, wechselt der Status automatisch auf `completed`.
+
+Jeder Durchlauf nutzt die bestehende Begrenzung von acht historischen Versionen und zwei Archivseiten. Für den Start ist kein `PATCH_AUTO_PUBLISH=true` nötig. Die Steuerdatei `public/data/patch-backfill-control.json` wird beim ersten Start auf GitHub angelegt; weder diese Datei noch die gespeicherten Patchdaten werden von der ZIP ersetzt. Die acht auswertbaren Einträge der aktuellen 0.9.6-Vorschau können vor dem Update manuell importiert werden; andernfalls übernimmt sie der erste automatische Durchlauf.
 Version 0.7.0 entfernt technische Archiv-Einträge und ersetzt wiederholte News-Platzhalter mit vorsichtigen deutschen Beschreibungen, die auf dem Titel beruhen. Wo eine bereits geprüfte Patch-Zusammenfassung zur exakt selben Comm-Link-ID vorliegt, nutzt die News-Karte deren erste zwei Sätze. Artikelinhalte werden ohne brauchbare Quellbeschreibung oder KI-Schlüssel nicht als vollständig zusammengefasst ausgegeben.
 Die Patch-Seite zeigt höchstens fünf aktuelle Einträge; die History zeigt alle gespeicherten Versionen. Der Worker ergänzt bei jedem geprüften manuellen Patch-Import zwei ältere Archivseiten und behält bestehende Versionen. Wie weit das Archiv zurückreichen kann, hängt von der verfügbaren Patch-Quelle ab. Die geprüfte Patch-Aufbereitung bleibt auf `summaryVersion=0.6.8`.
 Version 0.8.1 übernimmt neue Einträge in die Patch History nur, wenn ihr RSI-Quelllink tatsächlich auf Patch Notes zeigt. Ältere bereits gespeicherte Update-Ankündigungen bleiben erhalten, werden aber als solche bezeichnet und mit ihrem echten RSI-Link versehen. Eine allgemeine Titelübereinstimmung wie „Alpha 4.7.2“ genügt nicht mehr für eine Patch Note.
@@ -51,6 +58,7 @@ Die Website-Daten liegen ausschließlich unter `public/data/`.
 - `public/data/news.json`
 - `public/data/patches.json` (vorhandenen GitHub-Stand behalten; nicht in der Update-ZIP)
 - `public/data/patch-archive-state.json` (vom Worker gespeicherter Fortschritt; nicht in der ZIP enthalten)
+- `public/data/patch-backfill-control.json` (vom Worker angelegter Start- und Laufstatus; nicht in der ZIP enthalten)
 - `public/data/deals.json`
 - `public/data/events.json`
 - `public/data/freefly.json`
@@ -67,6 +75,7 @@ Im Browser werden diese Dateien über `/data/...` geladen, weil `public/` bei Cl
 - `/run` – führt den Import aus und schreibt bei vorhandenen GitHub-Zugangsdaten die Daten zurück.
 - `/run/news` – schreibt nur News und Metadaten zurück; gespeicherte Patch Notes bleiben erhalten.
 - `/run/patches` – schreibt nur das Patch-Archiv und Metadaten. Vor jedem Aufruf `/preview/patches?diagnostic=1` prüfen; anschließend die nächste Vorschau der noch offenen Versionen prüfen. `patchHistoricalDeferredItems` zeigt die noch ungeprüften 3.x-Seiten. Bei `historicalUnusableItems > 0` die betroffenen Versionen aus `historicalDiagnostics` prüfen, bevor die 3.x-Runde als abgeschlossen gilt. Vorhandene Archiveinträge bleiben erhalten. Falls die Archivdatei geschrieben wurde, aber der Fortschritt nicht, liest der nächste Aufruf das gespeicherte Archiv erneut und setzt fort.
+- `/backfill` – mit `RUN_SECRET` geschützte Start-, Stopp- und Statusseite für den begrenzten, alle zwei Minuten fortgesetzten Import.
 
 ## 0.5.8
 Der RSI-Parser wurde robuster gegen Änderungen am HTML-Aufbau der Comm-Link-Seite gemacht. `/preview` liefert bei einem Fehler zusätzliche technische Diagnosewerte, damit ein weiterer Fehler gezielt behoben werden kann.

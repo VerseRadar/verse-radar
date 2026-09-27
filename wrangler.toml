@@ -6,7 +6,7 @@ compatibility_date = "2026-09-01"
 directory = "./public/"
 
 [triggers]
-crons = ["0 */2 * * *"]
+crons = ["0 */2 * * *", "*/2 * * * *"]
 
 [vars]
 GITHUB_REPO = "VerseRadar/verse-radar"
