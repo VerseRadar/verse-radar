@@ -181,7 +181,7 @@
   {
     "version": "Alpha 4.8.3",
     "date": "2026-07-01T16:00:00.000Z",
-    "previous": "Alpha 4.8.1",
+    "previous": "Alpha 4.8.2",
     "summary": "Return of XenoThreat bringt die XenoThreat-Bedrohung als Event zurück.",
     "changes": [
       {
@@ -196,6 +196,35 @@
     "ai": false,
     "summaryVersion": "0.6.8",
     "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.8.2",
+    "date": "2026-06-17T00:00:00.000Z",
+    "previous": "Alpha 4.8.1",
+    "summary": "Das Content-Update kündigt weitere Schiffe für das Live-Spiel an. Probleme mit festhängenden und nicht korrekt geladenen Charakteren werden bearbeitet. Ein Fehler mit Hangartoren bei Eskortmissionen wird adressiert.",
+    "changes": [
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Neue Schiffe",
+        "description": "Das Content-Update kündigt weitere Schiffe für das Live-Spiel an."
+      },
+      {
+        "category": "Technik",
+        "title": "Charakterzustand",
+        "description": "Probleme mit festhängenden und nicht korrekt geladenen Charakteren werden bearbeitet."
+      },
+      {
+        "category": "Missionen",
+        "title": "Eskortaufträge",
+        "description": "Ein Fehler mit Hangartoren bei Eskortmissionen wird adressiert."
+      }
+    ],
+    "fullSummary": "Alpha 4.8.2 umfasst folgende Änderungen: Das Content-Update kündigt weitere Schiffe für das Live-Spiel an. Probleme mit festhängenden und nicht korrekt geladenen Charakteren werden bearbeitet. Ein Fehler mit Hangartoren bei Eskortmissionen wird adressiert. Weitere Details stehen in der verlinkten Quelle.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_4.8.2",
+    "sourceType": "Content Update",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung des nummerierten Content-Updates aus dem Community-Archiv; der Quelllink ist gekennzeichnet. Kein eigenständiger RSI-Patch-Notes-Link."
   },
   {
     "version": "Alpha 4.8.1",
@@ -219,7 +248,7 @@
   {
     "version": "Alpha 4.8",
     "date": "2026-05-15T18:00:00.000Z",
-    "previous": "Alpha 4.7",
+    "previous": "Alpha 4.7.2",
     "summary": "Mehrere neue Waffen bzw. Ausrüstungsgegenstände wurden hinzugefügt, darunter neue FPS-Waffen und schwere Ausrüstung. Die experimentelle VR-Unterstützung wurde bei Headtracking, Cursor, Rendering und OpenXR erweitert. Die Tactical Strike Group erweitert das Missionsangebot. Der Patch enthält zahlreiche Stabilitäts-, Crash- und Performance-Korrekturen.",
     "changes": [
       {
@@ -248,6 +277,79 @@
     "ai": false,
     "summaryVersion": "0.6.8",
     "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.7.2",
+    "date": "2026-04-22T00:00:00.000Z",
+    "previous": "Alpha 4.7.1",
+    "summary": "Neue Verträge erweitern Nyx und Stanton. Aufträge für Zustellungen und die Rückholung verlorener Fracht kommen hinzu. Gegnerwellen und Kopfgeldaufträge erweitern den Raumkampf. Bombardierungsaufträge kehren zurück. Bezahlte legale Bergungsaufträge werden angeboten.",
+    "changes": [
+      {
+        "category": "Missionen",
+        "title": "Nyx Mission Pack 2",
+        "description": "Neue Verträge erweitern Nyx und Stanton."
+      },
+      {
+        "category": "Missionen",
+        "title": "Kurier und Bergung",
+        "description": "Aufträge für Zustellungen und die Rückholung verlorener Fracht kommen hinzu."
+      },
+      {
+        "category": "Missionen",
+        "title": "Schiffskampf",
+        "description": "Gegnerwellen und Kopfgeldaufträge erweitern den Raumkampf."
+      },
+      {
+        "category": "Missionen",
+        "title": "Bombing Run",
+        "description": "Bombardierungsaufträge kehren zurück."
+      },
+      {
+        "category": "Bergung",
+        "title": "Paid Salvage",
+        "description": "Bezahlte legale Bergungsaufträge werden angeboten."
+      }
+    ],
+    "fullSummary": "Alpha 4.7.2 umfasst folgende Änderungen: Neue Verträge erweitern Nyx und Stanton. Aufträge für Zustellungen und die Rückholung verlorener Fracht kommen hinzu. Gegnerwellen und Kopfgeldaufträge erweitern den Raumkampf. Bombardierungsaufträge kehren zurück. Bezahlte legale Bergungsaufträge werden angeboten. Weitere Details stehen in der verlinkten Quelle.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21125-Star-Citizen-Alpha-472",
+    "sourceType": "Content Update",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung des nummerierten Content-Updates aus dem Community-Archiv; der Quelllink ist gekennzeichnet. Kein eigenständiger RSI-Patch-Notes-Link."
+  },
+  {
+    "version": "Alpha 4.7.1",
+    "date": "2026-04-08T00:00:00.000Z",
+    "previous": "Alpha 4.7",
+    "summary": "Der Frachter mit ausfahrbarer Frachtstruktur kommt ins Spiel. Ein neues zweisitziges Nutzfahrzeug kann kleine Frachtkisten transportieren. Vorkommen und Qualität von Savrillium werden angepasst. Mehrere Client- und Serverabstürze wurden behoben.",
+    "changes": [
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "MISC Hull B",
+        "description": "Der Frachter mit ausfahrbarer Frachtstruktur kommt ins Spiel."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Greycat UTV",
+        "description": "Ein neues zweisitziges Nutzfahrzeug kann kleine Frachtkisten transportieren."
+      },
+      {
+        "category": "Bergbau",
+        "title": "Breaker Stations",
+        "description": "Vorkommen und Qualität von Savrillium werden angepasst."
+      },
+      {
+        "category": "Technik",
+        "title": "Abstürze und Fehler",
+        "description": "Mehrere Client- und Serverabstürze wurden behoben."
+      }
+    ],
+    "fullSummary": "Alpha 4.7.1 umfasst folgende Änderungen: Der Frachter mit ausfahrbarer Frachtstruktur kommt ins Spiel. Ein neues zweisitziges Nutzfahrzeug kann kleine Frachtkisten transportieren. Vorkommen und Qualität von Savrillium werden angepasst. Mehrere Client- und Serverabstürze wurden behoben. Weitere Details stehen in der verlinkten Quelle.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_4.7.1",
+    "sourceType": "Content Update",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung des nummerierten Content-Updates aus dem Community-Archiv; der Quelllink ist gekennzeichnet. Kein eigenständiger RSI-Patch-Notes-Link."
   },
   {
     "version": "Alpha 4.7",
@@ -546,7 +648,7 @@
   {
     "version": "Alpha 4.3",
     "date": "2025-08-16T00:00:00.000Z",
-    "previous": null,
+    "previous": "Alpha 4.2.1",
     "summary": "Verlassene Forschungsanlagen bieten Ermittlungsaufträge mit Daten, Rätseln und Gefahren. Aufträge werden besser auf verfügbare Einsatzorte verteilt. Die Flugbalance leichter Jäger wurde überarbeitet. Schneefall reagiert an ausgewählten Orten auf das Wetter. Neue Bewegungs- und Ausstiegsmöglichkeiten verbessern die Nutzung von Leitern. Am gewählten Heimatort erfolgt der Einstieg direkt im eigenen instanzierten Hangar. Rund 100 Korrekturen zu Problemen aus Alpha 4.2.1 sind dokumentiert.",
     "changes": [
       {
@@ -587,6 +689,294 @@
     ],
     "fullSummary": "Alpha 4.3 erweitert Star Citizen in folgenden Bereichen: Verlassene Forschungsanlagen bieten Ermittlungsaufträge mit Daten, Rätseln und Gefahren. Aufträge werden besser auf verfügbare Einsatzorte verteilt. Die Flugbalance leichter Jäger wurde überarbeitet. Schneefall reagiert an ausgewählten Orten auf das Wetter. Neue Bewegungs- und Ausstiegsmöglichkeiten verbessern die Nutzung von Leitern. Am gewählten Heimatort erfolgt der Einstieg direkt im eigenen instanzierten Hangar. Rund 100 Korrekturen zu Problemen aus Alpha 4.2.1 sind dokumentiert. Die vollständigen Details und Einschränkungen stehen in den verlinkten Patch Notes.",
     "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/20728-Star-Citizen-Alpha-430",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.2.1",
+    "date": "2025-07-17T00:00:00.000Z",
+    "previous": "Alpha 4.2",
+    "summary": "Ein zeitlich begrenztes Event erweitert die laufende Geschichte um die Regen-Krise. Neue Aufträge drehen sich um die Begleitung bedrohter Schiffe. Rezepte und Belohnungen bei Wikelo wurden neu abgestimmt. Mehrere Schiffe erhalten Änderungen an ihrer Flugbalance. Die VOLT Pulse Laser Pistol erweitert die FPS-Waffen. Knapp 160 Korrekturen zu Problemen aus Alpha 4.2 sind dokumentiert.",
+    "changes": [
+      {
+        "category": "Events",
+        "title": "Resource Drive",
+        "description": "Ein zeitlich begrenztes Event erweitert die laufende Geschichte um die Regen-Krise."
+      },
+      {
+        "category": "Missionen",
+        "title": "Schiffs-Eskorte",
+        "description": "Neue Aufträge drehen sich um die Begleitung bedrohter Schiffe."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Wikelo-Aufträge",
+        "description": "Rezepte und Belohnungen bei Wikelo wurden neu abgestimmt."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Flugverhalten",
+        "description": "Mehrere Schiffe erhalten Änderungen an ihrer Flugbalance."
+      },
+      {
+        "category": "Waffen",
+        "title": "VOLT Pulse",
+        "description": "Die VOLT Pulse Laser Pistol erweitert die FPS-Waffen."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Knapp 160 Korrekturen zu Problemen aus Alpha 4.2 sind dokumentiert."
+      }
+    ],
+    "fullSummary": "Alpha 4.2.1 umfasst folgende Änderungen: Ein zeitlich begrenztes Event erweitert die laufende Geschichte um die Regen-Krise. Neue Aufträge drehen sich um die Begleitung bedrohter Schiffe. Rezepte und Belohnungen bei Wikelo wurden neu abgestimmt. Mehrere Schiffe erhalten Änderungen an ihrer Flugbalance. Die VOLT Pulse Laser Pistol erweitert die FPS-Waffen. Knapp 160 Korrekturen zu Problemen aus Alpha 4.2 sind dokumentiert. Weitere Details stehen in der verlinkten Quelle.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/20702-Star-Citizen-Alpha-421",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.2",
+    "date": "2025-06-19T00:00:00.000Z",
+    "previous": "Alpha 4.1.1",
+    "summary": "Neue Sandbox-Orte um ASD-Forschung und Stürme erweitern die Regen-Krise. Datenzentren, Shuttle-Stationen und Forschungseinrichtungen werden erkundbar. Gefährliche Strahlungszonen erfordern Schutzkleidung und angepasste Routen. Regen reagiert an unterstützten Orten auf das Wetter. Beim Wechsel von Rüstung werden außen befestigte Gegenstände nach Möglichkeit übernommen. Der Esperia Prowler Utility ergänzt die Fahrzeugauswahl.",
+    "changes": [
+      {
+        "category": "Gameplay",
+        "title": "Storm Breaker",
+        "description": "Neue Sandbox-Orte um ASD-Forschung und Stürme erweitern die Regen-Krise."
+      },
+      {
+        "category": "Orte",
+        "title": "ASD-Anlagen",
+        "description": "Datenzentren, Shuttle-Stationen und Forschungseinrichtungen werden erkundbar."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Strahlung",
+        "description": "Gefährliche Strahlungszonen erfordern Schutzkleidung und angepasste Routen."
+      },
+      {
+        "category": "Wetter",
+        "title": "Dynamischer Regen",
+        "description": "Regen reagiert an unterstützten Orten auf das Wetter."
+      },
+      {
+        "category": "Inventar",
+        "title": "Ausrüstungstausch",
+        "description": "Beim Wechsel von Rüstung werden außen befestigte Gegenstände nach Möglichkeit übernommen."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Prowler Utility",
+        "description": "Der Esperia Prowler Utility ergänzt die Fahrzeugauswahl."
+      }
+    ],
+    "fullSummary": "Alpha 4.2 umfasst folgende Änderungen: Neue Sandbox-Orte um ASD-Forschung und Stürme erweitern die Regen-Krise. Datenzentren, Shuttle-Stationen und Forschungseinrichtungen werden erkundbar. Gefährliche Strahlungszonen erfordern Schutzkleidung und angepasste Routen. Regen reagiert an unterstützten Orten auf das Wetter. Beim Wechsel von Rüstung werden außen befestigte Gegenstände nach Möglichkeit übernommen. Der Esperia Prowler Utility ergänzt die Fahrzeugauswahl. Weitere Details stehen in der verlinkten Quelle.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/20638-Star-Citizen-Alpha-42",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.1.1",
+    "date": "2025-05-13T00:00:00.000Z",
+    "previous": "Alpha 4.1",
+    "summary": "Neue Patrouillen- und Gefechtsaufträge erweitern den Raumkampf. Eine serverweite Mission führt auf die Jagd nach einer gestohlenen Polaris. Neue Bergbau-Basen in Asteroidenfeldern dienen als Schauplätze für Missionen. Spieler können ein verlassenes, noch funktionsfähiges eigenes Schiff direkt als Reiseziel wählen. Die Frachtkapazität der RAFT steigt durch ein neues Raster auf 192 SCU. Die Flugbalance von Polaris, 890 Jump und Reclaimer wurde angepasst.",
+    "changes": [
+      {
+        "category": "Missionen",
+        "title": "Schiffsgefechte",
+        "description": "Neue Patrouillen- und Gefechtsaufträge erweitern den Raumkampf."
+      },
+      {
+        "category": "Missionen",
+        "title": "Hunt the Polaris",
+        "description": "Eine serverweite Mission führt auf die Jagd nach einer gestohlenen Polaris."
+      },
+      {
+        "category": "Orte",
+        "title": "Asteroiden-Basen",
+        "description": "Neue Bergbau-Basen in Asteroidenfeldern dienen als Schauplätze für Missionen."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Quantum-Reise zum eigenen Schiff",
+        "description": "Spieler können ein verlassenes, noch funktionsfähiges eigenes Schiff direkt als Reiseziel wählen."
+      },
+      {
+        "category": "Fracht",
+        "title": "ARGO RAFT",
+        "description": "Die Frachtkapazität der RAFT steigt durch ein neues Raster auf 192 SCU."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Großschiffe",
+        "description": "Die Flugbalance von Polaris, 890 Jump und Reclaimer wurde angepasst."
+      }
+    ],
+    "fullSummary": "Alpha 4.1.1 umfasst folgende Änderungen: Neue Patrouillen- und Gefechtsaufträge erweitern den Raumkampf. Eine serverweite Mission führt auf die Jagd nach einer gestohlenen Polaris. Neue Bergbau-Basen in Asteroidenfeldern dienen als Schauplätze für Missionen. Spieler können ein verlassenes, noch funktionsfähiges eigenes Schiff direkt als Reiseziel wählen. Die Frachtkapazität der RAFT steigt durch ein neues Raster auf 192 SCU. Die Flugbalance von Polaris, 890 Jump und Reclaimer wurde angepasst. Weitere Details stehen in der verlinkten Quelle.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/20598-Star-Citizen-Alpha-411",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.1",
+    "date": "2025-03-27T00:00:00.000Z",
+    "previous": "Alpha 4.0.2",
+    "summary": "Eine neue dauerhafte Sandbox-Aktivität verbindet Ausrichtung und Bergbau. Neue Alignment-Anlagen und Orbitalplattformen kommen hinzu. Bodenfahrzeug- und FPS-Bergbau sowie Item Recovery erhalten neue Funktionen. Drake Golem und Argo ATLS GEO ergänzen die Auswahl. Das VOLT Parallax-Gewehr erweitert das Arsenal. Streaming und Verzögerungen im Spielbetrieb wurden überarbeitet.",
+    "changes": [
+      {
+        "category": "Gameplay",
+        "title": "Align & Mine",
+        "description": "Eine neue dauerhafte Sandbox-Aktivität verbindet Ausrichtung und Bergbau."
+      },
+      {
+        "category": "Orte",
+        "title": "Hathor-Anlagen",
+        "description": "Neue Alignment-Anlagen und Orbitalplattformen kommen hinzu."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Bergbau und Item Recovery",
+        "description": "Bodenfahrzeug- und FPS-Bergbau sowie Item Recovery erhalten neue Funktionen."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Neue Fahrzeuge",
+        "description": "Drake Golem und Argo ATLS GEO ergänzen die Auswahl."
+      },
+      {
+        "category": "Waffen",
+        "title": "VOLT Parallax",
+        "description": "Das VOLT Parallax-Gewehr erweitert das Arsenal."
+      },
+      {
+        "category": "Technik",
+        "title": "Streaming",
+        "description": "Streaming und Verzögerungen im Spielbetrieb wurden überarbeitet."
+      }
+    ],
+    "fullSummary": "Alpha 4.1 umfasst folgende Änderungen: Eine neue dauerhafte Sandbox-Aktivität verbindet Ausrichtung und Bergbau. Neue Alignment-Anlagen und Orbitalplattformen kommen hinzu. Bodenfahrzeug- und FPS-Bergbau sowie Item Recovery erhalten neue Funktionen. Drake Golem und Argo ATLS GEO ergänzen die Auswahl. Das VOLT Parallax-Gewehr erweitert das Arsenal. Streaming und Verzögerungen im Spielbetrieb wurden überarbeitet. Weitere Details stehen in der verlinkten Quelle.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/20522-Star-Citizen-Alpha-41",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.0.2",
+    "date": "2025-02-28T00:00:00.000Z",
+    "previous": "Alpha 4.0.1",
+    "summary": "Das Pyro-Event ergänzt die laufenden Inhalte. Kuriermissionen werden im Pyro-System aktiviert. Nächtliche Sichtbarkeit und Performance an Orten in Pyro wurden verbessert. Verbindung, Aufzüge und allgemeine Stabilität stehen im Fokus.",
+    "changes": [
+      {
+        "category": "Events",
+        "title": "Supply or Die",
+        "description": "Das Pyro-Event ergänzt die laufenden Inhalte."
+      },
+      {
+        "category": "Missionen",
+        "title": "Kurieraufträge in Pyro",
+        "description": "Kuriermissionen werden im Pyro-System aktiviert."
+      },
+      {
+        "category": "Orte",
+        "title": "Nacht und Außenposten",
+        "description": "Nächtliche Sichtbarkeit und Performance an Orten in Pyro wurden verbessert."
+      },
+      {
+        "category": "Technik",
+        "title": "Stabilität",
+        "description": "Verbindung, Aufzüge und allgemeine Stabilität stehen im Fokus."
+      }
+    ],
+    "fullSummary": "Alpha 4.0.2 umfasst folgende Änderungen: Das Pyro-Event ergänzt die laufenden Inhalte. Kuriermissionen werden im Pyro-System aktiviert. Nächtliche Sichtbarkeit und Performance an Orten in Pyro wurden verbessert. Verbindung, Aufzüge und allgemeine Stabilität stehen im Fokus. Weitere Details stehen in der verlinkten Quelle.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/20445-Star-Citizen-Alpha-402",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.0.1",
+    "date": "2025-01-29T00:00:00.000Z",
+    "previous": "Alpha 4.0",
+    "summary": "Darstellung, Beleuchtung und Performance der umkämpften Zonen wurden verbessert. Inventare und Darstellung der Frontier Outposts wurden korrigiert. Beleuchtung und Performance der Stadt wurden überarbeitet. Starfighter Ion, Mirai Guardian und Anvil Ballista erhalten Anpassungen. Stationsgeschütze wurden gestärkt, mehrere Kopfgeldbelohnungen angepasst.",
+    "changes": [
+      {
+        "category": "Orte",
+        "title": "Contested Zones",
+        "description": "Darstellung, Beleuchtung und Performance der umkämpften Zonen wurden verbessert."
+      },
+      {
+        "category": "Orte",
+        "title": "Pyro-Außenposten",
+        "description": "Inventare und Darstellung der Frontier Outposts wurden korrigiert."
+      },
+      {
+        "category": "Orte",
+        "title": "New Babbage",
+        "description": "Beleuchtung und Performance der Stadt wurden überarbeitet."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Schiffsabstimmung",
+        "description": "Starfighter Ion, Mirai Guardian und Anvil Ballista erhalten Anpassungen."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Geschütze und Kopfgelder",
+        "description": "Stationsgeschütze wurden gestärkt, mehrere Kopfgeldbelohnungen angepasst."
+      }
+    ],
+    "fullSummary": "Alpha 4.0.1 umfasst folgende Änderungen: Darstellung, Beleuchtung und Performance der umkämpften Zonen wurden verbessert. Inventare und Darstellung der Frontier Outposts wurden korrigiert. Beleuchtung und Performance der Stadt wurden überarbeitet. Starfighter Ion, Mirai Guardian und Anvil Ballista erhalten Anpassungen. Stationsgeschütze wurden gestärkt, mehrere Kopfgeldbelohnungen angepasst. Weitere Details stehen in der verlinkten Quelle.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/20418-Star-Citizen-Alpha-401",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.0",
+    "date": "2024-12-19T00:00:00.000Z",
+    "previous": null,
+    "summary": "Mit Pyro kommt ein zweites Sternensystem hinzu. Stationen in Pyro erhalten umkämpfte FPS-Zonen mit Fortschritt und Beute. Pyro ergänzt neue abbaubare Ressourcen und eigene Verteilungen. Die erste statische Server-Meshing-Version verteilt einen Shard auf mehrere Server. Der Übergang auf Alpha 4.0 setzt Fortschritt und Guthaben zurück.",
+    "changes": [
+      {
+        "category": "Orte",
+        "title": "Pyro-System",
+        "description": "Mit Pyro kommt ein zweites Sternensystem hinzu."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Contested Zones",
+        "description": "Stationen in Pyro erhalten umkämpfte FPS-Zonen mit Fortschritt und Beute."
+      },
+      {
+        "category": "Bergbau",
+        "title": "Rohstoffe in Pyro",
+        "description": "Pyro ergänzt neue abbaubare Ressourcen und eigene Verteilungen."
+      },
+      {
+        "category": "Technik",
+        "title": "Server Meshing",
+        "description": "Die erste statische Server-Meshing-Version verteilt einen Shard auf mehrere Server."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Vollständiger Reset",
+        "description": "Der Übergang auf Alpha 4.0 setzt Fortschritt und Guthaben zurück."
+      }
+    ],
+    "fullSummary": "Alpha 4.0 umfasst folgende Änderungen: Mit Pyro kommt ein zweites Sternensystem hinzu. Stationen in Pyro erhalten umkämpfte FPS-Zonen mit Fortschritt und Beute. Pyro ergänzt neue abbaubare Ressourcen und eigene Verteilungen. Die erste statische Server-Meshing-Version verteilt einen Shard auf mehrere Server. Der Übergang auf Alpha 4.0 setzt Fortschritt und Guthaben zurück. Weitere Details stehen in der verlinkten Quelle.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/20360-Star-Citizen-Alpha-40",
     "sourceType": "Patch Notes",
     "ai": false,
     "summaryVersion": "0.6.8",
