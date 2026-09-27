@@ -1,4 +1,4 @@
-/* Verse Radar 0.9.5 – RSI news + patch notes ingestion
+/* Verse Radar 0.9.6 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -19,7 +19,7 @@ const PATCH_DETAILS_PER_IMPORT = 2;
 const PATCH_SEEDS_PER_IMPORT = 2;
 const HISTORICAL_PATCHES_PER_IMPORT = 8;
 const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
-const VERSION = "0.9.5";
+const VERSION = "0.9.6";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -47,9 +47,9 @@ const PATCH_SEEDS = [
   { version: "Alpha 4.7.2", id: 0, date: "2026-04-22T00:00:00.000Z", sourceType: "Content Update", sourceUrl: "https://robertsspaceindustries.com/en/comm-link/transmission/21125-Star-Citizen-Alpha-472" },
   { version: "Alpha 4.7.1", id: 0, date: "2026-04-08T00:00:00.000Z", sourceType: "Content Update", sourceUrl: "https://starcitizen.tools/Update:Star_Citizen_Alpha_4.7.1" }
 ];
-// The published 3.x category was checked as a complete list of 80 releases.
-// Keep this historical index locally: the Wiki categorymembers API can return
-// an empty list even though its public category page lists the releases.
+// The public category lists 80 releases; 3.17.2a is separately documented
+// in RSI Spectrum and the comm-link archive. Keep the combined historical
+// index locally: the Wiki categorymembers API can return an empty list.
 const HISTORICAL_VERSIONS = [
   "3.0.0", "3.0.1", "3.1.0", "3.1.1", "3.1.2", "3.1.3", "3.1.4",
   "3.2.0", "3.2.1", "3.2.2", "3.3.0", "3.3.5", "3.3.6", "3.3.7",
@@ -59,7 +59,7 @@ const HISTORICAL_VERSIONS = [
   "3.10.0", "3.10.1", "3.10.2", "3.11.0", "3.11.0a", "3.11.0b", "3.11.0c", "3.11.1", "3.11.1a",
   "3.12.0", "3.12.0a", "3.12.0b", "3.12.1", "3.13.0", "3.13.0a", "3.13.1",
   "3.14.0", "3.14.1", "3.15.0", "3.15.1", "3.16.0", "3.16.1",
-  "3.17.0", "3.17.1", "3.17.2", "3.17.3", "3.17.4", "3.17.5",
+  "3.17.0", "3.17.1", "3.17.2", "3.17.2a", "3.17.3", "3.17.4", "3.17.5",
   "3.18.0", "3.18.1", "3.18.2", "3.19.0", "3.19.1",
   "3.20.0", "3.20.0a", "3.20.0b", "3.21.0", "3.21.1",
   "3.22.0", "3.22.0a", "3.22.1", "3.23.0", "3.23.1", "3.23.1a",
@@ -642,7 +642,7 @@ async function updatePatches(env) {
       sourceUrl: item.sourceUrl,
       sourceType: item.sourceType || "Patch Notes",
       ai: Boolean(ai),
-      summaryVersion: item.historical ? "0.9.5" : "0.6.8",
+      summaryVersion: item.historical ? "0.9.6" : "0.6.8",
       note: item.sourceType === "Community Archive"
         ? "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
         : item.sourceType === "RSI Release Info"
@@ -896,6 +896,7 @@ function listHistoricalPatches() {
 }
 
 async function fetchHistoricalPatch(patch) {
+  if (patch.version === "Alpha 3.17.2a") return fetchHistorical3172a();
   const api = new URL("https://starcitizen.tools/api.php");
   for (const [key, value] of Object.entries({ action: "parse", page: patch.title,
     prop: "text", format: "json" })) api.searchParams.set(key, value);
@@ -920,6 +921,21 @@ async function fetchHistoricalPatch(patch) {
     sourceId: Number(html.match(/api\.star-citizen\.wiki\/comm-links\/(\d+)/i)?.[1] || 0),
     content, fallbackSummary: fallbackPatchSummary(patch.version, content),
     fallbackFullSummary: fallbackFullSummary(patch.version, content) };
+}
+
+async function fetchHistorical3172a() {
+  const version = "Alpha 3.17.2a";
+  // This hotfix has an RSI Spectrum patch-note thread and an archived
+  // comm-link record, but no separate Wiki Update page in the category.
+  const sourceUrl = "https://robertsspaceindustries.com/spectrum/community/SC/forum/190048/thread/star-citizen-alpha-3-17-2a-live-8186206-patch-note";
+  let content = cleanPatchText(await fetchPatchDetail(18804, ""));
+  const nextPatch = content.search(/back to top\s+star citizen patch 3\.17\.2\s+alpha patch 3\.17\.2\b/i);
+  if (nextPatch > 0) content = content.slice(0, nextPatch).trim();
+  if (!/\b3\.17\.2a\b/i.test(content)) return { unusableReason: "3.17.2a nicht eindeutig im Archivtext" };
+  return { version, date: "2022-08-31T00:00:00.000Z", sourceUrl, sourceType: "Patch Notes",
+    historical: true, sourceId: 18804, content,
+    fallbackSummary: fallbackPatchSummary(version, content),
+    fallbackFullSummary: fallbackFullSummary(version, content) };
 }
 
 function historicalOfficialLink(html) {
@@ -1213,7 +1229,17 @@ function archiveHighlights(version, content) {
   return spec.changes.filter(([, , , pattern]) => pattern.test(content))
     .map(([category,title,description]) => ({category,title,description}));
 }
-function historicalPatchChanges(content) {
+function historicalPatchChanges(content, version = "") {
+  if (version === "Alpha 3.17.2a") {
+    const fixes = [
+      ["Missionen", "Combat Assistance Beacons", "Häufigkeit, Schwierigkeit und Bezahlung der Kampfhilfe-Aufträge wurden angepasst.", /combat assistance service beacons/i],
+      ["Gameplay", "Shop-Kioske", "Die MAX-Schaltfläche an Shop-Kiosken wurde durch eine +10-Schaltfläche ersetzt.", /max button on shop kiosks to \+10/i],
+      ["Schiffe & Fahrzeuge", "Esperia Blade", "Die Trefferpunkte mehrerer Bauteile der Esperia Blade wurden reduziert.", /reduced the hp of multiple parts on the esperia blade/i],
+      ["Technik", "Fehlerbehebungen", "Die Notizen dokumentieren Korrekturen an Aufzügen, Missionen und Client- sowie Serverabstürzen.", /major bug fixes[\s\S]*client crashes[\s\S]*server crashes/i]
+    ];
+    return fixes.filter(([, , , pattern]) => pattern.test(content))
+      .map(([category, title, description]) => ({ category, title, description }));
+  }
   const main = content.match(/features and gameplay[\s\S]*?(?=bug fixes|technical updates|known issues|$)/i)?.[0] || content;
   const rules = [
     ["Gameplay", "Bergbau", "Bergbau und Rohstoffgewinnung werden erweitert oder angepasst.", /\bmining gameplay\b|\bnew mining\b|\bmining v2\b/i],
@@ -1255,7 +1281,7 @@ function historicalPatchChanges(content) {
 }
 function publishablePatch(version, content) {
   if (content.length < 500) return false;
-  if (/^Alpha 3\./.test(version)) return historicalPatchChanges(content).length > 0 &&
+  if (/^Alpha 3\./.test(version)) return historicalPatchChanges(content, version).length > 0 &&
     /\bpatch notes\b|\bfeatures and gameplay\b|\bbug fixes\b/i.test(content);
   if (Object.hasOwn(ARCHIVE_HIGHLIGHTS, version)) {
     return (archiveHighlights(version, content)?.length || 0) >= minimumHighlights(version);
@@ -1267,7 +1293,7 @@ function minimumHighlights(version) {
 }
 function fallbackPatchSummary(version, content) {
   const t = content || "";
-  if (/^Alpha 3\./.test(version)) return `${version}: ${historicalPatchChanges(t).slice(0, 6).map(x => x.description).join(" ")}`;
+  if (/^Alpha 3\./.test(version)) return `${version}: ${historicalPatchChanges(t, version).slice(0, 6).map(x => x.description).join(" ")}`;
   if (alpha47Content(version, t)) return "Alpha 4.7 erweitert Nyx mit Operation Breaker Stations: In den Stationen warten Kämpfe, Rätsel und abbaubare Rohstoffe. Das Inventar wurde mit zwei Fenstern und Zugriff auf nahe Container überarbeitet. Crafting startet mit dem Item Fabricator, Bauplänen und Materialqualität, die sich auf hergestellte Gegenstände auswirkt. Dazu kommen die RSI Aurora Mk II, Änderungen an Schilden, Rüstung und Radar sowie weitere Anlaufstellen in Nyx. Experimentelle VR-Funktionen und zahlreiche Fehlerkorrekturen runden das Update ab.";
   const highlights = archiveHighlights(version, t);
   if (highlights?.length >= minimumHighlights(version)) return highlights.map(x => x.description).join(" ");
@@ -1301,7 +1327,7 @@ function fallbackPatchSummary(version, content) {
 function fallbackFullSummary(version, content) {
   if (!content) return "Die Patch-Notizen konnten technisch noch nicht vollständig aus dem Archiv übernommen werden. Die offizielle Originalquelle ist direkt verlinkt.";
   const t = content;
-  if (/^Alpha 3\./.test(version)) return `${version} enthält folgende dokumentierte Änderungen: ${historicalPatchChanges(t).map(x => x.description).join(" ")} Die verlinkte Quelle enthält die vollständigen Patch Notes.`;
+  if (/^Alpha 3\./.test(version)) return `${version} enthält folgende dokumentierte Änderungen: ${historicalPatchChanges(t, version).map(x => x.description).join(" ")} Die verlinkte Quelle enthält die vollständigen Patch Notes.`;
   if (alpha47Content(version, t)) return "Alpha 4.7 bringt Operation Breaker Stations nach Nyx. In diesen Aufträgen kämpfen sich Spieler durch Gegner und Gefahren, lösen Rätsel und nehmen eine Bergbaustation wieder in Betrieb, um an Rohstoffe im Asteroiden zu gelangen. Stationen können exklusiv oder gemeinsam zugänglich sein. Das Inventar erhält eine neue Oberfläche mit zwei Fenstern. Nahe Container, Rucksäcke und Körper erscheinen als auswählbare Tabs; Suche, Sortierung und Filter helfen beim Umlagern und Ausrüsten. Das neue Crafting nutzt den Item Fabricator und Baupläne. Gesammelte und abgebaute Materialien besitzen Qualitätswerte, die die Werte des hergestellten Gegenstands beeinflussen. Auch die Verteilung von abbaubaren Rohstoffen wurde angepasst. Bei Schiffen kommt die RSI Aurora Mk II hinzu. Schilde und Rüstung wurden neu abgestimmt; Radar-Komponenten und radarbasierte Zielhilfe verändern die technischen Möglichkeiten der Fahrzeuge. In Nyx bieten People's Service Stations zusätzliche Anlaufstellen und mögliche Heimatorte. Die experimentelle VR-Unterstützung erhält Verbesserungen bei Cursor, Oberfläche und Rendering. Laut Patch Notes wurden seit Alpha 4.6 zudem über 150 Fehler und Abstürze korrigiert.";
   const highlights = archiveHighlights(version, t);
   if (highlights?.length >= minimumHighlights(version)) return `${version} umfasst folgende Änderungen: ${highlights.map(x => x.description).join(" ")} Weitere Details stehen in der verlinkten Quelle.`;
@@ -1338,7 +1364,7 @@ function fallbackFullSummary(version, content) {
 }
 function buildPatchChanges(item) {
   const t = item.content || ""; const changes = [];
-  if (item.historical) return historicalPatchChanges(t);
+  if (item.historical) return historicalPatchChanges(t, item.version);
   if (alpha47Content(item.version, t)) return alpha47Changes(t);
   const highlights = archiveHighlights(item.version, t);
   if (highlights?.length >= minimumHighlights(item.version)) return highlights;

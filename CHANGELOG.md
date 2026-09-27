@@ -1,5 +1,11 @@
 # Changelog – Verse Radar
 
+## 0.9.6 – Eigenständigen Hotfix 3.17.2a ergänzen
+- Die Comm-Link-Suche meldet Alpha 3.17.2a, die 80er-Liste der Wiki-Patchkategorie führt sie jedoch nicht als eigene Update-Seite.
+- Der Hotfix erhält einen separaten Eintrag mit dem offiziellen RSI-Spectrum-Link, dem datierten Archivtext und eigenen Änderungspunkten zu Kampfhilfe-Aufträgen, Kiosken, Esperia Blade und Fehlerbehebungen.
+- Text des darauffolgenden 3.17.2-Archivabschnitts wird nicht in die 3.17.2a-Zusammenfassung übernommen.
+- Der Index umfasst jetzt 81 Versionen; ein bereits gespeicherter Archivfortschritt bleibt kompatibel.
+
 ## 0.9.5 – 3.x-Quellenindex korrigiert
 - Der Wiki-API-Index lieferte trotz vorhandener Archivseiten keine 3.x-Einträge. Die 80 in der öffentlich sichtbaren Patch-Kategorie aufgeführten 3.x-Versionen sind nun direkt im Worker hinterlegt.
 - Jede einzelne Patchseite wird weiterhin vor einer Übernahme geprüft; bestehende 4.x-Archiveinträge bleiben unangetastet.

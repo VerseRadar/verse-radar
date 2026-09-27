@@ -28,6 +28,9 @@ globalThis.fetch = async (input, options = {}) => {
     saved.set(path, { sha: `sha-${calls.length}`, data: JSON.parse(Buffer.from(payload.content, 'base64').toString()) });
     return Response.json({ ok: true });
   }
+  if (url.host === 'api.star-citizen.wiki' && url.pathname === '/api/comm-links/18804') {
+    return Response.json({ data: { content: ('Star Citizen Patch 3.17.2a Major Bug Fixes Combat Assistance Service Beacons. Changed MAX Button on Shop Kiosks to +10. Reduced the HP of Multiple Parts on the Esperia Blade. Fixed 8 Client Crashes Fixed 9 Server Crashes. ').repeat(5) + 'Back to top Star Citizen Patch 3.17.2 Alpha Patch 3.17.2 and Siege of Orison.' } });
+  }
   if (url.host === 'api.star-citizen.wiki') {
     const page = Number(url.searchParams.get('page[number]'));
     return Response.json({ meta: { current_page: page, last_page: 61 }, data: page === 1 ?
@@ -60,8 +63,8 @@ const preview = await invoke('/preview/patches?diagnostic=1');
 assert.equal(preview.ok, true);
 assert.equal(preview.count, 31);
 assert.equal(preview.newItems, 8);
-assert.equal(preview.historicalCandidates, 80);
-assert.equal(preview.historicalDeferredItems, 72);
+assert.equal(preview.historicalCandidates, 81);
+assert.equal(preview.historicalDeferredItems, 73);
 assert.equal(preview.historicalUnusableItems, 0);
 assert.equal(calls.some(c => new URL(c.url).searchParams.get('action') === 'query'), false);
 assert.ok(calls.length < 50);
@@ -73,7 +76,7 @@ const first = await invoke('/run/patches');
 assert.equal(first.ok, true);
 assert.equal(first.patchItems, 31);
 assert.equal(first.patchNewItems, 8);
-assert.equal(first.patchHistoricalDeferredItems, 72);
+assert.equal(first.patchHistoricalDeferredItems, 73);
 assert.ok(calls.length < 50);
 assert.equal(saved.get(statePath).data.historicalNextIndex, 8);
 assert.ok(saved.get(archivePath).data.some(item => item.version === 'Alpha 3.23.1a'));
@@ -93,9 +96,22 @@ brokenVersion = null;
 const second = await invoke('/preview/patches?diagnostic=1');
 assert.equal(second.count, 39);
 assert.equal(second.newItems, 8);
-assert.equal(second.historicalDeferredItems, 64);
+assert.equal(second.historicalDeferredItems, 65);
 assert.equal(second.historicalDiagnostics.length, 8);
 assert.equal(second.historicalDiagnostics.find(item => item.version === 'Alpha 3.22.1').sourceType, 'Community Archive');
 assert.ok(calls.length < 50);
+
+// The unlisted Spectrum hotfix must be importable independently, and its
+// archived text must not include the following 3.17.2 release notes.
+const versions = [...workerSource.match(/const HISTORICAL_VERSIONS = \[([\s\S]*?)\];/)[1].matchAll(/"(3\.[^"]+)"/g)].map(m => m[1]);
+const alreadyStored = new Set(saved.get(archivePath).data.map(item => item.version));
+saved.get(archivePath).data.push(...versions.filter(v => v !== '3.17.2a' && !alreadyStored.has(`Alpha ${v}`)).map(v => ({ version: `Alpha ${v}`, sourceUrl: 'https://example.test/already-archived', summary: 'Bestehend' })));
+const special = await invoke('/preview/patches');
+assert.equal(special.newItems, 1);
+const hotfix = special.items.find(item => item.version === 'Alpha 3.17.2a');
+assert.equal(hotfix.date, '2022-08-31T00:00:00.000Z');
+assert.match(hotfix.sourceUrl, /robertsspaceindustries\.com\/spectrum\/.*3-17-2a/);
+assert.ok(hotfix.changes.some(change => change.title === 'Combat Assistance Beacons'));
+assert.doesNotMatch(hotfix.summary, /Siege of Orison/i);
 
 console.log('Historische 3.x-Versionen, Quelllink-Prüfung, Suffixe und Worker-Limit: OK');
