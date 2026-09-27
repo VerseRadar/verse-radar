@@ -1168,7 +1168,7 @@
   {
     "version": "Alpha 3.23.0",
     "date": "2024-05-10T00:00:00.000Z",
-    "previous": null,
+    "previous": "Alpha 3.22.1",
     "summary": "Alpha 3.23.0: Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes. Vulkan ergänzt die Grafikschnittstellen des Spiels. Der Zugriff auf Inventar und Ausrüstung wird angepasst. Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. Der Ruf bei Fraktionen beeinflusst weitere Aufträge. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
     "changes": [
       {
@@ -1208,5 +1208,267 @@
     "ai": false,
     "summaryVersion": "0.9.5",
     "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 3.22.1",
+    "date": "2024-02-23T00:00:00.000Z",
+    "previous": "Alpha 3.22.0a",
+    "summary": "Alpha 3.22.1: Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes. Die XenoThreat-Missionen und ihre Abläufe werden angepasst. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Master Modes",
+        "description": "Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes."
+      },
+      {
+        "category": "Missionen",
+        "title": "XenoThreat",
+        "description": "Die XenoThreat-Missionen und ihre Abläufe werden angepasst."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Arena Commander",
+        "description": "Arena Commander erhält neue Spielmodi oder Anpassungen."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.22.1 enthält folgende dokumentierte Änderungen: Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes. Die XenoThreat-Missionen und ihre Abläufe werden angepasst. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.22.1",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.22.0a",
+    "date": "2024-01-25T00:00:00.000Z",
+    "previous": "Alpha 3.22.0",
+    "summary": "Alpha 3.22.0a: Das Event rund um Orison erhält neue Kampfeinsätze. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Missionen",
+        "title": "Siege of Orison",
+        "description": "Das Event rund um Orison erhält neue Kampfeinsätze."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.22.0a enthält folgende dokumentierte Änderungen: Das Event rund um Orison erhält neue Kampfeinsätze. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.22.0a",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.22.0",
+    "date": "2023-12-14T00:00:00.000Z",
+    "previous": "Alpha 3.21.1",
+    "summary": "Alpha 3.22.0: Bergung und Verwertung von Schiffswracks werden erweitert. Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes. Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Gameplay",
+        "title": "Salvage",
+        "description": "Bergung und Verwertung von Schiffswracks werden erweitert."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Master Modes",
+        "description": "Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes."
+      },
+      {
+        "category": "Charakter",
+        "title": "Charaktereditor",
+        "description": "Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Arena Commander",
+        "description": "Arena Commander erhält neue Spielmodi oder Anpassungen."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.22.0 enthält folgende dokumentierte Änderungen: Bergung und Verwertung von Schiffswracks werden erweitert. Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes. Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.22.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.21.1",
+    "date": "2023-11-17T00:00:00.000Z",
+    "previous": "Alpha 3.21.0",
+    "summary": "Alpha 3.21.1: Das Event rund um Orison erhält neue Kampfeinsätze. Die Cutlass Blue wird zur Schiffsauswahl hinzugefügt. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Missionen",
+        "title": "Siege of Orison",
+        "description": "Das Event rund um Orison erhält neue Kampfeinsätze."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Drake Cutlass Blue",
+        "description": "Die Cutlass Blue wird zur Schiffsauswahl hinzugefügt."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Arena Commander",
+        "description": "Arena Commander erhält neue Spielmodi oder Anpassungen."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.21.1 enthält folgende dokumentierte Änderungen: Das Event rund um Orison erhält neue Kampfeinsätze. Die Cutlass Blue wird zur Schiffsauswahl hinzugefügt. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.21.1",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.21.0",
+    "date": "2023-10-19T00:00:00.000Z",
+    "previous": "Alpha 3.20.0b",
+    "summary": "Alpha 3.21.0: Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes. Der Zugriff auf Inventar und Ausrüstung wird angepasst. Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Master Modes",
+        "description": "Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Inventar",
+        "description": "Der Zugriff auf Inventar und Ausrüstung wird angepasst."
+      },
+      {
+        "category": "Charakter",
+        "title": "Charaktereditor",
+        "description": "Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Arena Commander",
+        "description": "Arena Commander erhält neue Spielmodi oder Anpassungen."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.21.0 enthält folgende dokumentierte Änderungen: Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes. Der Zugriff auf Inventar und Ausrüstung wird angepasst. Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.21.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.20.0b",
+    "date": "2023-10-11T00:00:00.000Z",
+    "previous": "Alpha 3.20.0a",
+    "summary": "Alpha 3.20.0b: Der Zugriff auf Inventar und Ausrüstung wird angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Gameplay",
+        "title": "Inventar",
+        "description": "Der Zugriff auf Inventar und Ausrüstung wird angepasst."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.20.0b enthält folgende dokumentierte Änderungen: Der Zugriff auf Inventar und Ausrüstung wird angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.20.0b",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.20.0a",
+    "date": "2023-09-24T00:00:00.000Z",
+    "previous": "Alpha 3.20.0",
+    "summary": "Alpha 3.20.0a: Der Zugriff auf Inventar und Ausrüstung wird angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Gameplay",
+        "title": "Inventar",
+        "description": "Der Zugriff auf Inventar und Ausrüstung wird angepasst."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.20.0a enthält folgende dokumentierte Änderungen: Der Zugriff auf Inventar und Ausrüstung wird angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.20.0a",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.20.0",
+    "date": "2023-09-19T00:00:00.000Z",
+    "previous": null,
+    "summary": "Alpha 3.20.0: Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes. Gegenstände und Veränderungen werden durch Persistent Entity Streaming dauerhaft gespeichert. Nach Serverfehlern wird die Spielsitzung wiederhergestellt. Der Zugriff auf Inventar und Ausrüstung wird angepasst. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Master Modes",
+        "description": "Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes."
+      },
+      {
+        "category": "Technik",
+        "title": "Persistent Entity Streaming",
+        "description": "Gegenstände und Veränderungen werden durch Persistent Entity Streaming dauerhaft gespeichert."
+      },
+      {
+        "category": "Technik",
+        "title": "Server Crash Recovery",
+        "description": "Nach Serverfehlern wird die Spielsitzung wiederhergestellt."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Inventar",
+        "description": "Der Zugriff auf Inventar und Ausrüstung wird angepasst."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Arena Commander",
+        "description": "Arena Commander erhält neue Spielmodi oder Anpassungen."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.20.0 enthält folgende dokumentierte Änderungen: Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes. Gegenstände und Veränderungen werden durch Persistent Entity Streaming dauerhaft gespeichert. Nach Serverfehlern wird die Spielsitzung wiederhergestellt. Der Zugriff auf Inventar und Ausrüstung wird angepasst. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.20.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
   }
 ]
