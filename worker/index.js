@@ -1,4 +1,4 @@
-/* Verse Radar 0.9.8 – RSI news + patch notes ingestion
+/* Verse Radar 0.9.9 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -22,7 +22,7 @@ const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
 const PATCH_BACKFILL_PATH = "public/data/patch-backfill-control.json";
 const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "0.9.8";
+const VERSION = "0.9.9";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -68,6 +68,36 @@ const HISTORICAL_VERSIONS = [
   "3.22.0", "3.22.0a", "3.22.1", "3.23.0", "3.23.1", "3.23.1a",
   "3.24.0", "3.24.1", "3.24.2", "3.24.2a", "3.24.3"
 ];
+// These short releases have verified, version-specific notes on RSI Spectrum.
+// Their wiki mirrors do not use the headings expected by the general parser.
+const HISTORICAL_SHORT_RELEASES = {
+  "Alpha 3.17.5": {
+    marker: /\balpha patch 3\.17\.5\b/i, minimum: 1,
+    sourceUrl: "https://robertsspaceindustries.com/spectrum/community/SC/forum/190048/thread/star-citizen-alpha-3-17-5-live-8338165-patch-notes/5683361",
+    changes: [
+      ["Event", "Red Festival 2953", "Das Red Festival erhält zum Mondneujahr überarbeitete Umschläge zum Jahr des Hahns.", /\blunar new year envelope\b[\s\S]{0,90}\byear of the rooster\b/i]
+    ]
+  },
+  "Alpha 3.17.4": {
+    marker: /\balpha patch 3\.17\.4\b/i, minimum: 2,
+    sourceUrl: "https://robertsspaceindustries.com/spectrum/community/SC/forum/190048/thread/star-citizen-alpha-3-17-4-live-8288900-patch-notes",
+    changes: [
+      ["Schiffe & Fahrzeuge", "Drake Corsair", "Die Drake Corsair kommt als neues Schiff hinzu.", /\badded new ship:\s*drake corsair\b/i],
+      ["Technik", "Serverabsturz behoben", "Die Notizen melden die Behebung eines Serverabsturzes.", /\bfixed 1 server crash\b/i]
+    ]
+  },
+  "Alpha 3.11.1a": {
+    marker: /\bhot\s*fix 3\.11\.1a\b/i, minimum: 2,
+    sourceUrl: "https://robertsspaceindustries.com/spectrum/community/SC/forum/190048/thread/star-citizen-alpha-3-11-1-live-6538054-patch-notes",
+    changes: [
+      ["Schiffe & Fahrzeuge", "Schiffe auf Planeten", "Ausgeschaltete Schiffe sollten nicht mehr durch Planetenoberflächen fallen.", /\bships to fall through planet surfaces when powered off\b/i],
+      ["Charakter", "Nomad-Sitzanimation", "Sitzanimationen weiblicher Figuren im Nomad wurden korrigiert.", /\bfemale characters\b[\s\S]{0,80}\bsit animations\b[\s\S]{0,80}\bnomad\b/i],
+      ["Schiffe & Fahrzeuge", "Sabre-Comet-Lackierung", "Lackierungen lassen sich wieder auf die Sabre Comet anwenden.", /\bpaints\b[\s\S]{0,75}\bsabre comet\b/i],
+      ["Handel", "Handelskioske", "Die Anzeige für illegale Fracht erscheint ohne entsprechende Ladung nicht mehr fälschlich.", /\billegal cargo\b[\s\S]{0,100}\btrading kiosks\b/i],
+      ["Technik", "Server und Backend", "Ein Server-Deadlock und ein Absturz des Backend-Dienstes wurden behoben.", /\bfixed a server deadlock\b[\s\S]{0,100}\bfixed a backend service crash\b/i]
+    ]
+  }
+};
 const VERSION_RE = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?$/;
 const PATCH_NOTES_URL = "https://robertsspaceindustries.com/en/patch-notes";
 const RELEVANT = /patch|alpha\s*\d|free\s*fly|foundation festival|fleet week|invictus|iae|event|roadmap|ship showdown|siege|monthly report|this week in star citizen|live experience|pirate week|subscriber|vehicle|ship|aegis|argo|anvil|kruger|sabre|aurora|gameplay|engineering|q\s*&\s*a|letter from the chairman/i;
@@ -744,7 +774,7 @@ async function updatePatches(env) {
       sourceUrl: item.sourceUrl,
       sourceType: item.sourceType || "Patch Notes",
       ai: Boolean(ai),
-      summaryVersion: item.historical ? "0.9.6" : "0.6.8",
+      summaryVersion: Object.hasOwn(HISTORICAL_SHORT_RELEASES, item.version) ? "0.9.9" : item.historical ? "0.9.6" : "0.6.8",
       note: item.sourceType === "Community Archive"
         ? "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
         : item.sourceType === "RSI Release Info"
@@ -1022,8 +1052,8 @@ async function fetchHistoricalPatch(patch) {
   const date = dateMatch && validDate(dateMatch[1]);
   if (!date) return { unusableReason: "Erscheinungsdatum im Wiki-Detail nicht erkennbar" };
   const wikiUrl = `https://starcitizen.tools/${patch.title.replace(/ /g, "_")}`;
-  const sourceUrl = historicalOfficialLink(html) || wikiUrl;
-  const sourceType = /\/comm-link\/Patch-Notes\/\d+-/i.test(sourceUrl) ? "Patch Notes" :
+  const sourceUrl = HISTORICAL_SHORT_RELEASES[patch.version]?.sourceUrl || historicalOfficialLink(html) || wikiUrl;
+  const sourceType = /\/spectrum\/community\/SC\/forum\/190048\/thread\//i.test(sourceUrl) || /\/comm-link\/Patch-Notes\/\d+-/i.test(sourceUrl) ? "Patch Notes" :
     /\/comm-link\/transmission\/\d+-/i.test(sourceUrl) ? "RSI Release Info" : "Community Archive";
   const content = cleanPatchText(raw);
   return { version: patch.version, date, sourceUrl, sourceType, historical: true,
@@ -1339,6 +1369,12 @@ function archiveHighlights(version, content) {
     .map(([category,title,description]) => ({category,title,description}));
 }
 function historicalPatchChanges(content, version = "") {
+  const shortRelease = HISTORICAL_SHORT_RELEASES[version];
+  if (shortRelease) {
+    if (!shortRelease.marker.test(content)) return [];
+    return shortRelease.changes.filter(([, , , pattern]) => pattern.test(content))
+      .map(([category, title, description]) => ({ category, title, description }));
+  }
   if (version === "Alpha 3.17.2a") {
     const fixes = [
       ["Missionen", "Combat Assistance Beacons", "Häufigkeit, Schwierigkeit und Bezahlung der Kampfhilfe-Aufträge wurden angepasst.", /combat assistance service beacons/i],
@@ -1389,6 +1425,9 @@ function historicalPatchChanges(content, version = "") {
   return changes.slice(0, 9);
 }
 function publishablePatch(version, content) {
+  const shortRelease = HISTORICAL_SHORT_RELEASES[version];
+  if (shortRelease) return content.length >= 300 &&
+    historicalPatchChanges(content, version).length >= shortRelease.minimum;
   if (content.length < 500) return false;
   if (/^Alpha 3\./.test(version)) return historicalPatchChanges(content, version).length > 0 &&
     /\bpatch notes\b|\bfeatures and gameplay\b|\bbug fixes\b/i.test(content);

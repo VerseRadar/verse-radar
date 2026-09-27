@@ -1,4 +1,4 @@
-# Verse Radar 0.9.8
+# Verse Radar 0.9.9
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -35,6 +35,8 @@ Cron: bisheriger Zwei-Stunden-Takt (`0 */2 * * *`) und neuer Zwei-Minuten-Takt (
 Jeder Durchlauf nutzt die bestehende Begrenzung von acht historischen Versionen und zwei Archivseiten. Für den Start ist kein `PATCH_AUTO_PUBLISH=true` nötig. Die Steuerdatei `public/data/patch-backfill-control.json` wird beim ersten Start auf GitHub angelegt; weder diese Datei noch die gespeicherten Patchdaten werden von der ZIP ersetzt. Die acht auswertbaren Einträge der aktuellen 0.9.6-Vorschau können vor dem Update manuell importiert werden; andernfalls übernimmt sie der erste automatische Durchlauf.
 
 **0.9.8:** Wenn eine historische Version unbrauchbar war und der bisherige Cursor bereits weitergerückt ist, prüft der nächste Durchlauf diese Lücke zuerst erneut. Ist die Quelle weiterhin nicht auswertbar, pausiert die Automatik mit `lastRun.historicalUnusableVersions` einschließlich Version und Grund. Ein Klick auf „Anhalten“ löscht diese Fehlermeldung nicht mehr. Nach dem Einspielen der ZIP auf der Steuerungsseite wieder „Starten“ wählen; ein separater Reset des gespeicherten Patchstandes ist nicht erforderlich.
+
+**0.9.9:** Die Archivquellen zu Alpha 3.17.5, 3.17.4 und 3.11.1a werden anhand ihrer tatsächlichen kurzen Patch-Abschnitte ausgewertet. Für diese drei Versionen liegen offizielle RSI-Spectrum-Threads als Quelllink vor. Auf der pausierten `/backfill`-Seite nach dem Update einmal „Starten“ wählen. Wenn eine andere Version wegen eines Quellenfehlers nicht verarbeitet werden kann, hält die Automatik weiter an und nennt Version und Ursache.
 Version 0.7.0 entfernt technische Archiv-Einträge und ersetzt wiederholte News-Platzhalter mit vorsichtigen deutschen Beschreibungen, die auf dem Titel beruhen. Wo eine bereits geprüfte Patch-Zusammenfassung zur exakt selben Comm-Link-ID vorliegt, nutzt die News-Karte deren erste zwei Sätze. Artikelinhalte werden ohne brauchbare Quellbeschreibung oder KI-Schlüssel nicht als vollständig zusammengefasst ausgegeben.
 Die Patch-Seite zeigt höchstens fünf aktuelle Einträge; die History zeigt alle gespeicherten Versionen. Der Worker ergänzt bei jedem geprüften manuellen Patch-Import zwei ältere Archivseiten und behält bestehende Versionen. Wie weit das Archiv zurückreichen kann, hängt von der verfügbaren Patch-Quelle ab. Die geprüfte Patch-Aufbereitung bleibt auf `summaryVersion=0.6.8`.
 Version 0.8.1 übernimmt neue Einträge in die Patch History nur, wenn ihr RSI-Quelllink tatsächlich auf Patch Notes zeigt. Ältere bereits gespeicherte Update-Ankündigungen bleiben erhalten, werden aber als solche bezeichnet und mit ihrem echten RSI-Link versehen. Eine allgemeine Titelübereinstimmung wie „Alpha 4.7.2“ genügt nicht mehr für eine Patch Note.

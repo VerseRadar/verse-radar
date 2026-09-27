@@ -46,6 +46,16 @@ globalThis.fetch = async (input, options = {}) => {
     const version = title?.match(/Alpha (3\.\d+(?:\.\d+)?[a-z]?)/)?.[1];
     if (!version) throw Error(`Unexpected title ${title}`);
     if (version === brokenVersion) return Response.json({ error: { code: 'missingtitle' } });
+    const shortNotes = {
+      '3.17.5': 'Alpha Patch 3.17.5 LIVE Feature Updates. The Lunar New Year envelope (Year of the Rooster for 2953) returns for the Red Festival.',
+      '3.17.4': 'Alpha Patch 3.17.4 LIVE New features. Added New Ship: Drake Corsair. Technical: Fixed 1 Server Crash. Known issues with unrelated ships remain.',
+      '3.11.1a': 'Hot Fix 3.11.1a Patch notes. Fixed an issue causing ships to fall through planet surfaces when powered off. Female Characters should now have correct sit animations for the under counter seat in the Nomad. Paints should now be able to be applied to the Sabre Comet. Illegal Cargo text will no longer show up in trading kiosks without illegal cargo. Fixed a Server Deadlock. Fixed a Backend Service Crash.'
+    };
+    if (Object.hasOwn(shortNotes, version)) {
+      const releaseDate = { '3.17.5': '2023-01-18', '3.17.4': '2022-11-17', '3.11.1a': '2020-11-19' }[version];
+      const header = 'Delete the USER folder if display issues occur after updating. Database Reset: No. Long Term Persistence: Enabled. Starting aUEC: 20000. ';
+      return Response.json({ parse: { title, text: { '*': `<div>Star Citizen build released on ${releaseDate}.</div><h2>Patch notes</h2><p>${header.repeat(3)}${shortNotes[version]}</p>` } } });
+    }
     const official = version === '3.22.1'
       ? 'https://robertsspaceindustries.com/comm-link//19783-Star-Citizen-Alpha-3221'
       : `https://robertsspaceindustries.com/en/comm-link/Patch-Notes/20001-Star-Citizen-Alpha-${version.replaceAll('.', '')}`;
@@ -113,5 +123,31 @@ assert.equal(hotfix.date, '2022-08-31T00:00:00.000Z');
 assert.match(hotfix.sourceUrl, /robertsspaceindustries\.com\/spectrum\/.*3-17-2a/);
 assert.ok(hotfix.changes.some(change => change.title === 'Combat Assistance Beacons'));
 assert.doesNotMatch(hotfix.summary, /Siege of Orison/i);
+
+// The archived short releases use different headings and can be missed by
+// generic feature rules. They must retain their own facts and source links.
+saved.get(archivePath).data.push({ version: 'Alpha 3.17.2a', sourceUrl: hotfix.sourceUrl });
+for (const v of ['3.17.5', '3.17.4', '3.11.1a']) {
+  saved.get(archivePath).data = saved.get(archivePath).data.filter(item => item.version !== `Alpha ${v}`);
+}
+saved.get(statePath).data.historicalNextIndex = 70;
+calls = [];
+const shortPreview = await invoke('/preview/patches?diagnostic=1');
+assert.equal(shortPreview.newItems, 3);
+assert.equal(shortPreview.historicalUnusableItems, 0);
+assert.equal(shortPreview.historicalDiagnostics.length, 3);
+assert.ok(shortPreview.historicalDiagnostics.every(item => item.eligible && item.sourceType === 'Patch Notes'));
+assert.ok(calls.length < 50);
+const fullShort = await invoke('/preview/patches');
+for (const version of ['3.17.5', '3.17.4', '3.11.1a']) {
+  const item = fullShort.items.find(i => i.version === `Alpha ${version}`);
+  assert.ok(item, version);
+  assert.match(item.sourceUrl, /robertsspaceindustries\.com\/spectrum/);
+  assert.equal(item.summaryVersion, '0.9.9');
+  assert.ok(item.changes.length >= 1);
+}
+assert.ok(fullShort.items.find(i => i.version === 'Alpha 3.17.5').changes.some(c => c.title === 'Red Festival 2953'));
+assert.ok(fullShort.items.find(i => i.version === 'Alpha 3.17.4').changes.some(c => c.title === 'Drake Corsair'));
+assert.ok(fullShort.items.find(i => i.version === 'Alpha 3.11.1a').changes.some(c => c.title === 'Sabre-Comet-Lackierung'));
 
 console.log('Historische 3.x-Versionen, Quelllink-Prüfung, Suffixe und Worker-Limit: OK');

@@ -1,5 +1,11 @@
 # Changelog – Verse Radar
 
+## 0.9.9 – Drei kurze historische Patch Notes auswerten
+- Alpha 3.17.5: Red Festival und aktualisierte Mondneujahr-Umschläge anhand der Wiki-Archivseite erkennen.
+- Alpha 3.17.4: Drake Corsair und behobenen Serverabsturz aus den kurzen Patch Notes übernehmen.
+- Alpha 3.11.1a: Korrekturen an Schiffen, Sitzanimation, Lackierung, Handelskiosken sowie Server und Backend gezielt auswerten.
+- Die drei Einträge verwenden geprüfte offizielle RSI-Spectrum-Links und werden nur übernommen, wenn die jeweils passenden Quellstellen vorliegen. Der pausierte Automatikstand bleibt erhalten.
+
 ## 0.9.8 – Übersprungene historische Versionen erneut prüfen
 - Ein fehlender 3.x-Eintrag vor dem gespeicherten Cursor wird vor den nächsten alten Versionen noch einmal geprüft. So bleibt auch eine wegen eines temporären Quellenfehlers übersprungene Version erreichbar.
 - Ist ein Eintrag weiterhin unbrauchbar, stoppt die Automatik und meldet Version sowie konkreten Grund im letzten Durchlauf. Der Cursor bleibt auf der fehlerhaften Version stehen.
