@@ -219,7 +219,7 @@
   {
     "version": "Alpha 4.8",
     "date": "2026-05-15T18:00:00.000Z",
-    "previous": null,
+    "previous": "Alpha 4.7",
     "summary": "Mehrere neue Waffen bzw. Ausrüstungsgegenstände wurden hinzugefügt, darunter neue FPS-Waffen und schwere Ausrüstung. Die experimentelle VR-Unterstützung wurde bei Headtracking, Cursor, Rendering und OpenXR erweitert. Die Tactical Strike Group erweitert das Missionsangebot. Der Patch enthält zahlreiche Stabilitäts-, Crash- und Performance-Korrekturen.",
     "changes": [
       {
@@ -245,6 +245,212 @@
     ],
     "fullSummary": "Die experimentelle VR-Unterstützung erhält Verbesserungen für Headtracking, Stereo-Cursor, Kioske, Wasser-Rendering und OpenXR. Die Tactical Strike Group ergänzt das Missionsangebot. Zusätzlich enthält der Patch zahlreiche Stabilitäts-, Crash- und Performance-Fixes.",
     "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21168-Star-Citizen-Alpha-4.8",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.7",
+    "date": "2026-03-25T00:00:00.000Z",
+    "previous": "Alpha 4.6",
+    "summary": "Alpha 4.7 erweitert Nyx mit Operation Breaker Stations: In den Stationen warten Kämpfe, Rätsel und abbaubare Rohstoffe. Das Inventar wurde mit zwei Fenstern und Zugriff auf nahe Container überarbeitet. Crafting startet mit dem Item Fabricator, Bauplänen und Materialqualität, die sich auf hergestellte Gegenstände auswirkt. Dazu kommen die RSI Aurora Mk II, Änderungen an Schilden, Rüstung und Radar sowie weitere Anlaufstellen in Nyx. Experimentelle VR-Funktionen und zahlreiche Fehlerkorrekturen runden das Update ab.",
+    "changes": [
+      {
+        "category": "Missionen",
+        "title": "Operation Breaker Stations",
+        "description": "In Nyx werden QV Breaker Stations über Aufträge erschlossen: Kämpfe, Gefahren und Rätsel führen zu Rohstoffen im Asteroiden."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Inventar überarbeitet",
+        "description": "Zwei Inventarfenster, nahe Container als Tabs sowie Suche, Sortierung und Filter vereinfachen das Verwalten von Gegenständen."
+      },
+      {
+        "category": "Herstellung",
+        "title": "Crafting und Baupläne",
+        "description": "Mit dem Item Fabricator lassen sich Gegenstände anhand von Bauplänen und gesammelten Materialien herstellen."
+      },
+      {
+        "category": "Bergbau",
+        "title": "Materialqualität",
+        "description": "Abgebaute Rohstoffe erhalten Qualitätswerte; die Qualität eingesetzter Materialien beeinflusst die Werte hergestellter Gegenstände."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Aurora Mk II",
+        "description": "Die RSI Aurora Mk II wird als neues Schiff eingeführt."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Schilde, Rüstung und Radar",
+        "description": "Schutzsysteme wurden neu abgestimmt; Radar-Komponenten und radarbasierte Zielhilfe kommen hinzu."
+      },
+      {
+        "category": "Orte",
+        "title": "Stationen in Nyx",
+        "description": "People's Service Stations bieten neue Anlaufstellen und können als Heimatort gewählt werden."
+      },
+      {
+        "category": "VR",
+        "title": "Experimentelle VR-Unterstützung",
+        "description": "Cursor, Oberfläche und Rendering für VR wurden weiterentwickelt."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Über 150 Fehler- und Absturzkorrekturen seit Alpha 4.6 sind dokumentiert."
+      }
+    ],
+    "fullSummary": "Alpha 4.7 bringt Operation Breaker Stations nach Nyx. In diesen Aufträgen kämpfen sich Spieler durch Gegner und Gefahren, lösen Rätsel und nehmen eine Bergbaustation wieder in Betrieb, um an Rohstoffe im Asteroiden zu gelangen. Stationen können exklusiv oder gemeinsam zugänglich sein. Das Inventar erhält eine neue Oberfläche mit zwei Fenstern. Nahe Container, Rucksäcke und Körper erscheinen als auswählbare Tabs; Suche, Sortierung und Filter helfen beim Umlagern und Ausrüsten. Das neue Crafting nutzt den Item Fabricator und Baupläne. Gesammelte und abgebaute Materialien besitzen Qualitätswerte, die die Werte des hergestellten Gegenstands beeinflussen. Auch die Verteilung von abbaubaren Rohstoffen wurde angepasst. Bei Schiffen kommt die RSI Aurora Mk II hinzu. Schilde und Rüstung wurden neu abgestimmt; Radar-Komponenten und radarbasierte Zielhilfe verändern die technischen Möglichkeiten der Fahrzeuge. In Nyx bieten People's Service Stations zusätzliche Anlaufstellen und mögliche Heimatorte. Die experimentelle VR-Unterstützung erhält Verbesserungen bei Cursor, Oberfläche und Rendering. Laut Patch Notes wurden seit Alpha 4.6 zudem über 150 Fehler und Abstürze korrigiert.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21070-Star-Citizen-Alpha-47",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.6",
+    "date": "2026-01-28T00:00:00.000Z",
+    "previous": "Alpha 4.5",
+    "summary": "Hilfseinsätze rund um eine Gesundheitskrise in Levski: Transporte, Beschaffung und Verteidigung. Das Light Amplification System verbessert die Sicht bei wenig Licht. Schiffstechnik und Rüstung erhalten Anpassungen im Gameplay. Die Aurora-Schiffe wurden überarbeitet. Neue Versorgungskioske bieten Schiffsbesatzungen Werkzeug und Proviant. Die VR-Unterstützung erhält weitere Verbesserungen. Über 160 Fehler- und Absturzkorrekturen sind dokumentiert.",
+    "changes": [
+      {
+        "category": "Missionen",
+        "title": "Clearing the Air",
+        "description": "Hilfseinsätze rund um eine Gesundheitskrise in Levski: Transporte, Beschaffung und Verteidigung."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "LAMP",
+        "description": "Das Light Amplification System verbessert die Sicht bei wenig Licht."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Engineering und Rüstung",
+        "description": "Schiffstechnik und Rüstung erhalten Anpassungen im Gameplay."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Aurora-Serie",
+        "description": "Die Aurora-Schiffe wurden überarbeitet."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Kel-To-Versorgung",
+        "description": "Neue Versorgungskioske bieten Schiffsbesatzungen Werkzeug und Proviant."
+      },
+      {
+        "category": "VR",
+        "title": "Experimentelle VR",
+        "description": "Die VR-Unterstützung erhält weitere Verbesserungen."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Über 160 Fehler- und Absturzkorrekturen sind dokumentiert."
+      }
+    ],
+    "fullSummary": "Alpha 4.6 erweitert Star Citizen in folgenden Bereichen: Hilfseinsätze rund um eine Gesundheitskrise in Levski: Transporte, Beschaffung und Verteidigung. Das Light Amplification System verbessert die Sicht bei wenig Licht. Schiffstechnik und Rüstung erhalten Anpassungen im Gameplay. Die Aurora-Schiffe wurden überarbeitet. Neue Versorgungskioske bieten Schiffsbesatzungen Werkzeug und Proviant. Die VR-Unterstützung erhält weitere Verbesserungen. Über 160 Fehler- und Absturzkorrekturen sind dokumentiert. Die vollständigen Details und Einschränkungen stehen in den verlinkten Patch Notes.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/20969-Star-Citizen-Alpha-46",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.5",
+    "date": "2025-12-17T00:00:00.000Z",
+    "previous": "Alpha 4.4",
+    "summary": "Schiffssysteme lassen sich über ein Engineering-Terminal überwachen, reparieren und austauschen. Rüstung und Schutzsysteme wurden für das Engineering-Gameplay angepasst. Feuer an Bord ergänzt das Engineering-Gameplay. Beute und die Wirtschaft der Erzraffinierung wurden angepasst. Helme erhalten eine stärkere physische Einbindung. Erste experimentelle VR-Unterstützung wurde eingeführt. Über 150 Fehler- und Absturzkorrekturen sind dokumentiert.",
+    "changes": [
+      {
+        "category": "Gameplay",
+        "title": "Schiffs-Engineering",
+        "description": "Schiffssysteme lassen sich über ein Engineering-Terminal überwachen, reparieren und austauschen."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Schiffsrüstung",
+        "description": "Rüstung und Schutzsysteme wurden für das Engineering-Gameplay angepasst."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Brandgefahren",
+        "description": "Feuer an Bord ergänzt das Engineering-Gameplay."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Loot und Raffinerie",
+        "description": "Beute und die Wirtschaft der Erzraffinierung wurden angepasst."
+      },
+      {
+        "category": "Inventar",
+        "title": "Physische Helme",
+        "description": "Helme erhalten eine stärkere physische Einbindung."
+      },
+      {
+        "category": "VR",
+        "title": "Experimentelle VR",
+        "description": "Erste experimentelle VR-Unterstützung wurde eingeführt."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Über 150 Fehler- und Absturzkorrekturen sind dokumentiert."
+      }
+    ],
+    "fullSummary": "Alpha 4.5 erweitert Star Citizen in folgenden Bereichen: Schiffssysteme lassen sich über ein Engineering-Terminal überwachen, reparieren und austauschen. Rüstung und Schutzsysteme wurden für das Engineering-Gameplay angepasst. Feuer an Bord ergänzt das Engineering-Gameplay. Beute und die Wirtschaft der Erzraffinierung wurden angepasst. Helme erhalten eine stärkere physische Einbindung. Erste experimentelle VR-Unterstützung wurde eingeführt. Über 150 Fehler- und Absturzkorrekturen sind dokumentiert. Die vollständigen Details und Einschränkungen stehen in den verlinkten Patch Notes.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/20934-Star-Citizen-Alpha-450",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.4",
+    "date": "2025-11-19T00:00:00.000Z",
+    "previous": null,
+    "summary": "Nyx wird als drittes Sternensystem ergänzt; Levski und Delamar kehren zurück. Die Operation erweitert die Aufträge in Nyx. Neue Frachtaufträge führen zwischen Sternensystemen. Weitere Missionen erweitern das neue Sternensystem. Stationen erhalten außenliegende Frachtaufzüge. TripleDown und Boomtube erweitern das Arsenal. Über 180 Fehler- und Absturzkorrekturen sind dokumentiert.",
+    "changes": [
+      {
+        "category": "Orte",
+        "title": "Nyx, Levski und Delamar",
+        "description": "Nyx wird als drittes Sternensystem ergänzt; Levski und Delamar kehren zurück."
+      },
+      {
+        "category": "Missionen",
+        "title": "Sworn Enemies",
+        "description": "Die Operation erweitert die Aufträge in Nyx."
+      },
+      {
+        "category": "Missionen",
+        "title": "Interstellarer Transport",
+        "description": "Neue Frachtaufträge führen zwischen Sternensystemen."
+      },
+      {
+        "category": "Missionen",
+        "title": "Nyx Mission Pack",
+        "description": "Weitere Missionen erweitern das neue Sternensystem."
+      },
+      {
+        "category": "Fracht",
+        "title": "Externe Frachtaufzüge",
+        "description": "Stationen erhalten außenliegende Frachtaufzüge."
+      },
+      {
+        "category": "Waffen",
+        "title": "Neue FPS-Waffen",
+        "description": "TripleDown und Boomtube erweitern das Arsenal."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Über 180 Fehler- und Absturzkorrekturen sind dokumentiert."
+      }
+    ],
+    "fullSummary": "Alpha 4.4 erweitert Star Citizen in folgenden Bereichen: Nyx wird als drittes Sternensystem ergänzt; Levski und Delamar kehren zurück. Die Operation erweitert die Aufträge in Nyx. Neue Frachtaufträge führen zwischen Sternensystemen. Weitere Missionen erweitern das neue Sternensystem. Stationen erhalten außenliegende Frachtaufzüge. TripleDown und Boomtube erweitern das Arsenal. Über 180 Fehler- und Absturzkorrekturen sind dokumentiert. Die vollständigen Details und Einschränkungen stehen in den verlinkten Patch Notes.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/20899-Star-Citizen-Alpha-440",
+    "sourceType": "Patch Notes",
     "ai": false,
     "summaryVersion": "0.6.8",
     "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
