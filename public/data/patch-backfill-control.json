@@ -10,8 +10,8 @@
     "historicalDeferredItems": 51
   },
   "sessionId": "c84ab0d7-b0d3-4cac-a4e2-0d9a08975338",
-  "leaseId": null,
-  "leaseUntil": null,
+  "leaseId": "9ad873e7-4b56-495b-b632-a3df5a87ee04",
+  "leaseUntil": "2026-09-27T20:42:10.335Z",
   "lastError": null,
   "changedAt": "2026-09-27T20:30:19.746Z"
 }
