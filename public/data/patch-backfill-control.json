@@ -1,17 +1,32 @@
 {
-  "status": "running",
+  "status": "paused",
   "lastRun": {
-    "at": "2026-09-27T20:34:16.386Z",
-    "patchItems": 68,
-    "newItems": 7,
-    "nextPage": 25,
+    "at": "2026-09-27T20:54:16.255Z",
+    "patchItems": 73,
+    "newItems": 5,
+    "nextPage": 27,
     "backfillComplete": false,
-    "historicalMissingItems": 36,
-    "historicalDeferredItems": 35
+    "historicalMissingItems": 31,
+    "historicalDeferredItems": 28,
+    "historicalUnusableItems": 3,
+    "historicalUnusableVersions": [
+      {
+        "version": "Alpha 3.17.5",
+        "reason": "Patchtext nicht ausreichend auswertbar"
+      },
+      {
+        "version": "Alpha 3.17.4",
+        "reason": "Patchtext nicht ausreichend auswertbar"
+      },
+      {
+        "version": "Alpha 3.11.1a",
+        "reason": "Patchtext nicht ausreichend auswertbar"
+      }
+    ]
   },
   "sessionId": "0d51430e-98c3-4260-9128-f824f93ae0e8",
-  "leaseId": "7f5c7656-c6e9-454c-8939-08400059a99b",
-  "leaseUntil": "2026-09-27T21:04:10.151Z",
-  "lastError": null,
-  "changedAt": "2026-09-27T20:53:00.823Z"
+  "leaseId": null,
+  "leaseUntil": null,
+  "lastError": "3 historische Quelle(n) unbrauchbar; bitte prüfen.",
+  "changedAt": "2026-09-27T20:54:21.061Z"
 }
