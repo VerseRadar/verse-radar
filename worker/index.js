@@ -1,4 +1,4 @@
-/* Verse Radar 0.9.0 – RSI news + patch notes ingestion
+/* Verse Radar 0.9.1 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -15,7 +15,7 @@ const MAX = 20;
 const PATCH_PAGE_SIZE = 100;
 const PATCH_PAGES_PER_IMPORT = 2;
 const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
-const VERSION = "0.9.0";
+const VERSION = "0.9.1";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -35,7 +35,13 @@ const PATCH_SEEDS = [
   { version: "Alpha 4.2.1", id: 20702, date: "2025-07-17T00:00:00.000Z" },
   { version: "Alpha 4.2", id: 20638, date: "2025-06-19T00:00:00.000Z" },
   { version: "Alpha 4.1.1", id: 20598, date: "2025-05-13T00:00:00.000Z" },
-  { version: "Alpha 4.1", id: 20522, date: "2025-03-27T00:00:00.000Z" }
+  { version: "Alpha 4.1", id: 20522, date: "2025-03-27T00:00:00.000Z" },
+  { version: "Alpha 4.0.2", id: 20445, date: "2025-02-28T00:00:00.000Z" },
+  { version: "Alpha 4.0.1", id: 20418, date: "2025-01-29T00:00:00.000Z" },
+  { version: "Alpha 4.0", id: 20360, date: "2024-12-19T00:00:00.000Z" },
+  { version: "Alpha 4.8.2", id: 0, date: "2026-06-17T00:00:00.000Z", sourceType: "Content Update", sourceUrl: "https://starcitizen.tools/Update:Star_Citizen_Alpha_4.8.2" },
+  { version: "Alpha 4.7.2", id: 0, date: "2026-04-22T00:00:00.000Z", sourceType: "Content Update", sourceUrl: "https://robertsspaceindustries.com/en/comm-link/transmission/21125-Star-Citizen-Alpha-472" },
+  { version: "Alpha 4.7.1", id: 0, date: "2026-04-08T00:00:00.000Z", sourceType: "Content Update", sourceUrl: "https://starcitizen.tools/Update:Star_Citizen_Alpha_4.7.1" }
 ];
 const VERSION_RE = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?$/;
 const PATCH_NOTES_URL = "https://robertsspaceindustries.com/en/patch-notes";
@@ -594,10 +600,12 @@ async function updatePatches(env) {
       changes: ai?.changes?.length ? ai.changes : buildPatchChanges(item),
       fullSummary: ai?.fullSummary || item.fallbackFullSummary,
       sourceUrl: item.sourceUrl,
-      sourceType: "Patch Notes",
+      sourceType: item.sourceType || "Patch Notes",
       ai: Boolean(ai),
       summaryVersion: "0.6.8",
-      note: "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+      note: item.sourceType === "Content Update"
+        ? "Deutsche Zusammenfassung des nummerierten Content-Updates aus dem Community-Archiv; der Quelllink ist gekennzeichnet. Kein eigenständiger RSI-Patch-Notes-Link."
+        : "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
     });
   }
   const patches = [...byVersion.values()].sort(comparePatchVersionsDesc).map((p, i, all) => ({ ...p, previous: all[i + 1]?.version || null }));
@@ -672,8 +680,8 @@ async function fetchPatchItems(state) {
     const already = discovered.some(x => x.version === seed.version);
     if (already) continue;
     const title = `Star Citizen ${seed.version}`;
-    const sourceUrl = officialPatchUrl(seed.id, title);
-    let content = cleanPatchText(await fetchPatchDetail(seed.id, ""));
+    const sourceUrl = seed.sourceUrl || officialPatchUrl(seed.id, title);
+    let content = seed.id ? cleanPatchText(await fetchPatchDetail(seed.id, "")) : "";
     if (!publishablePatch(seed.version, content)) {
       // A detail record may be long yet omit whole feature sections. Check
       // the full wiki update before deciding that a major patch is unusable.
@@ -684,7 +692,7 @@ async function fetchPatchItems(state) {
       eligible: publishablePatch(seed.version, content),
       matchedChanges: Object.hasOwn(ARCHIVE_HIGHLIGHTS, seed.version)
         ? (archiveHighlights(seed.version, content) || []).map(change => change.title) : undefined });
-    discovered.push({ version: seed.version, date: seed.date, sourceUrl, sourceId: seed.id, content, fallbackSummary: fallbackPatchSummary(seed.version, content), fallbackFullSummary: fallbackFullSummary(seed.version, content) });
+    discovered.push({ version: seed.version, date: seed.date, sourceUrl, sourceType: seed.sourceType || "Patch Notes", sourceId: seed.id, content, fallbackSummary: fallbackPatchSummary(seed.version, content), fallbackFullSummary: fallbackFullSummary(seed.version, content) });
   }
 
   if (!discovered.length) throw Error("Keine Patch Notes erkannt.");
@@ -776,7 +784,7 @@ function normalizePatchVersion(v) {
   return String(v || "").replace(/\.0(?=\b)/g, "").replace(/\s+/g, " ").trim();
 }
 function officialPatchUrl(id, title) {
-  const verifiedSlugs = new Map([[21070,"47"],[20969,"46"],[20934,"450"],[20899,"440"],[20852,"432"],[20777,"431"],[20728,"430"],[20702,"421"],[20638,"42"],[20598,"411"],[20522,"41"]]);
+  const verifiedSlugs = new Map([[21070,"47"],[20969,"46"],[20934,"450"],[20899,"440"],[20852,"432"],[20777,"431"],[20728,"430"],[20702,"421"],[20638,"42"],[20598,"411"],[20522,"41"],[20445,"402"],[20418,"401"],[20360,"40"]]);
   if (verifiedSlugs.has(id)) return `https://robertsspaceindustries.com/en/comm-link/Patch-Notes/${id}-Star-Citizen-Alpha-${verifiedSlugs.get(id)}`;
   const slug = String(title || "Star Citizen Patch Notes").trim()
     .replace(/^Star Citizen\s*/i, "Star-Citizen-")
@@ -974,6 +982,62 @@ const ARCHIVE_HIGHLIGHTS = {
       ["Waffen","VOLT Parallax", "Das VOLT Parallax-Gewehr erweitert das Arsenal.", /volt[\s\S]*parallax/i],
       ["Technik","Streaming", "Streaming und Verzögerungen im Spielbetrieb wurden überarbeitet.", /streaming radius improvements/i]
     ]
+  },
+  "Alpha 4.0.2": {
+    required: /supply or die[\s\S]*courier missions/i,
+    changes: [
+      ["Events","Supply or Die", "Das Pyro-Event ergänzt die laufenden Inhalte.", /supply or die/i],
+      ["Missionen","Kurieraufträge in Pyro", "Kuriermissionen werden im Pyro-System aktiviert.", /courier missions in pyro/i],
+      ["Orte","Nacht und Außenposten", "Nächtliche Sichtbarkeit und Performance an Orten in Pyro wurden verbessert.", /planetary night brightness[\s\S]*pyro outposts/i],
+      ["Technik","Stabilität", "Verbindung, Aufzüge und allgemeine Stabilität stehen im Fokus.", /connectivity\/stability[\s\S]*elevator behavior/i]
+    ]
+  },
+  "Alpha 4.0.1": {
+    required: /contested zone polish[\s\S]*frontier outpost polish/i,
+    changes: [
+      ["Orte","Contested Zones", "Darstellung, Beleuchtung und Performance der umkämpften Zonen wurden verbessert.", /contested zone polish/i],
+      ["Orte","Pyro-Außenposten", "Inventare und Darstellung der Frontier Outposts wurden korrigiert.", /frontier outpost polish/i],
+      ["Orte","New Babbage", "Beleuchtung und Performance der Stadt wurden überarbeitet.", /new babbage polish/i],
+      ["Schiffe & Fahrzeuge","Schiffsabstimmung", "Starfighter Ion, Mirai Guardian und Anvil Ballista erhalten Anpassungen.", /starfighter ion[\s\S]*mirai guardian[\s\S]*anvil ballista/i],
+      ["Gameplay","Geschütze und Kopfgelder", "Stationsgeschütze wurden gestärkt, mehrere Kopfgeldbelohnungen angepasst.", /station turrets aiming prediction[\s\S]*bounty missions/i]
+    ]
+  },
+  "Alpha 4.0": {
+    required: /new star system:\s*pyro[\s\S]*server meshing v1/i,
+    changes: [
+      ["Orte","Pyro-System", "Mit Pyro kommt ein zweites Sternensystem hinzu.", /new star system:\s*pyro/i],
+      ["Gameplay","Contested Zones", "Umliegende Stationen erhalten umkämpfte FPS-Zonen mit Fortschritt und Beute.", /space station contested zones/i],
+      ["Bergbau","Rohstoffe in Pyro", "Pyro ergänzt neue abbaubare Ressourcen und eigene Verteilungen.", /unique resource distribution/i],
+      ["Technik","Server Meshing", "Die erste statische Server-Meshing-Version verteilt einen Shard auf mehrere Server.", /server meshing v1/i],
+      ["Gameplay","Vollständiger Reset", "Der Übergang auf Alpha 4.0 setzt Fortschritt und Guthaben zurück.", /full wipe/i]
+    ]
+  },
+  "Alpha 4.8.2": {
+    required: /new ships and many bugfixes[\s\S]*characters being unstowed/i,
+    changes: [
+      ["Schiffe & Fahrzeuge","Neue Schiffe", "Das Content-Update kündigt weitere Schiffe für das Live-Spiel an.", /new ships and many bugfixes/i],
+      ["Technik","Charakterzustand", "Probleme mit festhängenden und nicht korrekt geladenen Charakteren werden bearbeitet.", /characters being unstowed/i],
+      ["Missionen","Eskortaufträge", "Ein Fehler mit Hangartoren bei Eskortmissionen wird adressiert.", /escort missions/i]
+    ]
+  },
+  "Alpha 4.7.2": {
+    required: /nyx mission pack 2[\s\S]*delivery:\s*courier/i,
+    changes: [
+      ["Missionen","Nyx Mission Pack 2", "Neue Verträge erweitern Nyx und Stanton.", /nyx mission pack 2/i],
+      ["Missionen","Kurier und Bergung", "Aufträge für Zustellungen und die Rückholung verlorener Fracht kommen hinzu.", /delivery:\s*courier[\s\S]*delivery:\s*recover cargo/i],
+      ["Missionen","Schiffskampf", "Gegnerwellen und Kopfgeldaufträge erweitern den Raumkampf.", /ship wave attack[\s\S]*bounty \(kill ship\)/i],
+      ["Missionen","Bombing Run", "Bombardierungsaufträge kehren zurück.", /bombing run/i],
+      ["Bergung","Paid Salvage", "Bezahlte legale Bergungsaufträge werden angeboten.", /paid salvage/i]
+    ]
+  },
+  "Alpha 4.7.1": {
+    required: /new ship:\s*misc hull b[\s\S]*greycat utv/i,
+    changes: [
+      ["Schiffe & Fahrzeuge","MISC Hull B", "Der Frachter mit ausfahrbarer Frachtstruktur kommt ins Spiel.", /new ship:\s*misc hull b/i],
+      ["Schiffe & Fahrzeuge","Greycat UTV", "Ein neues zweisitziges Nutzfahrzeug kann kleine Frachtkisten transportieren.", /new vehicle:\s*greycat utv/i],
+      ["Bergbau","Breaker Stations", "Vorkommen und Qualität von Savrillium werden angepasst.", /breaker stations updates/i],
+      ["Technik","Abstürze und Fehler", "Mehrere Client- und Serverabstürze wurden behoben.", /fixed 9 client crashes[\s\S]*fixed 14 server/i]
+    ]
   }
 };
 function archiveHighlights(version, content) {
@@ -984,14 +1048,19 @@ function archiveHighlights(version, content) {
 }
 function publishablePatch(version, content) {
   if (content.length < 500) return false;
-  if (Object.hasOwn(ARCHIVE_HIGHLIGHTS, version)) return (archiveHighlights(version, content)?.length || 0) >= 4;
+  if (Object.hasOwn(ARCHIVE_HIGHLIGHTS, version)) {
+    return (archiveHighlights(version, content)?.length || 0) >= minimumHighlights(version);
+  }
   return true;
+}
+function minimumHighlights(version) {
+  return PATCH_SEEDS.find(seed => seed.version === version)?.sourceType === "Content Update" ? 2 : 4;
 }
 function fallbackPatchSummary(version, content) {
   const t = content || "";
   if (alpha47Content(version, t)) return "Alpha 4.7 erweitert Nyx mit Operation Breaker Stations: In den Stationen warten Kämpfe, Rätsel und abbaubare Rohstoffe. Das Inventar wurde mit zwei Fenstern und Zugriff auf nahe Container überarbeitet. Crafting startet mit dem Item Fabricator, Bauplänen und Materialqualität, die sich auf hergestellte Gegenstände auswirkt. Dazu kommen die RSI Aurora Mk II, Änderungen an Schilden, Rüstung und Radar sowie weitere Anlaufstellen in Nyx. Experimentelle VR-Funktionen und zahlreiche Fehlerkorrekturen runden das Update ab.";
   const highlights = archiveHighlights(version, t);
-  if (highlights?.length >= 4) return highlights.map(x => x.description).join(" ");
+  if (highlights?.length >= minimumHighlights(version)) return highlights.map(x => x.description).join(" ");
   const parts = [];
   if (/orison relief support/i.test(t)) parts.push("Orison Relief Support bringt eine neue Reihe von Wiederaufbau-, Transport-, Herstellungs- und Kampfeinsätzen mit persönlichem Fortschritts- und Belohnungssystem.");
   if (/siege of orison v2/i.test(t)) parts.push("Siege of Orison wurde als Instancing-Mission überarbeitet und bietet eine geschlossene Mission für Spieler und Gruppe.");
@@ -1024,7 +1093,7 @@ function fallbackFullSummary(version, content) {
   const t = content;
   if (alpha47Content(version, t)) return "Alpha 4.7 bringt Operation Breaker Stations nach Nyx. In diesen Aufträgen kämpfen sich Spieler durch Gegner und Gefahren, lösen Rätsel und nehmen eine Bergbaustation wieder in Betrieb, um an Rohstoffe im Asteroiden zu gelangen. Stationen können exklusiv oder gemeinsam zugänglich sein. Das Inventar erhält eine neue Oberfläche mit zwei Fenstern. Nahe Container, Rucksäcke und Körper erscheinen als auswählbare Tabs; Suche, Sortierung und Filter helfen beim Umlagern und Ausrüsten. Das neue Crafting nutzt den Item Fabricator und Baupläne. Gesammelte und abgebaute Materialien besitzen Qualitätswerte, die die Werte des hergestellten Gegenstands beeinflussen. Auch die Verteilung von abbaubaren Rohstoffen wurde angepasst. Bei Schiffen kommt die RSI Aurora Mk II hinzu. Schilde und Rüstung wurden neu abgestimmt; Radar-Komponenten und radarbasierte Zielhilfe verändern die technischen Möglichkeiten der Fahrzeuge. In Nyx bieten People's Service Stations zusätzliche Anlaufstellen und mögliche Heimatorte. Die experimentelle VR-Unterstützung erhält Verbesserungen bei Cursor, Oberfläche und Rendering. Laut Patch Notes wurden seit Alpha 4.6 zudem über 150 Fehler und Abstürze korrigiert.";
   const highlights = archiveHighlights(version, t);
-  if (highlights?.length >= 4) return `${version} erweitert Star Citizen in folgenden Bereichen: ${highlights.map(x => x.description).join(" ")} Die vollständigen Details und Einschränkungen stehen in den verlinkten Patch Notes.`;
+  if (highlights?.length >= minimumHighlights(version)) return `${version} umfasst folgende Änderungen: ${highlights.map(x => x.description).join(" ")} Weitere Details stehen in der verlinkten Quelle.`;
   const parts = [];
   if (/orison relief support/i.test(t)) parts.push("Im Gameplay bringt der Patch mit Orison Relief Support eine neue Reihe von Wiederaufbau- und Unterstützungsaufträgen. Je nach Auftrag geht es um Ressourcensammlung, Herstellung, Transporte oder Kämpfe; der persönliche Fortschritt schaltet mehrere Belohnungen frei.");
   if (/siege of orison v2/i.test(t)) parts.push("Siege of Orison wurde als Instancing-Inhalt überarbeitet. Die Mission läuft in einer geschlossenen Instanz für die eigene Gruppe, nutzt Checkpoints und wurde bei Plattformen, Gegnern und Belohnungen angepasst.");
@@ -1060,7 +1129,7 @@ function buildPatchChanges(item) {
   const t = item.content || ""; const changes = [];
   if (alpha47Content(item.version, t)) return alpha47Changes(t);
   const highlights = archiveHighlights(item.version, t);
-  if (highlights?.length >= 4) return highlights;
+  if (highlights?.length >= minimumHighlights(item.version)) return highlights;
   const add = (category,title,description,pattern) => { if (pattern.test(t)) changes.push({category,title,description}); };
   add("Gameplay","Orison Relief Support","Neue Wiederaufbau- und Unterstützungsaufträge rund um Orison mit Ressourcen, Herstellung, Transport und Kampf.",/orison relief support/i);
   add("Missionen","Siege of Orison V2","Die Mission wurde auf Instancing umgestellt und für Gruppen mit Checkpoints und überarbeiteten Gefechten neu aufgebaut.",/siege of orison v2/i);

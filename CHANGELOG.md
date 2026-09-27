@@ -1,5 +1,10 @@
 # Changelog – Verse Radar
 
+## 0.9.1 – 4.x gesammelt abschließen
+- Alpha 4.0, 4.0.1 und 4.0.2 mit geprüften RSI-Patch-Notes-Links, Daten und deutschen Änderungspunkten ergänzt.
+- Fehlende nummerierte Content-Updates 4.7.1, 4.7.2 und 4.8.2 mit konkreter Quelle und klarer Kennzeichnung in der History ergänzt; ein Link auf die Patch Notes des Hauptpatches wird nicht als eigener Patchlink ausgegeben.
+- Community-Wiki-Links sind sichtbar als „Community-Archiv“ bezeichnet. Bestehende Update-Meldungen 4.8.1/4.8.3 bleiben erhalten.
+
 ## 0.9.0 – Archivlücke zwischen Alpha 4.3 und 4.0 schließen
 - Offizielle Patch-Notes-Links und Veröffentlichungsdaten für Alpha 4.2.1, 4.2, 4.1.1 und 4.1 ergänzt.
 - Versionseigene Änderungspunkte zu Resource Drive, Storm Breaker, Schiffsmissionen und Orbital Assault.

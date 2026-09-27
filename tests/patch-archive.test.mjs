@@ -34,6 +34,7 @@ let archiveSeedDetailsAvailable = false;
 let archivePartialDetails = false;
 let archive43DetailsAvailable = false;
 let archive41DetailsAvailable = false;
+let remaining4DetailsAvailable = false;
 const externalPatch = { version: 'Alpha 4.6', previous: null, sourceUrl: 'https://robertsspaceindustries.com/external', summary: 'Parallel gespeicherter Patch' };
 
 globalThis.fetch = async (input, init = {}) => {
@@ -78,6 +79,14 @@ globalThis.fetch = async (input, init = {}) => {
     }[Number(url.pathname.split('/').at(-1))];
     return Response.json({data:{content:content.repeat(6)}});
   }
+  if (remaining4DetailsAvailable && url.host === 'api.star-citizen.wiki' && /^\/api\/comm-links\/(20445|20418|20360)$/.test(url.pathname)) {
+    const content = {
+      20445: 'Supply or Die Courier Missions in Pyro Planetary Night Brightness Pyro Outposts Connectivity/Stability Elevator Behavior. ',
+      20418: 'Contested Zone Polish Frontier Outpost Polish New Babbage Polish Starfighter Ion Mirai Guardian Anvil Ballista Station Turrets Aiming Prediction Bounty Missions. ',
+      20360: 'Full Wipe New Star System: Pyro Space Station Contested Zones Unique Resource Distribution Server Meshing V1. '
+    }[Number(url.pathname.split('/').at(-1))];
+    return Response.json({data:{content:content.repeat(6)}});
+  }
   if (archivePartialDetails && url.host === 'starcitizen.tools' && url.pathname === '/api.php') {
     const page = url.searchParams.get('page');
     const content = page?.endsWith('4.5.0')
@@ -86,6 +95,17 @@ globalThis.fetch = async (input, init = {}) => {
       ? 'Patch notes edit Welcome To Nyx The Return to Levski Sworn Enemies Operation Interstellar Hauling Nyx Mission Pack External Station Freight Elevators TripleDown Boomtube Streaming Improvements and Environment Performance Optimizations over 180 bug and crash fixes. '.repeat(4)
       : '';
     return Response.json({parse: {text: {'*': content}}});
+  }
+  if (remaining4DetailsAvailable && url.host === 'starcitizen.tools' && url.pathname === '/api.php') {
+    const page = url.searchParams.get('page') || '';
+    const content = page.endsWith('4.8.2')
+      ? 'Patch notes edit New ships and many bugfixes Characters being unstowed Escort missions. '.repeat(12)
+      : page.endsWith('4.7.2')
+      ? 'Patch notes edit Nyx Mission Pack 2 Delivery: Courier Delivery: Recover Cargo Combat: Ship Wave Attack Bounty (Kill Ship) Combat: Bombing Run Salvage: Paid Salvage. '.repeat(7)
+      : page.endsWith('4.7.1')
+      ? 'Patch notes edit New Ship: MISC Hull B New Vehicle: Greycat UTV Breaker Stations Updates Fixed 9 client crashes Fixed 14 server crashes. '.repeat(7)
+      : '';
+    return Response.json({parse:{text:{'*':content}}});
   }
   if (url.host === 'api.github.com' && url.pathname.includes('/contents/')) {
     const path = url.pathname.split('/contents/')[1];
@@ -246,5 +266,21 @@ for (const [version, suffix] of [['Alpha 4.2.1','20702-Star-Citizen-Alpha-421'],
   assert.ok(item.sourceUrl.endsWith(suffix));
   assert.ok(item.changes.length >= 4);
 }
+archivePartialDetails = false;
+remaining4DetailsAvailable = true;
+const allFourPreview = await (await request('/preview/patches')).json();
+for (const [version, suffix] of [['Alpha 4.0.2','20445-Star-Citizen-Alpha-402'],['Alpha 4.0.1','20418-Star-Citizen-Alpha-401'],['Alpha 4.0','20360-Star-Citizen-Alpha-40']]) {
+  const item = allFourPreview.items.find(p => p.version === version);
+  assert.ok(item?.sourceUrl.endsWith(suffix));
+  assert.ok(item.changes.length >= 4);
+  assert.equal(item.sourceType, 'Patch Notes');
+}
+for (const version of ['Alpha 4.8.2','Alpha 4.7.2','Alpha 4.7.1']) {
+  const item = allFourPreview.items.find(p => p.version === version);
+  assert.ok(item?.changes.length >= 2);
+  assert.equal(item.sourceType, 'Content Update');
+  assert.match(item.note, /kein eigenständiger RSI-Patch-Notes-Link/i);
+}
+assert.equal(stored.get(patchesPath).data.some(p => p.version === 'Alpha 4.7.1'), false);
 
 console.log('Patch-Archiv: Vorschau, Nachladen, Fehlerschutz und Cursor-Recovery: OK');
