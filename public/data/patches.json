@@ -1629,7 +1629,7 @@
   {
     "version": "Alpha 3.17.3",
     "date": "2022-10-06T00:00:00.000Z",
-    "previous": null,
+    "previous": "Alpha 3.17.2a",
     "summary": "Alpha 3.17.3: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
     "changes": [
       {
@@ -1643,6 +1643,213 @@
     "sourceType": "Community Archive",
     "ai": false,
     "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.17.2a",
+    "date": "2022-08-31T00:00:00.000Z",
+    "previous": "Alpha 3.17.2",
+    "summary": "Alpha 3.17.2a: Häufigkeit, Schwierigkeit und Bezahlung der Kampfhilfe-Aufträge wurden angepasst. Die MAX-Schaltfläche an Shop-Kiosken wurde durch eine +10-Schaltfläche ersetzt. Die Trefferpunkte mehrerer Bauteile der Esperia Blade wurden reduziert. Die Notizen dokumentieren Korrekturen an Aufzügen, Missionen und Client- sowie Serverabstürzen.",
+    "changes": [
+      {
+        "category": "Missionen",
+        "title": "Combat Assistance Beacons",
+        "description": "Häufigkeit, Schwierigkeit und Bezahlung der Kampfhilfe-Aufträge wurden angepasst."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Shop-Kioske",
+        "description": "Die MAX-Schaltfläche an Shop-Kiosken wurde durch eine +10-Schaltfläche ersetzt."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Esperia Blade",
+        "description": "Die Trefferpunkte mehrerer Bauteile der Esperia Blade wurden reduziert."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Notizen dokumentieren Korrekturen an Aufzügen, Missionen und Client- sowie Serverabstürzen."
+      }
+    ],
+    "fullSummary": "Alpha 3.17.2a enthält folgende dokumentierte Änderungen: Häufigkeit, Schwierigkeit und Bezahlung der Kampfhilfe-Aufträge wurden angepasst. Die MAX-Schaltfläche an Shop-Kiosken wurde durch eine +10-Schaltfläche ersetzt. Die Trefferpunkte mehrerer Bauteile der Esperia Blade wurden reduziert. Die Notizen dokumentieren Korrekturen an Aufzügen, Missionen und Client- sowie Serverabstürzen. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://robertsspaceindustries.com/spectrum/community/SC/forum/190048/thread/star-citizen-alpha-3-17-2a-live-8186206-patch-note",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 3.17.2",
+    "date": "2022-07-28T00:00:00.000Z",
+    "previous": "Alpha 3.17.1",
+    "summary": "Alpha 3.17.2: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.17.2 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.17.2",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.17.1",
+    "date": "2022-05-19T00:00:00.000Z",
+    "previous": "Alpha 3.17.0",
+    "summary": "Alpha 3.17.1: Der Zugriff auf Inventar und Ausrüstung wird angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Gameplay",
+        "title": "Inventar",
+        "description": "Der Zugriff auf Inventar und Ausrüstung wird angepasst."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.17.1 enthält folgende dokumentierte Änderungen: Der Zugriff auf Inventar und Ausrüstung wird angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.17.1",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.17.0",
+    "date": "2022-04-29T00:00:00.000Z",
+    "previous": "Alpha 3.16.1",
+    "summary": "Alpha 3.17.0: Hunger, Durst und weitere Überlebensmechaniken werden eingeführt oder angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Gameplay",
+        "title": "Ernährung und Überleben",
+        "description": "Hunger, Durst und weitere Überlebensmechaniken werden eingeführt oder angepasst."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.17.0 enthält folgende dokumentierte Änderungen: Hunger, Durst und weitere Überlebensmechaniken werden eingeführt oder angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.17.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.16.1",
+    "date": "2022-01-27T00:00:00.000Z",
+    "previous": "Alpha 3.16.0",
+    "summary": "Alpha 3.16.1: Tempo, Treibstoffverbrauch oder Bedienung der Quantum-Reise werden angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Quantum-Reisen",
+        "description": "Tempo, Treibstoffverbrauch oder Bedienung der Quantum-Reise werden angepasst."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.16.1 enthält folgende dokumentierte Änderungen: Tempo, Treibstoffverbrauch oder Bedienung der Quantum-Reise werden angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.16.1",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.16.0",
+    "date": "2021-12-21T00:00:00.000Z",
+    "previous": "Alpha 3.15.1",
+    "summary": "Alpha 3.16.0: Der Zugriff auf Inventar und Ausrüstung wird angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Gameplay",
+        "title": "Inventar",
+        "description": "Der Zugriff auf Inventar und Ausrüstung wird angepasst."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.16.0 enthält folgende dokumentierte Änderungen: Der Zugriff auf Inventar und Ausrüstung wird angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.16.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.15.1",
+    "date": "2021-11-18T00:00:00.000Z",
+    "previous": "Alpha 3.15.0",
+    "summary": "Alpha 3.15.1: Der Zugriff auf Inventar und Ausrüstung wird angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Gameplay",
+        "title": "Inventar",
+        "description": "Der Zugriff auf Inventar und Ausrüstung wird angepasst."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.15.1 enthält folgende dokumentierte Änderungen: Der Zugriff auf Inventar und Ausrüstung wird angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.15.1",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.15.0",
+    "date": "2021-11-10T00:00:00.000Z",
+    "previous": null,
+    "summary": "Alpha 3.15.0: Nach Serverfehlern wird die Spielsitzung wiederhergestellt. Der Zugriff auf Inventar und Ausrüstung wird angepasst. Die XenoThreat-Missionen und ihre Abläufe werden angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Server Crash Recovery",
+        "description": "Nach Serverfehlern wird die Spielsitzung wiederhergestellt."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Inventar",
+        "description": "Der Zugriff auf Inventar und Ausrüstung wird angepasst."
+      },
+      {
+        "category": "Missionen",
+        "title": "XenoThreat",
+        "description": "Die XenoThreat-Missionen und ihre Abläufe werden angepasst."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.15.0 enthält folgende dokumentierte Änderungen: Nach Serverfehlern wird die Spielsitzung wiederhergestellt. Der Zugriff auf Inventar und Ausrüstung wird angepasst. Die XenoThreat-Missionen und ihre Abläufe werden angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.15.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
     "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
   }
 ]
