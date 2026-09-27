@@ -1,4 +1,4 @@
-/* Verse Radar 0.9.2 – RSI news + patch notes ingestion
+/* Verse Radar 0.9.3 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -14,8 +14,11 @@ const COMM_LINK_URL = "https://robertsspaceindustries.com/en/comm-link?sort=publ
 const MAX = 20;
 const PATCH_PAGE_SIZE = 100;
 const PATCH_PAGES_PER_IMPORT = 2;
+// Leave headroom for GitHub reads/writes, redirects and retries on Workers Free.
+const PATCH_DETAILS_PER_IMPORT = 2;
+const PATCH_SEEDS_PER_IMPORT = 2;
 const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
-const VERSION = "0.9.2";
+const VERSION = "0.9.3";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -81,6 +84,8 @@ export default {
             scannedPages: result.scannedPages, nextPage: result.nextState.nextPage,
             backfillComplete: result.nextState.complete, pageDiagnostics: result.pageDiagnostics,
             patchAutoPublishEnabled: env.PATCH_AUTO_PUBLISH === "true",
+            deferredSeedItems: result.deferredSeedItems,
+            deferredPageItems: result.deferredPageItems,
             seedDiagnostics: result.seedDiagnostics });
         }
         return json({
@@ -92,6 +97,8 @@ export default {
           scannedPages: result.scannedPages,
           nextPage: result.nextState.nextPage,
           backfillComplete: result.nextState.complete,
+          deferredSeedItems: result.deferredSeedItems,
+          deferredPageItems: result.deferredPageItems,
           published: false,
           pageDiagnostics: result.pageDiagnostics,
           items: result.patches,
@@ -499,7 +506,7 @@ async function updateSite(env, { includeNews = true, includePatches = true } = {
   const patchResult = includePatches ? await updatePatches(env) : null;
   const now = new Date().toISOString();
   const automation = includeNews && includePatches ? "Cloudflare Worker + RSI Comm-Link + RSI Patch Notes" : includeNews ? "Cloudflare Worker + RSI Comm-Link; Patch-Import pausiert" : "Cloudflare Worker + RSI Patch Notes; News-Import pausiert";
-  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation, version: VERSION, fetchedItems: newsResult?.fetchedItems ?? null, newItems: newsResult?.newItems ?? null, refreshedItems: newsResult?.refreshedItems ?? null, aiItems: newsResult?.aiItems ?? null, newsItems: newsResult?.news.length ?? null, patchItems: patchResult?.patches.length ?? null, patchNewItems: patchResult?.newItems ?? null, patchNextPage: patchResult?.nextState.nextPage ?? null, patchBackfillComplete: patchResult?.nextState.complete ?? null, patchAiItems: patchResult?.aiItems ?? null };
+  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation, version: VERSION, fetchedItems: newsResult?.fetchedItems ?? null, newItems: newsResult?.newItems ?? null, refreshedItems: newsResult?.refreshedItems ?? null, aiItems: newsResult?.aiItems ?? null, newsItems: newsResult?.news.length ?? null, patchItems: patchResult?.patches.length ?? null, patchNewItems: patchResult?.newItems ?? null, patchNextPage: patchResult?.nextState.nextPage ?? null, patchBackfillComplete: patchResult?.nextState.complete ?? null, patchDeferredSeedItems: patchResult?.deferredSeedItems ?? null, patchDeferredPageItems: patchResult?.deferredPageItems ?? null, patchAiItems: patchResult?.aiItems ?? null };
 
   if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) {
     return { ok: true, version: VERSION, published: false, ...meta, note: "GitHub Secrets fehlen; nichts zurückgeschrieben." };
@@ -577,7 +584,8 @@ async function updatePatches(env) {
   const existing = archive.data;
   validateArchiveEntries(existing);
   const state = parsePatchState(stateFile.data);
-  const { items, scannedPages, nextState, pageDiagnostics, seedDiagnostics } = await fetchPatchItems(state);
+  const existingVersions = new Set(existing.map(x => versionParts(x.version).join(".")));
+  const { items, scannedPages, nextState, pageDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems } = await fetchPatchItems(state, existingVersions);
   const unique = dedupePatchItems(items).sort(comparePatchVersionsDesc);
   const byVersion = new Map(existing.map(x => [versionParts(x.version).join("."), correctLegacyLink(x)]));
   let aiItems = 0;
@@ -609,7 +617,7 @@ async function updatePatches(env) {
     });
   }
   const patches = [...byVersion.values()].sort(comparePatchVersionsDesc).map((p, i, all) => ({ ...p, previous: all[i + 1]?.version || null }));
-  return { patches, items: unique, newItems: patches.length - existing.length, aiItems, scannedPages, nextState, pageDiagnostics, seedDiagnostics, archiveSha: archive.sha, stateSha: stateFile.sha };
+  return { patches, items: unique, newItems: patches.length - existing.length, aiItems, scannedPages, nextState, pageDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems, archiveSha: archive.sha, stateSha: stateFile.sha };
 }
 
 function parsePatchState(value) {
@@ -618,11 +626,15 @@ function parsePatchState(value) {
   return { nextPage: value.nextPage, complete: value.complete };
 }
 
-async function fetchPatchItems(state) {
+async function fetchPatchItems(state, existingVersions) {
   const discovered = [];
   const scannedPages = [];
   const pageDiagnostics = [];
   const seedDiagnostics = [];
+  let fetchedDetails = 0;
+  let deferredPageItems = 0;
+  let firstDeferredPage = null;
+  let recognizedPatchNotes = 0;
   const pages = state.complete ? [1] : [...new Set([1, ...Array.from({ length: PATCH_PAGES_PER_IMPORT }, (_, i) => state.nextPage + i)])];
   let lastPage = null;
   let reachedEnd = false;
@@ -665,6 +677,14 @@ async function fetchPatchItems(state) {
       if (!/^https:\/\/robertsspaceindustries\.com\/(?:en\/)?comm-link\/Patch-Notes\/\d+-/i.test(sourceUrl)) continue;
       const id = Number(record?.id); if (!id) continue;
       const version = normalizePatchVersion(title.replace(/^Star Citizen /i, "").trim());
+      recognizedPatchNotes++;
+      if (existingVersions.has(versionParts(version).join("."))) continue;
+      if (fetchedDetails >= PATCH_DETAILS_PER_IMPORT) {
+        deferredPageItems++;
+        firstDeferredPage ??= page;
+        continue;
+      }
+      fetchedDetails++;
       const date = validDate(record?.created_at) || validDate(record?.published_at) || new Date().toISOString();
       let content = cleanPatchText(extractPatchContent(record));
       if (content.length < 500) content = cleanPatchText(await fetchPatchDetail(id, content));
@@ -672,13 +692,25 @@ async function fetchPatchItems(state) {
       discovered.push({ version, date, sourceUrl, sourceId: id, content, fallbackSummary: fallbackPatchSummary(version, content), fallbackFullSummary: fallbackFullSummary(version, content) });
     }
   }
-  if (!scannedPages.length || (scannedPages.length === 1 && !discovered.length)) throw Error("Keine Patch Notes in der aktuellen Quelle erkannt; Import abgebrochen.");
+  if (!scannedPages.length || (scannedPages.length === 1 && !recognizedPatchNotes)) throw Error("Keine Patch Notes in der aktuellen Quelle erkannt; Import abgebrochen.");
 
   // RSI's patch index is sometimes only partially mirrored by the archive API.
   // Seed the current major patches so a temporary archive/index gap cannot hide them.
-  for (const seed of PATCH_SEEDS) {
+  let fetchedSeeds = 0;
+  let deferredSeedItems = 0;
+  for (const seed of [...PATCH_SEEDS].sort(comparePatchVersionsDesc)) {
     const already = discovered.some(x => x.version === seed.version);
     if (already) continue;
+    if (existingVersions.has(versionParts(seed.version).join("."))) {
+      seedDiagnostics.push({ version: seed.version, sourceId: seed.id, alreadyStored: true });
+      continue;
+    }
+    if (fetchedSeeds >= PATCH_SEEDS_PER_IMPORT) {
+      seedDiagnostics.push({ version: seed.version, sourceId: seed.id, deferred: true });
+      deferredSeedItems++;
+      continue;
+    }
+    fetchedSeeds++;
     const title = `Star Citizen ${seed.version}`;
     const sourceUrl = seed.sourceUrl || officialPatchUrl(seed.id, title);
     let content = seed.id ? cleanPatchText(await fetchPatchDetail(seed.id, "")) : "";
@@ -695,15 +727,17 @@ async function fetchPatchItems(state) {
     discovered.push({ version: seed.version, date: seed.date, sourceUrl, sourceType: seed.sourceType || "Patch Notes", sourceId: seed.id, content, fallbackSummary: fallbackPatchSummary(seed.version, content), fallbackFullSummary: fallbackFullSummary(seed.version, content) });
   }
 
-  if (!discovered.length) throw Error("Keine Patch Notes erkannt.");
+  if (!discovered.length && !existingVersions.size) throw Error("Keine Patch Notes erkannt.");
   // A title variant (e.g. "Alpha 4.8: Tactical Strike") is not a separate
   // predecessor of the same numbered release. Never publish empty source text
   // as a generic patch summary.
   const unique = dedupePatchItems(discovered).filter(item => publishablePatch(item.version, item.content)).sort(comparePatchVersionsDesc);
-  if (!unique.length) throw Error("Keine Patch Notes mit auswertbarem Quelltext erkannt.");
+  if (!unique.length && !existingVersions.size) throw Error("Keine Patch Notes mit auswertbarem Quelltext erkannt.");
   const lastScanned = scannedPages[scannedPages.length - 1];
-  const complete = state.complete || reachedEnd || (lastPage !== null && lastScanned >= lastPage);
-  return { items: unique, scannedPages, pageDiagnostics, seedDiagnostics, nextState: { nextPage: complete ? Math.max(lastScanned, state.nextPage) : lastScanned + 1, complete } };
+  const complete = !firstDeferredPage && (state.complete || reachedEnd || (lastPage !== null && lastScanned >= lastPage));
+  const nextPage = firstDeferredPage || (complete ? Math.max(lastScanned, state.nextPage) : lastScanned + 1);
+  return { items: unique, scannedPages, pageDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems,
+    nextState: { nextPage, complete } };
 }
 
 function extractPatchContent(record) {

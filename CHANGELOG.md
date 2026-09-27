@@ -1,5 +1,11 @@
 # Changelog – Verse Radar
 
+## 0.9.3 – Worker-Anfragelimit beim Patch-Import beachten
+- Bereits archivierte Versionen werden bei der Quellprüfung übersprungen.
+- Pro Aufruf höchstens zwei neue Patch-Details und zwei zusätzliche Archivversionen aus den festen Quellen prüfen; offene Versionen folgen bei den nächsten Aufrufen.
+- `deferredSeedItems` und `deferredPageItems` zeigen in der Vorschau, wie viele Quellprüfungen noch warten; `/run/patches` meldet die Werte mit `patch`-Präfix.
+- Bei einem fehlgeschlagenen Schreibvorgang wird der GitHub-Archivstand beim nächsten Aufruf erneut gelesen. Bereits gespeicherte Einträge werden nicht doppelt importiert, und der Archivcursor überspringt keine zurückgestellten Seiten.
+
 ## 0.9.2 – Alpha 4.0 trotz verkürzter Detailquelle erkennen
 - Das Community-Detail zu Alpha 4.0 enthält nur einen verkürzten Patchtext. Die zentralen Änderungen sind anhand der vollständigen Wiki-Patchseite geprüft und werden bei bestätigtem Wipe, Pyro und Server Meshing erkannt.
 - Regressionstest prüft den tatsächlich beobachteten verkürzten Quelltext.
