@@ -2681,7 +2681,7 @@
   {
     "version": "Alpha 3.4.2",
     "date": "2019-01-15T00:00:00.000Z",
-    "previous": null,
+    "previous": "Alpha 3.4.1",
     "summary": "Alpha 3.4.2: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
     "changes": [
       {
@@ -2692,6 +2692,173 @@
     ],
     "fullSummary": "Alpha 3.4.2 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
     "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.4.2",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.4.1",
+    "date": "2019-01-14T00:00:00.000Z",
+    "previous": "Alpha 3.4.0",
+    "summary": "Alpha 3.4.1: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.4.1 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.4.1",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.4.0",
+    "date": "2018-12-21T00:00:00.000Z",
+    "previous": "Alpha 3.3.7",
+    "summary": "Alpha 3.4.0: Hurston und seine Monde erweitern das Stanton-System. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Orte",
+        "title": "Hurston",
+        "description": "Hurston und seine Monde erweitern das Stanton-System."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.4.0 enthält folgende dokumentierte Änderungen: Hurston und seine Monde erweitern das Stanton-System. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.4.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.3.7",
+    "date": "2018-12-04T00:00:00.000Z",
+    "previous": "Alpha 3.3.6",
+    "summary": "Alpha 3.3.7: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.3.7 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.3.7",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.3.6",
+    "date": "2018-11-21T00:00:00.000Z",
+    "previous": "Alpha 3.3.5",
+    "summary": "Alpha 3.3.6: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.3.6 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.3.6",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.3.5",
+    "date": "2018-11-20T00:00:00.000Z",
+    "previous": "Alpha 3.3.0",
+    "summary": "Alpha 3.3.5: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.3.5 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.3.5",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.3.0",
+    "date": "2018-11-09T00:00:00.000Z",
+    "previous": "Alpha 3.2.2",
+    "summary": "Alpha 3.3.0: Object Container Streaming verbessert das Nachladen von Spielinhalten. HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Object Container Streaming",
+        "description": "Object Container Streaming verbessert das Nachladen von Spielinhalten."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Schiffsanzeigen",
+        "description": "HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.3.0 enthält folgende dokumentierte Änderungen: Object Container Streaming verbessert das Nachladen von Spielinhalten. HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.3.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.2.2",
+    "date": "2018-08-02T00:00:00.000Z",
+    "previous": "Alpha 3.2.1",
+    "summary": "Alpha 3.2.2: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.2.2 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.2.2",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.2.1",
+    "date": "2018-07-24T00:00:00.000Z",
+    "previous": null,
+    "summary": "Alpha 3.2.1: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.2.1 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.2.1",
     "sourceType": "Community Archive",
     "ai": false,
     "summaryVersion": "0.9.6",
