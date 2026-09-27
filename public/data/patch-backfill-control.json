@@ -9,9 +9,9 @@
     "historicalMissingItems": 36,
     "historicalDeferredItems": 35
   },
-  "sessionId": "c84ab0d7-b0d3-4cac-a4e2-0d9a08975338",
+  "sessionId": "5dabec62-a983-47dc-9b55-427f85107feb",
   "leaseId": null,
   "leaseUntil": null,
-  "lastError": "1 historische Quelle(n) unbrauchbar; bitte prüfen.",
-  "changedAt": "2026-09-27T20:34:21.548Z"
+  "lastError": null,
+  "changedAt": "2026-09-27T20:42:47.018Z"
 }
