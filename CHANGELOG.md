@@ -1,5 +1,10 @@
 # Changelog – Verse Radar
 
+## 0.8.7 – Ältere Patch Notes erschließen
+- Für Alpha 4.6, 4.5 und 4.4 sind die offiziellen Patch-Notes-IDs, Veröffentlichungsdaten und passende deutsche Änderungspunkte hinterlegt.
+- Die drei Einträge brauchen auswertbare Wiki-Patchtexte mit mehreren belegten Hauptpunkten; Quelllücken erscheinen unter `seedDiagnostics`.
+- Die `SCW/...-API`-Platzhalter der Community-API bleiben als Originalquelle ausgeschlossen.
+
 ## 0.8.6 – Original-Link von Alpha 4.7
 - Der Alpha-4.7-Eintrag verwendet den offiziellen RSI-Link `21070-Star-Citizen-Alpha-47`.
 

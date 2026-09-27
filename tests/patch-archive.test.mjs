@@ -30,6 +30,7 @@ let missingSourceUrl = false;
 let archiveConflictOnce = false;
 let archiveConflictAlways = false;
 let alpha47DetailAvailable = false;
+let archiveSeedDetailsAvailable = false;
 const externalPatch = { version: 'Alpha 4.6', previous: null, sourceUrl: 'https://robertsspaceindustries.com/external', summary: 'Parallel gespeicherter Patch' };
 
 globalThis.fetch = async (input, init = {}) => {
@@ -44,6 +45,14 @@ globalThis.fetch = async (input, init = {}) => {
   }
   if (alpha47DetailAvailable && url.host === 'api.star-citizen.wiki' && url.pathname === '/api/comm-links/21070') {
     return Response.json({ data: { content: ('Operation Breaker Stations Inventory Rework Two-Panel Layout Nearby Inventories Search, Sort, and Filter Crafting, Fabricator, and Blueprints Material Quality and Mining Updates New Ship: RSI Aurora Mk II Shield Balance Armor Balance Radar-Based Aim Assist People\'s Service Stations Virtual Reality Updates over 150 bug and crash fixes. ').repeat(4) } });
+  }
+  if (archiveSeedDetailsAvailable && url.host === 'api.star-citizen.wiki' && /^\/api\/comm-links\/(20969|20934|20899)$/.test(url.pathname)) {
+    const content = {
+      20969: 'Clearing The Air: Alliance Aid Missions Kel-To Ship Supply Kiosks Lamp: Light Amplification System Engineering and Ship Armor Gameplay Updates Aurora Series Update Virtual Reality Updates over 160 bug and crash fixes.',
+      20934: 'Engineering Gameplay Ship Armor Fire Hazards Loot Refresh & Collector Updates Ore Refining Economic Balance Physicalized Helmets Virtual Reality Support (Experimental) Vulkan Graphics and Settings Overhaul over 150 bug and crash fixes.',
+      20899: 'Welcome To Nyx The Return to Levski Sworn Enemies Operation Interstellar Hauling Nyx Mission Pack External Station Freight Elevators TripleDown Boomtube Streaming Improvements and Environment Performance Optimizations over 180 bug and crash fixes.'
+    }[Number(url.pathname.split('/').at(-1))];
+    return Response.json({ data: { content: content.repeat(4) } });
   }
   if (url.host === 'api.github.com' && url.pathname.includes('/contents/')) {
     const path = url.pathname.split('/contents/')[1];
@@ -163,5 +172,24 @@ assert.match(alpha47.summary, /Crafting/);
 assert.match(alpha47.fullSummary, /Inventar/);
 assert.ok(alpha47.changes.length >= 7);
 assert.equal(stored.get(patchesPath).data.some(p => p.version === 'Alpha 4.7'), false);
+
+archiveSeedDetailsAvailable = true;
+stored.get(patchesPath).data = stored.get(patchesPath).data.filter(p => p.version !== 'Alpha 4.6');
+const archivePreview = await (await request('/preview/patches?diagnostic=1')).json();
+assert.equal(archivePreview.newItems, 4);
+for (const version of ['Alpha 4.6','Alpha 4.5','Alpha 4.4']) {
+  assert.equal(archivePreview.seedDiagnostics.find(p => p.version === version).eligible, true);
+}
+const archiveEntries = await (await request('/preview/patches')).json();
+for (const [version, date, suffix] of [
+  ['Alpha 4.6','2026-01-28T00:00:00.000Z','20969-Star-Citizen-Alpha-46'],
+  ['Alpha 4.5','2025-12-17T00:00:00.000Z','20934-Star-Citizen-Alpha-450'],
+  ['Alpha 4.4','2025-11-19T00:00:00.000Z','20899-Star-Citizen-Alpha-440']
+]) {
+  const item = archiveEntries.items.find(p => p.version === version);
+  assert.equal(item.date, date);
+  assert.ok(item.sourceUrl.endsWith(suffix));
+  assert.ok(item.changes.length >= 4);
+}
 
 console.log('Patch-Archiv: Vorschau, Nachladen, Fehlerschutz und Cursor-Recovery: OK');

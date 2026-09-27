@@ -1,4 +1,4 @@
-# Verse Radar 0.8.6
+# Verse Radar 0.8.7
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -34,6 +34,7 @@ Version 0.8.3 ergänzt `/preview/patches?diagnostic=1`: eine kurze, schreibfreie
 Version 0.8.4 prüft die offiziell gelistete Alpha 4.7 (ID 21070) zusätzlich direkt anhand der Community-Detailseite und der Wiki-Update-Seite. In der kompakten Diagnose meldet `seedDiagnostics`, ob ausreichend Quelltext vorliegt. Ein Eintrag ohne auswertbaren Quelltext wird nicht veröffentlicht. Die ZIP enthält keine Archiv-Fortschrittsdatei mehr: Bei Updates die bereits im GitHub-Repository vorhandene Datei `public/data/patch-archive-state.json` behalten. Bei einer vollständigen Neuinstallation legt der Worker sie beim ersten erfolgreichen Import selbst an.
 Version 0.8.5 ergänzt für Alpha 4.7 eine ausführlichere deutsche Aufbereitung von Missionen, Inventar, Crafting, Bergbau, Schiffen, Nyx und VR. Das Datum ist anhand der Wiki-Patchseite auf den 25.03.2026 gesetzt. Vor der Veröffentlichung `/preview/patches` prüfen.
 Version 0.8.6 verwendet für Alpha 4.7 den tatsächlichen RSI-Link mit dem URL-Ende `Alpha-47`.
+Version 0.8.7 prüft die offiziell verlinkten Alpha-Versionen 4.6, 4.5 und 4.4 zusätzlich über Wiki-Patchtexte. Die Community-API liefert dafür teils `SCW/...-API`-Platzhalter statt der Original-URLs. Gezielte deutsche Änderungspunkte werden nur angelegt, wenn die wesentlichen Quellabschnitte vorhanden sind; andernfalls bleibt der Eintrag in der Diagnose sichtbar, wird jedoch nicht veröffentlicht. Vor `/run/patches` die neuen Einträge in `/preview/patches` auf Inhalt und RSI-Link prüfen.
 Der beigelegte statische Datenstand enthält 13 redaktionelle News und alle sechs geprüften Patches als Rückfall bei API-Ausfall. Der Datumsstand ist der bestätigte Erstimport vom 26.09.2026.
 
 ## Datenstruktur
