@@ -1,17 +1,17 @@
 {
   "status": "running",
   "lastRun": {
-    "at": "2026-09-27T20:30:15.329Z",
-    "patchItems": 53,
+    "at": "2026-09-27T20:32:16.129Z",
+    "patchItems": 61,
     "newItems": 8,
-    "nextPage": 21,
+    "nextPage": 23,
     "backfillComplete": false,
-    "historicalMissingItems": 51,
-    "historicalDeferredItems": 51
+    "historicalMissingItems": 43,
+    "historicalDeferredItems": 43
   },
   "sessionId": "c84ab0d7-b0d3-4cac-a4e2-0d9a08975338",
-  "leaseId": "9ad873e7-4b56-495b-b632-a3df5a87ee04",
-  "leaseUntil": "2026-09-27T20:42:10.335Z",
+  "leaseId": null,
+  "leaseUntil": null,
   "lastError": null,
-  "changedAt": "2026-09-27T20:30:19.746Z"
+  "changedAt": "2026-09-27T20:32:20.946Z"
 }
