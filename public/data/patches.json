@@ -2070,7 +2070,7 @@
   {
     "version": "Alpha 3.12.0",
     "date": "2020-12-17T00:00:00.000Z",
-    "previous": "Alpha 3.11.1",
+    "previous": "Alpha 3.11.1a",
     "summary": "Alpha 3.12.0: Bergbau und Rohstoffgewinnung werden erweitert oder angepasst. Der Ruf bei Fraktionen beeinflusst weitere Aufträge. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
     "changes": [
       {
@@ -2095,6 +2095,45 @@
     "ai": false,
     "summaryVersion": "0.9.6",
     "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.11.1a",
+    "date": "2020-11-19T00:00:00.000Z",
+    "previous": "Alpha 3.11.1",
+    "summary": "Alpha 3.11.1a: Ausgeschaltete Schiffe sollten nicht mehr durch Planetenoberflächen fallen. Sitzanimationen weiblicher Figuren im Nomad wurden korrigiert. Lackierungen lassen sich wieder auf die Sabre Comet anwenden. Die Anzeige für illegale Fracht erscheint ohne entsprechende Ladung nicht mehr fälschlich. Ein Server-Deadlock und ein Absturz des Backend-Dienstes wurden behoben.",
+    "changes": [
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Schiffe auf Planeten",
+        "description": "Ausgeschaltete Schiffe sollten nicht mehr durch Planetenoberflächen fallen."
+      },
+      {
+        "category": "Charakter",
+        "title": "Nomad-Sitzanimation",
+        "description": "Sitzanimationen weiblicher Figuren im Nomad wurden korrigiert."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Sabre-Comet-Lackierung",
+        "description": "Lackierungen lassen sich wieder auf die Sabre Comet anwenden."
+      },
+      {
+        "category": "Handel",
+        "title": "Handelskioske",
+        "description": "Die Anzeige für illegale Fracht erscheint ohne entsprechende Ladung nicht mehr fälschlich."
+      },
+      {
+        "category": "Technik",
+        "title": "Server und Backend",
+        "description": "Ein Server-Deadlock und ein Absturz des Backend-Dienstes wurden behoben."
+      }
+    ],
+    "fullSummary": "Alpha 3.11.1a enthält folgende dokumentierte Änderungen: Ausgeschaltete Schiffe sollten nicht mehr durch Planetenoberflächen fallen. Sitzanimationen weiblicher Figuren im Nomad wurden korrigiert. Lackierungen lassen sich wieder auf die Sabre Comet anwenden. Die Anzeige für illegale Fracht erscheint ohne entsprechende Ladung nicht mehr fälschlich. Ein Server-Deadlock und ein Absturz des Backend-Dienstes wurden behoben. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://robertsspaceindustries.com/spectrum/community/SC/forum/190048/thread/star-citizen-alpha-3-11-1-live-6538054-patch-notes",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.9.10",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
   },
   {
     "version": "Alpha 3.11.1",
@@ -2469,7 +2508,7 @@
   {
     "version": "Alpha 3.7.0",
     "date": "2019-10-11T00:00:00.000Z",
-    "previous": null,
+    "previous": "Alpha 3.6.2",
     "summary": "Alpha 3.7.0: Der Zugriff auf Inventar und Ausrüstung wird angepasst. Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
     "changes": [
       {
@@ -2495,6 +2534,164 @@
     ],
     "fullSummary": "Alpha 3.7.0 enthält folgende dokumentierte Änderungen: Der Zugriff auf Inventar und Ausrüstung wird angepasst. Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
     "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.7.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.6.2",
+    "date": "2019-09-06T00:00:00.000Z",
+    "previous": "Alpha 3.6.1",
+    "summary": "Alpha 3.6.2: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.6.2 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.6.2",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.6.1",
+    "date": "2019-08-08T00:00:00.000Z",
+    "previous": "Alpha 3.6.0",
+    "summary": "Alpha 3.6.1: Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Charakter",
+        "title": "Charaktereditor",
+        "description": "Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.6.1 enthält folgende dokumentierte Änderungen: Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.6.1",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.6.0",
+    "date": "2019-07-19T00:00:00.000Z",
+    "previous": "Alpha 3.5.1",
+    "summary": "Alpha 3.6.0: HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Schiffsanzeigen",
+        "description": "HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.6.0 enthält folgende dokumentierte Änderungen: HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.6.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.5.1",
+    "date": "2019-06-06T00:00:00.000Z",
+    "previous": "Alpha 3.5.0",
+    "summary": "Alpha 3.5.1: Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Charakter",
+        "title": "Charaktereditor",
+        "description": "Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.5.1 enthält folgende dokumentierte Änderungen: Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.5.1",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.5.0",
+    "date": "2019-04-17T00:00:00.000Z",
+    "previous": "Alpha 3.4.3",
+    "summary": "Alpha 3.5.0: Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. ArcCorp ergänzt weitere Landeflächen und Orte. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Charakter",
+        "title": "Charaktereditor",
+        "description": "Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt."
+      },
+      {
+        "category": "Orte",
+        "title": "ArcCorp",
+        "description": "ArcCorp ergänzt weitere Landeflächen und Orte."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.5.0 enthält folgende dokumentierte Änderungen: Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. ArcCorp ergänzt weitere Landeflächen und Orte. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.5.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.4.3",
+    "date": "2019-01-25T00:00:00.000Z",
+    "previous": "Alpha 3.4.2",
+    "summary": "Alpha 3.4.3: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.4.3 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.4.3",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.4.2",
+    "date": "2019-01-15T00:00:00.000Z",
+    "previous": null,
+    "summary": "Alpha 3.4.2: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.4.2 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.4.2",
     "sourceType": "Community Archive",
     "ai": false,
     "summaryVersion": "0.9.6",
