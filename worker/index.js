@@ -1,4 +1,4 @@
-/* Verse Radar 0.8.5 – RSI news + patch notes ingestion
+/* Verse Radar 0.8.6 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -15,7 +15,7 @@ const MAX = 20;
 const PATCH_PAGE_SIZE = 100;
 const PATCH_PAGES_PER_IMPORT = 2;
 const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
-const VERSION = "0.8.5";
+const VERSION = "0.8.6";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -758,6 +758,8 @@ function normalizePatchVersion(v) {
   return String(v || "").replace(/\.0(?=\b)/g, "").replace(/\s+/g, " ").trim();
 }
 function officialPatchUrl(id, title) {
+  // The official 4.7 slug omits the dot; the generated title slug does not.
+  if (id === 21070) return "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21070-Star-Citizen-Alpha-47";
   const slug = String(title || "Star Citizen Patch Notes").trim()
     .replace(/^Star Citizen\s*/i, "Star-Citizen-")
     .replace(/[^A-Za-z0-9:.]+/g, "-")

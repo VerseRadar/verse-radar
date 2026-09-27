@@ -1,5 +1,8 @@
 # Changelog – Verse Radar
 
+## 0.8.6 – Original-Link von Alpha 4.7
+- Der Alpha-4.7-Eintrag verwendet den offiziellen RSI-Link `21070-Star-Citizen-Alpha-47`.
+
 ## 0.8.5 – Alpha 4.7 vollständig zusammenfassen
 - Alpha 4.7 nennt nun Breaker Stations, Inventar, Crafting, Materialqualität, Aurora Mk II, Schiffsänderungen, Nyx-Stationen, VR und wichtige Fehlerkorrekturen.
 - Fehlendes Datum auf den belegten 25.03.2026 gesetzt.

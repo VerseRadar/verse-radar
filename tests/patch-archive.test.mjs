@@ -158,6 +158,7 @@ const alpha47Preview = await (await request('/preview/patches')).json();
 const alpha47 = alpha47Preview.items.find(p => p.version === 'Alpha 4.7');
 assert.equal(alpha47Preview.newItems, 1);
 assert.equal(alpha47.date, '2026-03-25T00:00:00.000Z');
+assert.equal(alpha47.sourceUrl, 'https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21070-Star-Citizen-Alpha-47');
 assert.match(alpha47.summary, /Crafting/);
 assert.match(alpha47.fullSummary, /Inventar/);
 assert.ok(alpha47.changes.length >= 7);
