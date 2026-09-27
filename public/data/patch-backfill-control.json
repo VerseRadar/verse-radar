@@ -1,5 +1,5 @@
 {
-  "status": "paused",
+  "status": "running",
   "lastRun": {
     "at": "2026-09-27T20:34:16.386Z",
     "patchItems": 68,
@@ -9,9 +9,9 @@
     "historicalMissingItems": 36,
     "historicalDeferredItems": 35
   },
-  "sessionId": "5dabec62-a983-47dc-9b55-427f85107feb",
+  "sessionId": "0d51430e-98c3-4260-9128-f824f93ae0e8",
   "leaseId": null,
   "leaseUntil": null,
   "lastError": null,
-  "changedAt": "2026-09-27T20:42:47.018Z"
+  "changedAt": "2026-09-27T20:53:00.823Z"
 }
