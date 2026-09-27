@@ -1430,7 +1430,7 @@
   {
     "version": "Alpha 3.20.0",
     "date": "2023-09-19T00:00:00.000Z",
-    "previous": null,
+    "previous": "Alpha 3.19.1",
     "summary": "Alpha 3.20.0: Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes. Gegenstände und Veränderungen werden durch Persistent Entity Streaming dauerhaft gespeichert. Nach Serverfehlern wird die Spielsitzung wiederhergestellt. Der Zugriff auf Inventar und Ausrüstung wird angepasst. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
     "changes": [
       {
@@ -1466,6 +1466,180 @@
     ],
     "fullSummary": "Alpha 3.20.0 enthält folgende dokumentierte Änderungen: Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes. Gegenstände und Veränderungen werden durch Persistent Entity Streaming dauerhaft gespeichert. Nach Serverfehlern wird die Spielsitzung wiederhergestellt. Der Zugriff auf Inventar und Ausrüstung wird angepasst. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
     "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.20.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.19.1",
+    "date": "2023-06-15T00:00:00.000Z",
+    "previous": "Alpha 3.19.0",
+    "summary": "Alpha 3.19.1: Gegenstände und Veränderungen werden durch Persistent Entity Streaming dauerhaft gespeichert. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Persistent Entity Streaming",
+        "description": "Gegenstände und Veränderungen werden durch Persistent Entity Streaming dauerhaft gespeichert."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.19.1 enthält folgende dokumentierte Änderungen: Gegenstände und Veränderungen werden durch Persistent Entity Streaming dauerhaft gespeichert. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.19.1",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.19.0",
+    "date": "2023-05-16T00:00:00.000Z",
+    "previous": "Alpha 3.18.2",
+    "summary": "Alpha 3.19.0: Bergbau und Rohstoffgewinnung werden erweitert oder angepasst. Neue Werkzeuge oder Anbauteile erweitern den Bergbau. Neue Höhlentypen erweitern erkundbare Schauplätze. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Gameplay",
+        "title": "Bergbau",
+        "description": "Bergbau und Rohstoffgewinnung werden erweitert oder angepasst."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Bergbau-Werkzeuge",
+        "description": "Neue Werkzeuge oder Anbauteile erweitern den Bergbau."
+      },
+      {
+        "category": "Orte",
+        "title": "Neue Höhlen",
+        "description": "Neue Höhlentypen erweitern erkundbare Schauplätze."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.19.0 enthält folgende dokumentierte Änderungen: Bergbau und Rohstoffgewinnung werden erweitert oder angepasst. Neue Werkzeuge oder Anbauteile erweitern den Bergbau. Neue Höhlentypen erweitern erkundbare Schauplätze. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.19.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.18.2",
+    "date": "2023-04-21T00:00:00.000Z",
+    "previous": "Alpha 3.18.1",
+    "summary": "Alpha 3.18.2: Die XenoThreat-Missionen und ihre Abläufe werden angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Missionen",
+        "title": "XenoThreat",
+        "description": "Die XenoThreat-Missionen und ihre Abläufe werden angepasst."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.18.2 enthält folgende dokumentierte Änderungen: Die XenoThreat-Missionen und ihre Abläufe werden angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.18.2",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.18.1",
+    "date": "2023-04-12T00:00:00.000Z",
+    "previous": "Alpha 3.18.0",
+    "summary": "Alpha 3.18.1: Bergung und Verwertung von Schiffswracks werden erweitert. Gegenstände und Veränderungen werden durch Persistent Entity Streaming dauerhaft gespeichert. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Gameplay",
+        "title": "Salvage",
+        "description": "Bergung und Verwertung von Schiffswracks werden erweitert."
+      },
+      {
+        "category": "Technik",
+        "title": "Persistent Entity Streaming",
+        "description": "Gegenstände und Veränderungen werden durch Persistent Entity Streaming dauerhaft gespeichert."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.18.1 enthält folgende dokumentierte Änderungen: Bergung und Verwertung von Schiffswracks werden erweitert. Gegenstände und Veränderungen werden durch Persistent Entity Streaming dauerhaft gespeichert. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.18.1",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.18.0",
+    "date": "2023-03-10T00:00:00.000Z",
+    "previous": "Alpha 3.17.3",
+    "summary": "Alpha 3.18.0: Bergung und Verwertung von Schiffswracks werden erweitert. Gegenstände und Veränderungen werden durch Persistent Entity Streaming dauerhaft gespeichert. HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet. Das Event rund um Orison erhält neue Kampfeinsätze. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Gameplay",
+        "title": "Salvage",
+        "description": "Bergung und Verwertung von Schiffswracks werden erweitert."
+      },
+      {
+        "category": "Technik",
+        "title": "Persistent Entity Streaming",
+        "description": "Gegenstände und Veränderungen werden durch Persistent Entity Streaming dauerhaft gespeichert."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Schiffsanzeigen",
+        "description": "HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet."
+      },
+      {
+        "category": "Missionen",
+        "title": "Siege of Orison",
+        "description": "Das Event rund um Orison erhält neue Kampfeinsätze."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Arena Commander",
+        "description": "Arena Commander erhält neue Spielmodi oder Anpassungen."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.18.0 enthält folgende dokumentierte Änderungen: Bergung und Verwertung von Schiffswracks werden erweitert. Gegenstände und Veränderungen werden durch Persistent Entity Streaming dauerhaft gespeichert. HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet. Das Event rund um Orison erhält neue Kampfeinsätze. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.18.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.17.3",
+    "date": "2022-10-06T00:00:00.000Z",
+    "previous": null,
+    "summary": "Alpha 3.17.3: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.17.3 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.17.3",
     "sourceType": "Community Archive",
     "ai": false,
     "summaryVersion": "0.9.5",
