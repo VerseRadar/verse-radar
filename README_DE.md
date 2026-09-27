@@ -1,4 +1,4 @@
-# Verse Radar 0.8.3
+# Verse Radar 0.8.4
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -31,13 +31,14 @@ Die Patch-Seite zeigt höchstens fünf aktuelle Einträge; die History zeigt all
 Version 0.8.1 übernimmt neue Einträge in die Patch History nur, wenn ihr RSI-Quelllink tatsächlich auf Patch Notes zeigt. Ältere bereits gespeicherte Update-Ankündigungen bleiben erhalten, werden aber als solche bezeichnet und mit ihrem echten RSI-Link versehen. Eine allgemeine Titelübereinstimmung wie „Alpha 4.7.2“ genügt nicht mehr für eine Patch Note.
 Version 0.8.2 liest das GitHub-Archiv unmittelbar vor dem Schreiben erneut. Bei einem 409-Konflikt wird es höchstens dreimal mit dem jeweils aktuellen GitHub-Stand zusammengeführt. Zusätzliche Einträge anderer Schreibvorgänge bleiben erhalten. Der Archivfortschritt wird erst nach dem erfolgreichen Archiv-Schreibzugriff gesetzt und ebenfalls bei 409 mit dem neueren Stand abgeglichen.
 Version 0.8.3 ergänzt `/preview/patches?diagnostic=1`: eine kurze, schreibfreie Übersicht über Anzahl und ID-Bereich der geprüften Archivseiten sowie gefundene Alpha-Titel, Quellkanal, URL und Filterergebnis. Damit können Lücken im Community-Archiv ohne weiteren Import geprüft werden.
+Version 0.8.4 prüft die offiziell gelistete Alpha 4.7 (ID 21070) zusätzlich direkt anhand der Community-Detailseite und der Wiki-Update-Seite. In der kompakten Diagnose meldet `seedDiagnostics`, ob ausreichend Quelltext vorliegt. Ein Eintrag ohne auswertbaren Quelltext wird nicht veröffentlicht. Die ZIP enthält keine Archiv-Fortschrittsdatei mehr: Bei Updates die bereits im GitHub-Repository vorhandene Datei `public/data/patch-archive-state.json` behalten. Bei einer vollständigen Neuinstallation legt der Worker sie beim ersten erfolgreichen Import selbst an.
 Der beigelegte statische Datenstand enthält 13 redaktionelle News und alle sechs geprüften Patches als Rückfall bei API-Ausfall. Der Datumsstand ist der bestätigte Erstimport vom 26.09.2026.
 
 ## Datenstruktur
 Die Website-Daten liegen ausschließlich unter `public/data/`.
 - `public/data/news.json`
 - `public/data/patches.json`
-- `public/data/patch-archive-state.json` (Fortschritt des schrittweisen Archivimports)
+- `public/data/patch-archive-state.json` (vom Worker gespeicherter Fortschritt; nicht in der ZIP enthalten)
 - `public/data/deals.json`
 - `public/data/events.json`
 - `public/data/freefly.json`

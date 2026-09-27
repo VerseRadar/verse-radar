@@ -77,6 +77,8 @@ assert.equal(diagnostic.items, undefined);
 assert.deepEqual(diagnostic.pageDiagnostics.map(p => p.page), [1, 2]);
 assert.equal(diagnostic.pageDiagnostics[1].alphaRecords.find(p => p.title === 'Star Citizen Alpha 4.7.2').accepted, false);
 assert.equal(diagnostic.pageDiagnostics[1].alphaRecords.find(p => p.title === 'Star Citizen Alpha 4.9').accepted, true);
+assert.deepEqual(diagnostic.seedDiagnostics.find(p => p.version === 'Alpha 4.7'),
+  { version: 'Alpha 4.7', sourceId: 21070, sourceContentLength: 0, eligible: false });
 assert.deepEqual(writes(), []);
 const first = await (await request('/preview/patches')).json();
 assert.equal(first.published, false);

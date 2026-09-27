@@ -1,5 +1,10 @@
 # Changelog – Verse Radar
 
+## 0.8.4 – Fehlenden Alpha-4.7-Eintrag gezielt prüfen
+- Alpha 4.7 mit der auf RSI gelisteten ID 21070 als zusätzliche Quellprüfung; Veröffentlichung nur bei mindestens 500 Zeichen auswertbarem Wiki-Quelltext.
+- Die kompakte Vorschau zeigt unter `seedDiagnostics` die Quelltextlänge und Eignung zusätzlicher Patch-Quellen.
+- Die ZIP enthält keine statische Archiv-Fortschrittsdatei mehr. Der beim Import gespeicherte GitHub-Stand soll bei Updates erhalten bleiben.
+
 ## 0.8.3 – Quelllücken im Patch-Archiv sichtbar machen
 - Die Patch-Vorschau zeigt für jede geprüfte API-Seite Anzahl und ID-Bereich sowie Alpha-Titel, RSI-URL und Filterergebnis.
 - `/preview/patches?diagnostic=1` gibt nur die kompakte Diagnose zurück, ohne Zusammenfassungen oder GitHub-Schreibzugriff.
