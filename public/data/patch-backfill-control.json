@@ -2,8 +2,8 @@
   "status": "running",
   "lastRun": null,
   "sessionId": "c84ab0d7-b0d3-4cac-a4e2-0d9a08975338",
-  "leaseId": null,
-  "leaseUntil": null,
+  "leaseId": "bff472e2-e5fe-46c5-a1ee-6bbd3c1353c5",
+  "leaseUntil": "2026-09-27T20:40:10.136Z",
   "lastError": null,
   "changedAt": "2026-09-27T20:20:04.315Z"
 }
