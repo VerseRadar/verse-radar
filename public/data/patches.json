@@ -409,7 +409,7 @@
   {
     "version": "Alpha 4.4",
     "date": "2025-11-19T00:00:00.000Z",
-    "previous": null,
+    "previous": "Alpha 4.3.2",
     "summary": "Nyx wird als drittes Sternensystem ergänzt; Levski und Delamar kehren zurück. Die Operation erweitert die Aufträge in Nyx. Neue Frachtaufträge führen zwischen Sternensystemen. Weitere Missionen erweitern das neue Sternensystem. Stationen erhalten außenliegende Frachtaufzüge. TripleDown und Boomtube erweitern das Arsenal. Über 180 Fehler- und Absturzkorrekturen sind dokumentiert.",
     "changes": [
       {
@@ -450,6 +450,143 @@
     ],
     "fullSummary": "Alpha 4.4 erweitert Star Citizen in folgenden Bereichen: Nyx wird als drittes Sternensystem ergänzt; Levski und Delamar kehren zurück. Die Operation erweitert die Aufträge in Nyx. Neue Frachtaufträge führen zwischen Sternensystemen. Weitere Missionen erweitern das neue Sternensystem. Stationen erhalten außenliegende Frachtaufzüge. TripleDown und Boomtube erweitern das Arsenal. Über 180 Fehler- und Absturzkorrekturen sind dokumentiert. Die vollständigen Details und Einschränkungen stehen in den verlinkten Patch Notes.",
     "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/20899-Star-Citizen-Alpha-440",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.3.2",
+    "date": "2025-10-16T00:00:00.000Z",
+    "previous": "Alpha 4.3.1",
+    "summary": "Eine neue Begegnung führt in die Onyx-Anlage und ihre unterirdischen Bereiche. Das Zerlegen von Schiffsstrukturen wurde überarbeitet. Die Auftragsreihe erhält ein Finale. Anvil Paladin, Esperia Stinger und Grey's Market Shiv werden ergänzt. Killshot Rifle und Pulverizer LMG ergänzen das Arsenal. Etwa 130 Fehler- und Absturzkorrekturen sind dokumentiert.",
+    "changes": [
+      {
+        "category": "Missionen",
+        "title": "Yormandi Encounter",
+        "description": "Eine neue Begegnung führt in die Onyx-Anlage und ihre unterirdischen Bereiche."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Strukturelles Salvage",
+        "description": "Das Zerlegen von Schiffsstrukturen wurde überarbeitet."
+      },
+      {
+        "category": "Missionen",
+        "title": "Frontier Fighters",
+        "description": "Die Auftragsreihe erhält ein Finale."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Neue Schiffe",
+        "description": "Anvil Paladin, Esperia Stinger und Grey's Market Shiv werden ergänzt."
+      },
+      {
+        "category": "Waffen",
+        "title": "Neue FPS-Waffen",
+        "description": "Killshot Rifle und Pulverizer LMG ergänzen das Arsenal."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Etwa 130 Fehler- und Absturzkorrekturen sind dokumentiert."
+      }
+    ],
+    "fullSummary": "Alpha 4.3.2 erweitert Star Citizen in folgenden Bereichen: Eine neue Begegnung führt in die Onyx-Anlage und ihre unterirdischen Bereiche. Das Zerlegen von Schiffsstrukturen wurde überarbeitet. Die Auftragsreihe erhält ein Finale. Anvil Paladin, Esperia Stinger und Grey's Market Shiv werden ergänzt. Killshot Rifle und Pulverizer LMG ergänzen das Arsenal. Etwa 130 Fehler- und Absturzkorrekturen sind dokumentiert. Die vollständigen Details und Einschränkungen stehen in den verlinkten Patch Notes.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/20852-Star-Citizen-Alpha-432",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.3.1",
+    "date": "2025-09-18T00:00:00.000Z",
+    "previous": "Alpha 4.3",
+    "summary": "Neue Rätsel, Hindernisse und Gefechte führen tiefer in die Forschungseinrichtungen. Schiffs-Krankenbetten benötigen MedGel für Respawns und die Behandlung von Verletzungen. In Pyro bringen Dropships Verstärkung; deaktivierte Wachtürme können sie aufhalten. Die Schadensreduktion von Schiffsrüstung und Schild wurde neu abgestimmt. Beschleunigung und Steuerverhalten der Gladius wurden angepasst. Die Explosionsradien verschiedener Raketen wurden angepasst.",
+    "changes": [
+      {
+        "category": "Missionen",
+        "title": "Onyx-Anlagen erweitert",
+        "description": "Neue Rätsel, Hindernisse und Gefechte führen tiefer in die Forschungseinrichtungen."
+      },
+      {
+        "category": "Medizin",
+        "title": "MedGel",
+        "description": "Schiffs-Krankenbetten benötigen MedGel für Respawns und die Behandlung von Verletzungen."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Dropships und Wachtürme",
+        "description": "In Pyro bringen Dropships Verstärkung; deaktivierte Wachtürme können sie aufhalten."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Ballistik gegen Rüstung und Schilde",
+        "description": "Die Schadensreduktion von Schiffsrüstung und Schild wurde neu abgestimmt."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Gladius-Flugverhalten",
+        "description": "Beschleunigung und Steuerverhalten der Gladius wurden angepasst."
+      },
+      {
+        "category": "Waffen",
+        "title": "Raketenexplosionen",
+        "description": "Die Explosionsradien verschiedener Raketen wurden angepasst."
+      }
+    ],
+    "fullSummary": "Alpha 4.3.1 erweitert Star Citizen in folgenden Bereichen: Neue Rätsel, Hindernisse und Gefechte führen tiefer in die Forschungseinrichtungen. Schiffs-Krankenbetten benötigen MedGel für Respawns und die Behandlung von Verletzungen. In Pyro bringen Dropships Verstärkung; deaktivierte Wachtürme können sie aufhalten. Die Schadensreduktion von Schiffsrüstung und Schild wurde neu abgestimmt. Beschleunigung und Steuerverhalten der Gladius wurden angepasst. Die Explosionsradien verschiedener Raketen wurden angepasst. Die vollständigen Details und Einschränkungen stehen in den verlinkten Patch Notes.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/20777-Star-Citizen-Alpha-431",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.3",
+    "date": "2025-08-16T00:00:00.000Z",
+    "previous": null,
+    "summary": "Verlassene Forschungsanlagen bieten Ermittlungsaufträge mit Daten, Rätseln und Gefahren. Aufträge werden besser auf verfügbare Einsatzorte verteilt. Die Flugbalance leichter Jäger wurde überarbeitet. Schneefall reagiert an ausgewählten Orten auf das Wetter. Neue Bewegungs- und Ausstiegsmöglichkeiten verbessern die Nutzung von Leitern. Am gewählten Heimatort erfolgt der Einstieg direkt im eigenen instanzierten Hangar. Rund 100 Korrekturen zu Problemen aus Alpha 4.2.1 sind dokumentiert.",
+    "changes": [
+      {
+        "category": "Missionen",
+        "title": "Onyx-Anlagen",
+        "description": "Verlassene Forschungsanlagen bieten Ermittlungsaufträge mit Daten, Rätseln und Gefahren."
+      },
+      {
+        "category": "Missionen",
+        "title": "Missionsverteilung",
+        "description": "Aufträge werden besser auf verfügbare Einsatzorte verteilt."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Leichte Jäger",
+        "description": "Die Flugbalance leichter Jäger wurde überarbeitet."
+      },
+      {
+        "category": "Wetter",
+        "title": "Dynamischer Schnee",
+        "description": "Schneefall reagiert an ausgewählten Orten auf das Wetter."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Leitern",
+        "description": "Neue Bewegungs- und Ausstiegsmöglichkeiten verbessern die Nutzung von Leitern."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Persönliche Hangars",
+        "description": "Am gewählten Heimatort erfolgt der Einstieg direkt im eigenen instanzierten Hangar."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Rund 100 Korrekturen zu Problemen aus Alpha 4.2.1 sind dokumentiert."
+      }
+    ],
+    "fullSummary": "Alpha 4.3 erweitert Star Citizen in folgenden Bereichen: Verlassene Forschungsanlagen bieten Ermittlungsaufträge mit Daten, Rätseln und Gefahren. Aufträge werden besser auf verfügbare Einsatzorte verteilt. Die Flugbalance leichter Jäger wurde überarbeitet. Schneefall reagiert an ausgewählten Orten auf das Wetter. Neue Bewegungs- und Ausstiegsmöglichkeiten verbessern die Nutzung von Leitern. Am gewählten Heimatort erfolgt der Einstieg direkt im eigenen instanzierten Hangar. Rund 100 Korrekturen zu Problemen aus Alpha 4.2.1 sind dokumentiert. Die vollständigen Details und Einschränkungen stehen in den verlinkten Patch Notes.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/20728-Star-Citizen-Alpha-430",
     "sourceType": "Patch Notes",
     "ai": false,
     "summaryVersion": "0.6.8",
