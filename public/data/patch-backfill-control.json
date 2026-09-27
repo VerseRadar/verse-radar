@@ -1,24 +1,19 @@
 {
   "status": "running",
   "lastRun": {
-    "at": "2026-09-27T21:54:19.538Z",
-    "patchItems": 80,
-    "newItems": 7,
-    "nextPage": 29,
+    "at": "2026-09-27T22:02:19.514Z",
+    "patchItems": 88,
+    "newItems": 8,
+    "nextPage": 31,
     "backfillComplete": false,
-    "historicalMissingItems": 24,
-    "historicalDeferredItems": 23,
-    "historicalUnusableItems": 1,
-    "historicalUnusableVersions": [
-      {
-        "version": "Alpha 3.11.1a",
-        "reason": "Patchtext nicht ausreichend auswertbar"
-      }
-    ]
+    "historicalMissingItems": 16,
+    "historicalDeferredItems": 16,
+    "historicalUnusableItems": 0,
+    "historicalUnusableVersions": []
   },
   "sessionId": "7e0651df-a18c-437f-960d-f7efd3a7748c",
-  "leaseId": "761f5ea2-0a39-49a0-bd93-d70ce4774f0c",
-  "leaseUntil": "2026-09-27T22:12:16.257Z",
+  "leaseId": null,
+  "leaseUntil": null,
   "lastError": null,
-  "changedAt": "2026-09-27T22:00:58.006Z"
+  "changedAt": "2026-09-27T22:02:23.613Z"
 }
