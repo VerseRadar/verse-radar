@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-27T19:56:04.216Z",
+  "updatedAt": "2026-09-27T19:57:15.704Z",
   "source": "https://robertsspaceindustries.com/en/comm-link?sort=publish_new",
   "patchSource": "https://robertsspaceindustries.com/en/patch-notes",
   "mode": "live",
@@ -10,14 +10,14 @@
   "refreshedItems": null,
   "aiItems": null,
   "newsItems": null,
-  "patchItems": 31,
+  "patchItems": 39,
   "patchNewItems": 8,
-  "patchNextPage": 15,
+  "patchNextPage": 17,
   "patchBackfillComplete": false,
   "patchDeferredSeedItems": 0,
   "patchDeferredPageItems": 0,
   "patchHistoricalCandidates": 80,
-  "patchHistoricalDeferredItems": 72,
+  "patchHistoricalDeferredItems": 64,
   "patchHistoricalUnusableItems": 0,
   "patchAiItems": 0
 }
