@@ -1,4 +1,4 @@
-# Verse Radar 0.9.1
+# Verse Radar 0.9.2
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -39,6 +39,7 @@ Version 0.8.8 holt für 4.5 und 4.4 zusätzlich den vollständigen Wiki-Patchtex
 Version 0.8.9 ergänzt die offiziell verlinkten Alpha-Versionen 4.3.2, 4.3.1 und 4.3 als geprüfte Archivkandidaten mit eigenen deutschen Änderungspunkten. Die kompakte Diagnose zeigt zusätzlich `patchAutoPublishEnabled`, damit sich eine mögliche Cron-Veröffentlichung leichter einordnen lässt. Vor jedem Import die Vorschau und die dort aufgeführten neuen Einträge prüfen.
 Version 0.9.0 ergänzt die Lücke mit Alpha 4.2.1, 4.2, 4.1.1 und 4.1: offiziell belegte Links und Daten, eigene deutsche Änderungspunkte und Quelltextprüfung vor Veröffentlichung. Der Import-Cursor kann auf Seite 9 bleiben; die zusätzliche Quellprüfung findet ältere Versionen unabhängig davon.
 Version 0.9.1 schließt die 4.x-Runde mit 4.0, 4.0.1 und 4.0.2 sowie 4.7.1, 4.7.2 und 4.8.2. Die drei 4.0-Versionen haben eigene RSI-Patch-Notes-Links. Für die nummerierten Content-Updates 4.7.1 und 4.8.2 führt der Wiki-Link „Full patch notes“ zum übergeordneten Hauptpatch; sie erhalten deshalb einen als Community-Archiv gekennzeichneten Quelllink und den Typ `Content Update`. 4.7.2 ist mit seiner offiziellen RSI-Update-Meldung verlinkt. Die bereits gespeicherten 4.8.1/4.8.3 bleiben als Release Info erkennbar. Für die ganze 4.x-Runde reicht eine geprüfte Vorschau und ein manueller Import; 3.x folgt separat.
+Version 0.9.2 erkennt Alpha 4.0 auch dann, wenn die Detail-API nur den verkürzten Text mit Wipe, Pyro und Server Meshing liefert. Die zusätzlichen Änderungspunkte sind anhand der vollständigen Wiki-Patchseite und des offiziellen RSI-Patchlinks geprüft. Vor `/run/patches` in der Diagnose `eligible: true` und die fünf `matchedChanges` für Alpha 4.0 prüfen.
 Der lokale Datenstand enthält 13 redaktionelle News und sechs ältere Patches als Rückfall bei API-Ausfall. Bei dieser Update-ZIP bleiben die vorhandenen GitHub-Patchdaten maßgeblich.
 
 ## Datenstruktur

@@ -1,5 +1,9 @@
 # Changelog – Verse Radar
 
+## 0.9.2 – Alpha 4.0 trotz verkürzter Detailquelle erkennen
+- Das Community-Detail zu Alpha 4.0 enthält nur einen verkürzten Patchtext. Die zentralen Änderungen sind anhand der vollständigen Wiki-Patchseite geprüft und werden bei bestätigtem Wipe, Pyro und Server Meshing erkannt.
+- Regressionstest prüft den tatsächlich beobachteten verkürzten Quelltext.
+
 ## 0.9.1 – 4.x gesammelt abschließen
 - Alpha 4.0, 4.0.1 und 4.0.2 mit geprüften RSI-Patch-Notes-Links, Daten und deutschen Änderungspunkten ergänzt.
 - Fehlende nummerierte Content-Updates 4.7.1, 4.7.2 und 4.8.2 mit konkreter Quelle und klarer Kennzeichnung in der History ergänzt; ein Link auf die Patch Notes des Hauptpatches wird nicht als eigener Patchlink ausgegeben.

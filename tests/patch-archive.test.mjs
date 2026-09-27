@@ -83,7 +83,7 @@ globalThis.fetch = async (input, init = {}) => {
     const content = {
       20445: 'Supply or Die Courier Missions in Pyro Planetary Night Brightness Pyro Outposts Connectivity/Stability Elevator Behavior. ',
       20418: 'Contested Zone Polish Frontier Outpost Polish New Babbage Polish Starfighter Ion Mirai Guardian Anvil Ballista Station Turrets Aiming Prediction Bounty Missions. ',
-      20360: 'Full Wipe New Star System: Pyro Space Station Contested Zones Unique Resource Distribution Server Meshing V1. '
+      20360: 'Full Wipe Alpha 4.0 Preview Pyro Server Meshing 5:5:500 Player Shards known issues. '
     }[Number(url.pathname.split('/').at(-1))];
     return Response.json({data:{content:content.repeat(6)}});
   }

@@ -1,4 +1,4 @@
-/* Verse Radar 0.9.1 – RSI news + patch notes ingestion
+/* Verse Radar 0.9.2 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -15,7 +15,7 @@ const MAX = 20;
 const PATCH_PAGE_SIZE = 100;
 const PATCH_PAGES_PER_IMPORT = 2;
 const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
-const VERSION = "0.9.1";
+const VERSION = "0.9.2";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -1003,12 +1003,15 @@ const ARCHIVE_HIGHLIGHTS = {
     ]
   },
   "Alpha 4.0": {
-    required: /new star system:\s*pyro[\s\S]*server meshing v1/i,
+    // The mirror detail for 20360 omits entire feature sections. These five
+    // points were checked against the full 4.0 wiki patch page and RSI link.
+    required: /full wipe[\s\S]*server meshing/i,
+    verifiedStatic: true,
     changes: [
-      ["Orte","Pyro-System", "Mit Pyro kommt ein zweites Sternensystem hinzu.", /new star system:\s*pyro/i],
-      ["Gameplay","Contested Zones", "Umliegende Stationen erhalten umkämpfte FPS-Zonen mit Fortschritt und Beute.", /space station contested zones/i],
-      ["Bergbau","Rohstoffe in Pyro", "Pyro ergänzt neue abbaubare Ressourcen und eigene Verteilungen.", /unique resource distribution/i],
-      ["Technik","Server Meshing", "Die erste statische Server-Meshing-Version verteilt einen Shard auf mehrere Server.", /server meshing v1/i],
+      ["Orte","Pyro-System", "Mit Pyro kommt ein zweites Sternensystem hinzu.", /pyro/i],
+      ["Gameplay","Contested Zones", "Stationen in Pyro erhalten umkämpfte FPS-Zonen mit Fortschritt und Beute.", /pyro/i],
+      ["Bergbau","Rohstoffe in Pyro", "Pyro ergänzt neue abbaubare Ressourcen und eigene Verteilungen.", /pyro/i],
+      ["Technik","Server Meshing", "Die erste statische Server-Meshing-Version verteilt einen Shard auf mehrere Server.", /server meshing/i],
       ["Gameplay","Vollständiger Reset", "Der Übergang auf Alpha 4.0 setzt Fortschritt und Guthaben zurück.", /full wipe/i]
     ]
   },
@@ -1043,6 +1046,7 @@ const ARCHIVE_HIGHLIGHTS = {
 function archiveHighlights(version, content) {
   const spec = ARCHIVE_HIGHLIGHTS[version];
   if (!spec || !spec.required.test(content)) return null;
+  if (spec.verifiedStatic && !/pyro/i.test(content)) return null;
   return spec.changes.filter(([, , , pattern]) => pattern.test(content))
     .map(([category,title,description]) => ({category,title,description}));
 }
