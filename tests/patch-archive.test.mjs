@@ -29,6 +29,7 @@ let repeatFirstPage = false;
 let missingSourceUrl = false;
 let archiveConflictOnce = false;
 let archiveConflictAlways = false;
+let alpha47DetailAvailable = false;
 const externalPatch = { version: 'Alpha 4.6', previous: null, sourceUrl: 'https://robertsspaceindustries.com/external', summary: 'Parallel gespeicherter Patch' };
 
 globalThis.fetch = async (input, init = {}) => {
@@ -40,6 +41,9 @@ globalThis.fetch = async (input, init = {}) => {
     if (sourceFailure && page === 2) return new Response('', { status: 503 });
     const records = repeatFirstPage && page === 2 ? pages[1] : pages[page] || [];
     return Response.json({ data: missingSourceUrl && page === 2 ? [{ ...records[0], rsi_url: '' }, ...records.slice(1)] : records, meta: { current_page: page, last_page: 3 } });
+  }
+  if (alpha47DetailAvailable && url.host === 'api.star-citizen.wiki' && url.pathname === '/api/comm-links/21070') {
+    return Response.json({ data: { content: ('Operation Breaker Stations Inventory Rework Two-Panel Layout Nearby Inventories Search, Sort, and Filter Crafting, Fabricator, and Blueprints Material Quality and Mining Updates New Ship: RSI Aurora Mk II Shield Balance Armor Balance Radar-Based Aim Assist People\'s Service Stations Virtual Reality Updates over 150 bug and crash fixes. ').repeat(4) } });
   }
   if (url.host === 'api.github.com' && url.pathname.includes('/contents/')) {
     const path = url.pathname.split('/contents/')[1];
@@ -147,5 +151,16 @@ assert.equal(final.published, true);
 assert.equal(stored.get(patchesPath).data.length, 7);
 assert.equal(stored.get(statePath).data.complete, true);
 assert.equal(stored.get(patchesPath).data[0].summary, 'Geprüft 4.10.1');
+
+alpha47DetailAvailable = true;
+stored.get(patchesPath).data = stored.get(patchesPath).data.filter(p => p.version !== 'Alpha 4.7');
+const alpha47Preview = await (await request('/preview/patches')).json();
+const alpha47 = alpha47Preview.items.find(p => p.version === 'Alpha 4.7');
+assert.equal(alpha47Preview.newItems, 1);
+assert.equal(alpha47.date, '2026-03-25T00:00:00.000Z');
+assert.match(alpha47.summary, /Crafting/);
+assert.match(alpha47.fullSummary, /Inventar/);
+assert.ok(alpha47.changes.length >= 7);
+assert.equal(stored.get(patchesPath).data.some(p => p.version === 'Alpha 4.7'), false);
 
 console.log('Patch-Archiv: Vorschau, Nachladen, Fehlerschutz und Cursor-Recovery: OK');

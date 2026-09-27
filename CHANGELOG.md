@@ -1,5 +1,10 @@
 # Changelog – Verse Radar
 
+## 0.8.5 – Alpha 4.7 vollständig zusammenfassen
+- Alpha 4.7 nennt nun Breaker Stations, Inventar, Crafting, Materialqualität, Aurora Mk II, Schiffsänderungen, Nyx-Stationen, VR und wichtige Fehlerkorrekturen.
+- Fehlendes Datum auf den belegten 25.03.2026 gesetzt.
+- Die erweiterte Ersatz-Zusammenfassung greift nur, wenn die Quelle die zentralen Abschnittsüberschriften enthält.
+
 ## 0.8.4 – Fehlenden Alpha-4.7-Eintrag gezielt prüfen
 - Alpha 4.7 mit der auf RSI gelisteten ID 21070 als zusätzliche Quellprüfung; Veröffentlichung nur bei mindestens 500 Zeichen auswertbarem Wiki-Quelltext.
 - Die kompakte Vorschau zeigt unter `seedDiagnostics` die Quelltextlänge und Eignung zusätzlicher Patch-Quellen.

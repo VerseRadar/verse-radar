@@ -1,4 +1,4 @@
-/* Verse Radar 0.8.4 – RSI news + patch notes ingestion
+/* Verse Radar 0.8.5 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -15,7 +15,7 @@ const MAX = 20;
 const PATCH_PAGE_SIZE = 100;
 const PATCH_PAGES_PER_IMPORT = 2;
 const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
-const VERSION = "0.8.4";
+const VERSION = "0.8.5";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -25,7 +25,7 @@ const LEGACY_RELEASE_LINKS = new Map([
 const PATCH_SEEDS = [
   { version: "Alpha 4.10", id: 21293, date: "2026-08-26T18:00:00.000Z" },
   { version: "Alpha 4.9", id: 21245, date: "2026-07-15T18:00:00.000Z" },
-  { version: "Alpha 4.7", id: 21070, date: null }
+  { version: "Alpha 4.7", id: 21070, date: "2026-03-25T00:00:00.000Z" }
 ];
 const VERSION_RE = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?$/;
 const PATCH_NOTES_URL = "https://robertsspaceindustries.com/en/patch-notes";
@@ -818,8 +818,29 @@ function debutedIn(version, feature) {
 function newGearMention(content) {
   return /new fps weapon|arlington rifle|vendetta hmg|super heavy armor/i.test(content);
 }
+function alpha47Content(version, content) {
+  return version === "Alpha 4.7" && /operation breaker stations/i.test(content) &&
+    /inventory rework/i.test(content) && /crafting, fabricator, and blueprints/i.test(content);
+}
+function alpha47Changes(content) {
+  const changes = [];
+  const add = (category, title, description, pattern) => {
+    if (pattern.test(content)) changes.push({ category, title, description });
+  };
+  add("Missionen", "Operation Breaker Stations", "In Nyx werden QV Breaker Stations über Aufträge erschlossen: Kämpfe, Gefahren und Rätsel führen zu Rohstoffen im Asteroiden.", /operation breaker stations/i);
+  add("Gameplay", "Inventar überarbeitet", "Zwei Inventarfenster, nahe Container als Tabs sowie Suche, Sortierung und Filter vereinfachen das Verwalten von Gegenständen.", /two-panel layout[\s\S]*nearby inventories[\s\S]*search, sort, and filter/i);
+  add("Herstellung", "Crafting und Baupläne", "Mit dem Item Fabricator lassen sich Gegenstände anhand von Bauplänen und gesammelten Materialien herstellen.", /crafting, fabricator, and blueprints/i);
+  add("Bergbau", "Materialqualität", "Abgebaute Rohstoffe erhalten Qualitätswerte; die Qualität eingesetzter Materialien beeinflusst die Werte hergestellter Gegenstände.", /material quality and mining updates/i);
+  add("Schiffe & Fahrzeuge", "Aurora Mk II", "Die RSI Aurora Mk II wird als neues Schiff eingeführt.", /new ship:\s*rsi aurora mk ii/i);
+  add("Schiffe & Fahrzeuge", "Schilde, Rüstung und Radar", "Schutzsysteme wurden neu abgestimmt; Radar-Komponenten und radarbasierte Zielhilfe kommen hinzu.", /shield balance[\s\S]*armor balance[\s\S]*radar-based aim assist/i);
+  add("Orte", "Stationen in Nyx", "People's Service Stations bieten neue Anlaufstellen und können als Heimatort gewählt werden.", /people.s service stations/i);
+  add("VR", "Experimentelle VR-Unterstützung", "Cursor, Oberfläche und Rendering für VR wurden weiterentwickelt.", /virtual reality updates/i);
+  add("Technik", "Fehlerbehebungen", "Über 150 Fehler- und Absturzkorrekturen seit Alpha 4.6 sind dokumentiert.", /over 150 bug and crash fixes/i);
+  return changes;
+}
 function fallbackPatchSummary(version, content) {
   const t = content || "";
+  if (alpha47Content(version, t)) return "Alpha 4.7 erweitert Nyx mit Operation Breaker Stations: In den Stationen warten Kämpfe, Rätsel und abbaubare Rohstoffe. Das Inventar wurde mit zwei Fenstern und Zugriff auf nahe Container überarbeitet. Crafting startet mit dem Item Fabricator, Bauplänen und Materialqualität, die sich auf hergestellte Gegenstände auswirkt. Dazu kommen die RSI Aurora Mk II, Änderungen an Schilden, Rüstung und Radar sowie weitere Anlaufstellen in Nyx. Experimentelle VR-Funktionen und zahlreiche Fehlerkorrekturen runden das Update ab.";
   const parts = [];
   if (/orison relief support/i.test(t)) parts.push("Orison Relief Support bringt eine neue Reihe von Wiederaufbau-, Transport-, Herstellungs- und Kampfeinsätzen mit persönlichem Fortschritts- und Belohnungssystem.");
   if (/siege of orison v2/i.test(t)) parts.push("Siege of Orison wurde als Instancing-Mission überarbeitet und bietet eine geschlossene Mission für Spieler und Gruppe.");
@@ -850,6 +871,7 @@ function fallbackPatchSummary(version, content) {
 function fallbackFullSummary(version, content) {
   if (!content) return "Die Patch-Notizen konnten technisch noch nicht vollständig aus dem Archiv übernommen werden. Die offizielle Originalquelle ist direkt verlinkt.";
   const t = content;
+  if (alpha47Content(version, t)) return "Alpha 4.7 bringt Operation Breaker Stations nach Nyx. In diesen Aufträgen kämpfen sich Spieler durch Gegner und Gefahren, lösen Rätsel und nehmen eine Bergbaustation wieder in Betrieb, um an Rohstoffe im Asteroiden zu gelangen. Stationen können exklusiv oder gemeinsam zugänglich sein. Das Inventar erhält eine neue Oberfläche mit zwei Fenstern. Nahe Container, Rucksäcke und Körper erscheinen als auswählbare Tabs; Suche, Sortierung und Filter helfen beim Umlagern und Ausrüsten. Das neue Crafting nutzt den Item Fabricator und Baupläne. Gesammelte und abgebaute Materialien besitzen Qualitätswerte, die die Werte des hergestellten Gegenstands beeinflussen. Auch die Verteilung von abbaubaren Rohstoffen wurde angepasst. Bei Schiffen kommt die RSI Aurora Mk II hinzu. Schilde und Rüstung wurden neu abgestimmt; Radar-Komponenten und radarbasierte Zielhilfe verändern die technischen Möglichkeiten der Fahrzeuge. In Nyx bieten People's Service Stations zusätzliche Anlaufstellen und mögliche Heimatorte. Die experimentelle VR-Unterstützung erhält Verbesserungen bei Cursor, Oberfläche und Rendering. Laut Patch Notes wurden seit Alpha 4.6 zudem über 150 Fehler und Abstürze korrigiert.";
   const parts = [];
   if (/orison relief support/i.test(t)) parts.push("Im Gameplay bringt der Patch mit Orison Relief Support eine neue Reihe von Wiederaufbau- und Unterstützungsaufträgen. Je nach Auftrag geht es um Ressourcensammlung, Herstellung, Transporte oder Kämpfe; der persönliche Fortschritt schaltet mehrere Belohnungen frei.");
   if (/siege of orison v2/i.test(t)) parts.push("Siege of Orison wurde als Instancing-Inhalt überarbeitet. Die Mission läuft in einer geschlossenen Instanz für die eigene Gruppe, nutzt Checkpoints und wurde bei Plattformen, Gegnern und Belohnungen angepasst.");
@@ -883,6 +905,7 @@ function fallbackFullSummary(version, content) {
 }
 function buildPatchChanges(item) {
   const t = item.content || ""; const changes = [];
+  if (alpha47Content(item.version, t)) return alpha47Changes(t);
   const add = (category,title,description,pattern) => { if (pattern.test(t)) changes.push({category,title,description}); };
   add("Gameplay","Orison Relief Support","Neue Wiederaufbau- und Unterstützungsaufträge rund um Orison mit Ressourcen, Herstellung, Transport und Kampf.",/orison relief support/i);
   add("Missionen","Siege of Orison V2","Die Mission wurde auf Instancing umgestellt und für Gruppen mit Checkpoints und überarbeiteten Gefechten neu aufgebaut.",/siege of orison v2/i);
