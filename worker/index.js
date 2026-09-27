@@ -1,4 +1,4 @@
-/* Verse Radar 0.9.7 – RSI news + patch notes ingestion
+/* Verse Radar 0.9.8 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -22,7 +22,7 @@ const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
 const PATCH_BACKFILL_PATH = "public/data/patch-backfill-control.json";
 const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "0.9.7";
+const VERSION = "0.9.8";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -232,7 +232,7 @@ async function setBackfillControl(env, status) {
     const latest = await getGithubJSONStrict(env, PATCH_BACKFILL_PATH, { allowMissing: true });
     const current = parseBackfillControl(latest.data);
     const next = { ...current, status, sessionId: crypto.randomUUID(), leaseId: null, leaseUntil: null,
-      lastError: null, changedAt: new Date().toISOString() };
+      lastError: status === "running" ? null : current.lastError ?? null, changedAt: new Date().toISOString() };
     try {
       await putGithub(env, PATCH_BACKFILL_PATH, JSON.stringify(next, null, 2) + "\n", `Verse Radar ${VERSION}: ${status} patch backfill`, latest.sha);
       return next;
@@ -257,7 +257,9 @@ async function finishBackfillTick(env, sessionId, leaseId, result, error) {
       lastRun: result ? { at: result.updatedAt, patchItems: result.patchItems,
         newItems: result.patchNewItems, nextPage: result.patchNextPage,
         backfillComplete: result.patchBackfillComplete, historicalMissingItems: result.patchHistoricalMissingItems,
-        historicalDeferredItems: result.patchHistoricalDeferredItems } : current.lastRun };
+        historicalDeferredItems: result.patchHistoricalDeferredItems,
+        historicalUnusableItems: result.patchHistoricalUnusableItems,
+        historicalUnusableVersions: result.patchHistoricalUnusableVersions } : current.lastRun };
     try {
       await putGithub(env, PATCH_BACKFILL_PATH, JSON.stringify(next, null, 2) + "\n", `Verse Radar ${VERSION}: patch backfill progress`, latest.sha);
       return;
@@ -630,7 +632,7 @@ async function updateSite(env, { includeNews = true, includePatches = true } = {
   const patchResult = includePatches ? await updatePatches(env) : null;
   const now = new Date().toISOString();
   const automation = includeNews && includePatches ? "Cloudflare Worker + RSI Comm-Link + RSI Patch Notes" : includeNews ? "Cloudflare Worker + RSI Comm-Link; Patch-Import pausiert" : "Cloudflare Worker + RSI Patch Notes; News-Import pausiert";
-  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation, version: VERSION, fetchedItems: newsResult?.fetchedItems ?? null, newItems: newsResult?.newItems ?? null, refreshedItems: newsResult?.refreshedItems ?? null, aiItems: newsResult?.aiItems ?? null, newsItems: newsResult?.news.length ?? null, patchItems: patchResult?.patches.length ?? null, patchNewItems: patchResult?.newItems ?? null, patchNextPage: patchResult?.nextState.nextPage ?? null, patchBackfillComplete: patchResult?.nextState.complete ?? null, patchDeferredSeedItems: patchResult?.deferredSeedItems ?? null, patchDeferredPageItems: patchResult?.deferredPageItems ?? null, patchHistoricalCandidates: patchResult?.historicalCandidates ?? null, patchHistoricalDeferredItems: patchResult?.historicalDeferredItems ?? null, patchHistoricalUnusableItems: patchResult?.historicalUnusableItems ?? null, patchHistoricalMissingItems: null, patchAiItems: patchResult?.aiItems ?? null };
+  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation, version: VERSION, fetchedItems: newsResult?.fetchedItems ?? null, newItems: newsResult?.newItems ?? null, refreshedItems: newsResult?.refreshedItems ?? null, aiItems: newsResult?.aiItems ?? null, newsItems: newsResult?.news.length ?? null, patchItems: patchResult?.patches.length ?? null, patchNewItems: patchResult?.newItems ?? null, patchNextPage: patchResult?.nextState.nextPage ?? null, patchBackfillComplete: patchResult?.nextState.complete ?? null, patchDeferredSeedItems: patchResult?.deferredSeedItems ?? null, patchDeferredPageItems: patchResult?.deferredPageItems ?? null, patchHistoricalCandidates: patchResult?.historicalCandidates ?? null, patchHistoricalDeferredItems: patchResult?.historicalDeferredItems ?? null, patchHistoricalUnusableItems: patchResult?.historicalUnusableItems ?? null, patchHistoricalUnusableVersions: patchResult?.historicalDiagnostics.filter(item => !item.eligible).map(({ version, reason }) => ({ version, reason })) ?? null, patchHistoricalMissingItems: null, patchAiItems: patchResult?.aiItems ?? null };
 
   if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) {
     return { ok: true, version: VERSION, published: false, ...meta, note: "GitHub Secrets fehlen; nichts zurückgeschrieben." };
@@ -878,7 +880,13 @@ async function fetchPatchItems(state, existingVersions) {
   let checked = 0;
   let lastCheckedIndex = historical.length ? state.historicalNextIndex % historical.length : 0;
   let firstDeferredIndex = null;
-  const historicalStartIndex = lastCheckedIndex;
+  let firstUnusableIndex = null;
+  const historicalCursorIndex = lastCheckedIndex;
+  // A previous run may have advanced past a rejected page. Retry that gap
+  // before processing more older versions; stored entries are always skipped.
+  const earlierMissing = historical.findIndex((patch, index) => index < historicalCursorIndex &&
+    !existingVersions.has(patchKey(patch.version)) && !discoveredKeys.has(patchKey(patch.version)));
+  const historicalStartIndex = earlierMissing < 0 ? historicalCursorIndex : earlierMissing;
   for (let offset = 0; offset < historical.length; offset++) {
     const index = (historicalStartIndex + offset) % historical.length;
     const patch = historical[index];
@@ -897,7 +905,7 @@ async function fetchPatchItems(state, existingVersions) {
       sourceUrl: item?.sourceUrl || null,
       reason: eligible ? undefined : item?.unusableReason || "Patchtext nicht ausreichend auswertbar" });
     if (eligible) discovered.push(item);
-    else historicalUnusableItems++;
+    else { historicalUnusableItems++; firstUnusableIndex ??= index; }
   }
 
   if (!discovered.length && !existingVersions.size) throw Error("Keine Patch Notes erkannt.");
@@ -912,7 +920,8 @@ async function fetchPatchItems(state, existingVersions) {
   return { items: unique, scannedPages, pageDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems,
     historicalCandidates, historicalDeferredItems, historicalUnusableItems, historicalDiagnostics,
     nextState: { nextPage, complete,
-      historicalStartIndex, historicalNextIndex: firstDeferredIndex ?? (historical.length ? (lastCheckedIndex + 1) % historical.length : 0) } };
+      historicalStartIndex: historicalCursorIndex,
+      historicalNextIndex: firstUnusableIndex ?? firstDeferredIndex ?? (historical.length ? (lastCheckedIndex + 1) % historical.length : 0) } };
 }
 
 function extractPatchContent(record) {

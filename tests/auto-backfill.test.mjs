@@ -11,7 +11,7 @@ const saved = new Map([
   [archivePath, { sha: 'archive', data: [...versions.filter(v => v !== '3.17.2a'), ...modernVersions].map(v => ({ version: `Alpha ${v}`, sourceUrl: 'https://example.test/existing' })) }],
   [statePath, { sha: 'state', data: { nextPage: 19, complete: false, historicalNextIndex: 30 } }]
 ]);
-let requests = [], failPage = false;
+let requests = [], failPage = false, failHotfix = false;
 globalThis.fetch = async (input, options = {}) => {
   const url = new URL(String(input));
   const method = options.method || 'GET';
@@ -29,6 +29,7 @@ globalThis.fetch = async (input, options = {}) => {
     return Response.json({ ok: true });
   }
   if (url.host === 'api.star-citizen.wiki' && url.pathname === '/api/comm-links/18804') {
+    if (failHotfix) return new Response('', { status: 503 });
     return Response.json({ data: { content: ('Star Citizen Patch 3.17.2a Major Bug Fixes Combat Assistance Service Beacons. Changed MAX Button on Shop Kiosks to +10. Reduced the HP of Multiple Parts on the Esperia Blade. Fixed 8 Client Crashes Fixed 9 Server Crashes. ').repeat(5) + 'Back to top Star Citizen Patch 3.17.2 Alpha Patch 3.17.2 and Siege of Orison.' } });
   }
   if (url.host === 'api.star-citizen.wiki' && url.pathname === '/api/comm-links') {
@@ -74,4 +75,26 @@ failPage = true;
 await assert.rejects(worker.scheduled({ cron: '*/2 * * * *' }, env, {}), /503/);
 assert.equal((await req('/backfill/status')).status, 'paused');
 assert.match(saved.get(controlPath).data.lastError, /503/);
+
+// A bad historical source must remain visible after pausing. An earlier gap
+// before the saved cursor is retried first when its source recovers.
+failPage = false;
+failHotfix = true;
+saved.get(archivePath).data = saved.get(archivePath).data.filter(p => p.version !== 'Alpha 3.17.2a');
+saved.get(statePath).data = { nextPage: 23, complete: false, historicalNextIndex: 50 };
+assert.equal((await req('/backfill/start', 'POST')).status, 'running');
+await worker.scheduled({ cron: '*/2 * * * *' }, env, {});
+assert.equal(saved.get(controlPath).data.status, 'paused');
+assert.match(saved.get(controlPath).data.lastError, /unbrauchbar/);
+assert.equal(saved.get(controlPath).data.lastRun.historicalUnusableVersions[0].version, 'Alpha 3.17.2a');
+const reason = saved.get(controlPath).data.lastError;
+assert.equal((await req('/backfill/stop', 'POST')).lastError, reason);
+failHotfix = false;
+assert.equal((await req('/backfill/start', 'POST')).status, 'running');
+requests = [];
+await worker.scheduled({ cron: '*/2 * * * *' }, env, {});
+assert.ok(requests.length < 50);
+assert.equal(saved.get(controlPath).data.lastRun.historicalUnusableItems, 0);
+assert.equal(saved.get(controlPath).data.lastRun.newItems, 1);
+assert.ok(saved.get(archivePath).data.some(p => p.version === 'Alpha 3.17.2a'));
 console.log('Automatischer Import: Authentifizierung, Fortschritt, Pause, Abschluss, Fehlerhalt und Worker-Budget: OK');

@@ -1,5 +1,10 @@
 # Changelog – Verse Radar
 
+## 0.9.8 – Übersprungene historische Versionen erneut prüfen
+- Ein fehlender 3.x-Eintrag vor dem gespeicherten Cursor wird vor den nächsten alten Versionen noch einmal geprüft. So bleibt auch eine wegen eines temporären Quellenfehlers übersprungene Version erreichbar.
+- Ist ein Eintrag weiterhin unbrauchbar, stoppt die Automatik und meldet Version sowie konkreten Grund im letzten Durchlauf. Der Cursor bleibt auf der fehlerhaften Version stehen.
+- „Anhalten“ bewahrt eine vorhandene Fehlermeldung; „Starten“ löscht sie für einen neuen Versuch. Bereits gespeicherte Patches bleiben erhalten.
+
 ## 0.9.7 – Automatischer Patch-Archivimport
 - Neuer Zwei-Minuten-Cron für die Patch-History; der bisherige Zwei-Stunden-Cron bleibt erhalten.
 - `/backfill` zeigt Start, Stopp und Status. Das Worker-Secret `RUN_SECRET` schützt die Steuerung; das Secret steht nicht in der URL.
