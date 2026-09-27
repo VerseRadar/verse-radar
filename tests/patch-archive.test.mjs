@@ -32,6 +32,7 @@ let archiveConflictAlways = false;
 let alpha47DetailAvailable = false;
 let archiveSeedDetailsAvailable = false;
 let archivePartialDetails = false;
+let archive43DetailsAvailable = false;
 const externalPatch = { version: 'Alpha 4.6', previous: null, sourceUrl: 'https://robertsspaceindustries.com/external', summary: 'Parallel gespeicherter Patch' };
 
 globalThis.fetch = async (input, init = {}) => {
@@ -58,6 +59,14 @@ globalThis.fetch = async (input, init = {}) => {
       ? (id === 20934 ? 'Engineering Gameplay ship repairs. ' : 'Welcome To Nyx with Levski. ').repeat(30)
       : content.repeat(4);
     return Response.json({ data: { content: partial } });
+  }
+  if (archive43DetailsAvailable && url.host === 'api.star-citizen.wiki' && /^\/api\/comm-links\/(20852|20777|20728)$/.test(url.pathname)) {
+    const content = {
+      20852: 'Yormandi Encounter Structural Salvage Update Frontier Fighters Finale Anvil Paladin Esperia Stinger Grey\'s Market Shiv Killshot Rifle Pulverizer LMG approximately 130 bug and crash fixes. ',
+      20777: 'Onyx Facility Expansion MedGel - Medical Respawn Resource Dropships & Watch Towers Armor and Ballistic Damage changes Gladius Flight changes Missiles damage radius adjustments. ',
+      20728: 'Onyx Facilities Mission Distribution Tech Updates Light Fighter Flight Tuning Changes Dynamic Snow Ladder Improvements Personal Instanced Hangar Spawning approximately 100 bugfixes. '
+    }[Number(url.pathname.split('/').at(-1))];
+    return Response.json({data:{content:content.repeat(5)}});
   }
   if (archivePartialDetails && url.host === 'starcitizen.tools' && url.pathname === '/api.php') {
     const page = url.searchParams.get('page');
@@ -100,6 +109,7 @@ assert.equal((await request('/run/patches')).status, 401);
 assert.deepEqual(writes(), []);
 const diagnostic = await (await request('/preview/patches?diagnostic=1')).json();
 assert.equal(diagnostic.published, false);
+assert.equal(diagnostic.patchAutoPublishEnabled, false);
 assert.equal(diagnostic.items, undefined);
 assert.deepEqual(diagnostic.pageDiagnostics.map(p => p.page), [1, 2]);
 assert.equal(diagnostic.pageDiagnostics[1].alphaRecords.find(p => p.title === 'Star Citizen Alpha 4.7.2').accepted, false);
@@ -209,5 +219,14 @@ archivePartialDetails = true;
 const wikiFallback = await (await request('/preview/patches?diagnostic=1')).json();
 assert.equal(wikiFallback.seedDiagnostics.find(p => p.version === 'Alpha 4.5').eligible, true);
 assert.equal(wikiFallback.seedDiagnostics.find(p => p.version === 'Alpha 4.4').eligible, true);
+
+archive43DetailsAvailable = true;
+const olderPreview = await (await request('/preview/patches')).json();
+for (const [version, suffix] of [['Alpha 4.3.2','20852-Star-Citizen-Alpha-432'],['Alpha 4.3.1','20777-Star-Citizen-Alpha-431'],['Alpha 4.3','20728-Star-Citizen-Alpha-430']]) {
+  const item = olderPreview.items.find(p => p.version === version);
+  assert.ok(item, `missing ${version}`);
+  assert.ok(item.sourceUrl.endsWith(suffix));
+  assert.ok(item.changes.length >= 4);
+}
 
 console.log('Patch-Archiv: Vorschau, Nachladen, Fehlerschutz und Cursor-Recovery: OK');

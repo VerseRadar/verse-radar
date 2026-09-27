@@ -1,4 +1,4 @@
-/* Verse Radar 0.8.8 – RSI news + patch notes ingestion
+/* Verse Radar 0.8.9 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -15,7 +15,7 @@ const MAX = 20;
 const PATCH_PAGE_SIZE = 100;
 const PATCH_PAGES_PER_IMPORT = 2;
 const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
-const VERSION = "0.8.8";
+const VERSION = "0.8.9";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -28,7 +28,10 @@ const PATCH_SEEDS = [
   { version: "Alpha 4.7", id: 21070, date: "2026-03-25T00:00:00.000Z" },
   { version: "Alpha 4.6", id: 20969, date: "2026-01-28T00:00:00.000Z" },
   { version: "Alpha 4.5", id: 20934, date: "2025-12-17T00:00:00.000Z" },
-  { version: "Alpha 4.4", id: 20899, date: "2025-11-19T00:00:00.000Z" }
+  { version: "Alpha 4.4", id: 20899, date: "2025-11-19T00:00:00.000Z" },
+  { version: "Alpha 4.3.2", id: 20852, date: "2025-10-16T00:00:00.000Z" },
+  { version: "Alpha 4.3.1", id: 20777, date: "2025-09-18T00:00:00.000Z" },
+  { version: "Alpha 4.3", id: 20728, date: "2025-08-16T00:00:00.000Z" }
 ];
 const VERSION_RE = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?$/;
 const PATCH_NOTES_URL = "https://robertsspaceindustries.com/en/patch-notes";
@@ -67,6 +70,7 @@ export default {
             count: result.patches.length, newItems: result.newItems,
             scannedPages: result.scannedPages, nextPage: result.nextState.nextPage,
             backfillComplete: result.nextState.complete, pageDiagnostics: result.pageDiagnostics,
+            patchAutoPublishEnabled: env.PATCH_AUTO_PUBLISH === "true",
             seedDiagnostics: result.seedDiagnostics });
         }
         return json({
@@ -768,7 +772,7 @@ function normalizePatchVersion(v) {
   return String(v || "").replace(/\.0(?=\b)/g, "").replace(/\s+/g, " ").trim();
 }
 function officialPatchUrl(id, title) {
-  const verifiedSlugs = new Map([[21070,"47"],[20969,"46"],[20934,"450"],[20899,"440"]]);
+  const verifiedSlugs = new Map([[21070,"47"],[20969,"46"],[20934,"450"],[20899,"440"],[20852,"432"],[20777,"431"],[20728,"430"]]);
   if (verifiedSlugs.has(id)) return `https://robertsspaceindustries.com/en/comm-link/Patch-Notes/${id}-Star-Citizen-Alpha-${verifiedSlugs.get(id)}`;
   const slug = String(title || "Star Citizen Patch Notes").trim()
     .replace(/^Star Citizen\s*/i, "Star-Citizen-")
@@ -887,6 +891,40 @@ const ARCHIVE_HIGHLIGHTS = {
       ["Waffen","Neue FPS-Waffen", "TripleDown und Boomtube erweitern das Arsenal.", /tripledown[\s\S]*boomtube/i],
       ["Technik","Streaming und Performance", "Streaming und Umgebungsdarstellung wurden optimiert.", /streaming improvements[\s\S]*performance optimizations/i],
       ["Technik","Fehlerbehebungen", "Über 180 Fehler- und Absturzkorrekturen sind dokumentiert.", /over 180 bug and crash fixes/i]
+    ]
+  },
+  "Alpha 4.3.2": {
+    required: /yormandi encounter[\s\S]*structural salvage update/i,
+    changes: [
+      ["Missionen","Yormandi Encounter", "Eine neue Begegnung führt in die Onyx-Anlage und ihre unterirdischen Bereiche.", /yormandi encounter/i],
+      ["Gameplay","Strukturelles Salvage", "Das Zerlegen von Schiffsstrukturen wurde überarbeitet.", /structural salvage update/i],
+      ["Missionen","Frontier Fighters", "Die Auftragsreihe erhält ein Finale.", /frontier fighters finale/i],
+      ["Schiffe & Fahrzeuge","Neue Schiffe", "Anvil Paladin, Esperia Stinger und Grey's Market Shiv werden ergänzt.", /anvil paladin[\s\S]*esperia stinger[\s\S]*grey.s market shiv/i],
+      ["Waffen","Neue FPS-Waffen", "Killshot Rifle und Pulverizer LMG ergänzen das Arsenal.", /killshot rifle[\s\S]*pulverizer lmg/i],
+      ["Technik","Fehlerbehebungen", "Etwa 130 Fehler- und Absturzkorrekturen sind dokumentiert.", /approximately 130 bug and crash fixes/i]
+    ]
+  },
+  "Alpha 4.3.1": {
+    required: /onyx facility expansion[\s\S]*medgel/i,
+    changes: [
+      ["Missionen","Onyx-Anlagen erweitert", "Neue Rätsel, Hindernisse und Gefechte führen tiefer in die Forschungseinrichtungen.", /onyx facility expansion/i],
+      ["Medizin","MedGel", "Schiffs-Krankenbetten benötigen MedGel für Respawns und die Behandlung von Verletzungen.", /medgel - medical respawn resource/i],
+      ["Gameplay","Dropships und Wachtürme", "In Pyro bringen Dropships Verstärkung; deaktivierte Wachtürme können sie aufhalten.", /dropships & watch towers/i],
+      ["Schiffe & Fahrzeuge","Ballistik gegen Rüstung und Schilde", "Die Schadensreduktion von Schiffsrüstung und Schild wurde neu abgestimmt.", /armor and ballistic damage changes/i],
+      ["Schiffe & Fahrzeuge","Gladius-Flugverhalten", "Beschleunigung und Steuerverhalten der Gladius wurden angepasst.", /gladius flight changes/i],
+      ["Waffen","Raketenexplosionen", "Die Explosionsradien verschiedener Raketen wurden angepasst.", /missiles damage radius adjustments/i]
+    ]
+  },
+  "Alpha 4.3": {
+    required: /onyx facilities[\s\S]*dynamic snow/i,
+    changes: [
+      ["Missionen","Onyx-Anlagen", "Verlassene Forschungsanlagen bieten Ermittlungsaufträge mit Daten, Rätseln und Gefahren.", /onyx facilities/i],
+      ["Missionen","Missionsverteilung", "Aufträge werden besser auf verfügbare Einsatzorte verteilt.", /mission distribution tech updates/i],
+      ["Schiffe & Fahrzeuge","Leichte Jäger", "Die Flugbalance leichter Jäger wurde überarbeitet.", /light fighter flight tuning changes/i],
+      ["Wetter","Dynamischer Schnee", "Schneefall reagiert an ausgewählten Orten auf das Wetter.", /dynamic snow/i],
+      ["Gameplay","Leitern", "Neue Bewegungs- und Ausstiegsmöglichkeiten verbessern die Nutzung von Leitern.", /ladder improvements/i],
+      ["Gameplay","Persönliche Hangars", "Am gewählten Heimatort erfolgt der Einstieg direkt im eigenen instanzierten Hangar.", /personal instanced hangar spawning/i],
+      ["Technik","Fehlerbehebungen", "Rund 100 Korrekturen zu Problemen aus Alpha 4.2.1 sind dokumentiert.", /approximately 100 bugfixes/i]
     ]
   }
 };

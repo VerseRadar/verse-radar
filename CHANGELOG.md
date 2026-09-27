@@ -1,5 +1,10 @@
 # Changelog – Verse Radar
 
+## 0.8.9 – Patch-History bis Alpha 4.3 vorbereiten
+- Offizielle Patch-Notes-Links, Veröffentlichungsdaten und konkrete Änderungspunkte für Alpha 4.3, 4.3.1 und 4.3.2 ergänzt.
+- Neue Einträge erscheinen nur bei ausreichend passendem Quelltext.
+- Die Diagnose meldet, ob `PATCH_AUTO_PUBLISH=true` gesetzt ist; dadurch kann ein unerwarteter Cursor-Fortschritt eingeordnet werden.
+
 ## 0.8.8 – Archivdaten beim Update erhalten
 - Die Update-ZIP enthält keine ältere `public/data/patches.json` mehr. Der veröffentlichte GitHub-Stand soll bei der Installation erhalten bleiben.
 - Für 4.5 und 4.4 wird bei unvollständigen API-Detailtexten zusätzlich die vollständige Wiki-Patchseite geprüft.

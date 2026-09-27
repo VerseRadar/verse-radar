@@ -1,4 +1,4 @@
-# Verse Radar 0.8.8
+# Verse Radar 0.8.9
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -36,6 +36,7 @@ Version 0.8.5 ergänzt für Alpha 4.7 eine ausführlichere deutsche Aufbereitung
 Version 0.8.6 verwendet für Alpha 4.7 den tatsächlichen RSI-Link mit dem URL-Ende `Alpha-47`.
 Version 0.8.7 prüft die offiziell verlinkten Alpha-Versionen 4.6, 4.5 und 4.4 zusätzlich über Wiki-Patchtexte. Die Community-API liefert dafür teils `SCW/...-API`-Platzhalter statt der Original-URLs. Gezielte deutsche Änderungspunkte werden nur angelegt, wenn die wesentlichen Quellabschnitte vorhanden sind; andernfalls bleibt der Eintrag in der Diagnose sichtbar, wird jedoch nicht veröffentlicht. Vor `/run/patches` die neuen Einträge in `/preview/patches` auf Inhalt und RSI-Link prüfen.
 Version 0.8.8 holt für 4.5 und 4.4 zusätzlich den vollständigen Wiki-Patchtext, falls der API-Detailtext wichtige Abschnitte auslässt. `seedDiagnostics.matchedChanges` zeigt die erkannten Punkte. Die Update-ZIP enthält weder `public/data/patches.json` noch die Fortschrittsdatei: Beide vorhandenen GitHub-Dateien bei Updates behalten. Die vorherigen ZIPs enthielten einen alten Stand mit sechs Patches, der bei einer vollständigen Dateiübernahme den veröffentlichten siebten Eintrag überschreiben konnte.
+Version 0.8.9 ergänzt die offiziell verlinkten Alpha-Versionen 4.3.2, 4.3.1 und 4.3 als geprüfte Archivkandidaten mit eigenen deutschen Änderungspunkten. Die kompakte Diagnose zeigt zusätzlich `patchAutoPublishEnabled`, damit sich eine mögliche Cron-Veröffentlichung leichter einordnen lässt. Vor jedem Import die Vorschau und die dort aufgeführten neuen Einträge prüfen.
 Der lokale Datenstand enthält 13 redaktionelle News und sechs ältere Patches als Rückfall bei API-Ausfall. Bei dieser Update-ZIP bleiben die vorhandenen GitHub-Patchdaten maßgeblich.
 
 ## Datenstruktur
