@@ -1,4 +1,4 @@
-# Verse Radar 0.7.0
+# Verse Radar 0.8.0
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -27,13 +27,14 @@ Der Worker liest die offizielle RSI Comm-Link-Seite ein, erkennt aktuelle Comm-L
 Cron: alle 2 Stunden (`0 */2 * * *`).
 Ohne `NEWS_AUTO_PUBLISH=true` und ohne `PATCH_AUTO_PUBLISH=true` schreibt der Cron keine Daten. Der manuelle Endpunkt `/run/news` veröffentlicht nur News; `/run` veröffentlicht News und Patches. Falls `RUN_SECRET` gesetzt ist, benötigen beide Endpunkte den gewohnten Schlüssel.
 Version 0.7.0 entfernt technische Archiv-Einträge und ersetzt wiederholte News-Platzhalter mit vorsichtigen deutschen Beschreibungen, die auf dem Titel beruhen. Wo eine bereits geprüfte Patch-Zusammenfassung zur exakt selben Comm-Link-ID vorliegt, nutzt die News-Karte deren erste zwei Sätze. Artikelinhalte werden ohne brauchbare Quellbeschreibung oder KI-Schlüssel nicht als vollständig zusammengefasst ausgegeben.
-Die Patch-Seite zeigt höchstens fünf aktuelle Einträge; die History enthält vorerst höchstens zwölf gespeicherte Versionen. Die geprüfte Patch-Aufbereitung bleibt auf `summaryVersion=0.6.8`.
+Die Patch-Seite zeigt höchstens fünf aktuelle Einträge; die History zeigt alle gespeicherten Versionen. Der Worker ergänzt bei jedem geprüften manuellen Patch-Import zwei ältere Archivseiten und behält bestehende Versionen. Wie weit das Archiv zurückreichen kann, hängt von der verfügbaren Patch-Quelle ab. Die geprüfte Patch-Aufbereitung bleibt auf `summaryVersion=0.6.8`.
 Der beigelegte statische Datenstand enthält 13 redaktionelle News und alle sechs geprüften Patches als Rückfall bei API-Ausfall. Der Datumsstand ist der bestätigte Erstimport vom 26.09.2026.
 
 ## Datenstruktur
 Die Website-Daten liegen ausschließlich unter `public/data/`.
 - `public/data/news.json`
 - `public/data/patches.json`
+- `public/data/patch-archive-state.json` (Fortschritt des schrittweisen Archivimports)
 - `public/data/deals.json`
 - `public/data/events.json`
 - `public/data/freefly.json`
@@ -45,10 +46,11 @@ Im Browser werden diese Dateien über `/data/...` geladen, weil `public/` bei Cl
 - `/health` – zeigt die laufende Worker-Version.
 - `/preview` – holt RSI-Beiträge ab, ohne GitHub zu verändern.
 - `/preview/news` – berechnet die fertig veröffentlichbaren News inklusive `count`, `newItems`, `refreshedItems`, `aiItems` und `items`, ohne GitHub zu verändern. Vor `/run/news` prüfen.
-- `/preview/patches` – erstellt ohne GitHub-Schreibzugriff die fertig aufbereiteten Patch-Daten einschließlich `changes`, `summary`, `fullSummary` und Vorgängerversion. Erst diese Ausgabe prüfen, bevor `/run` benutzt wird.
+- `/preview/patches` – erstellt ohne GitHub-Schreibzugriff die fertig aufbereiteten Patch-Daten einschließlich `changes`, `summary`, `fullSummary` und Vorgängerversion; zeigt auch `newItems`, `scannedPages`, `nextPage` und `backfillComplete`. Erst diese Ausgabe prüfen, bevor Patches veröffentlicht werden.
 - `/api/patches` – liefert die aktuell gespeicherten Patch Notes für die Website.
 - `/run` – führt den Import aus und schreibt bei vorhandenen GitHub-Zugangsdaten die Daten zurück.
 - `/run/news` – schreibt nur News und Metadaten zurück; gespeicherte Patch Notes bleiben erhalten.
+- `/run/patches` – schreibt nur das Patch-Archiv und Metadaten. Vor jedem Aufruf `/preview/patches` prüfen; anschließend kann bei Bedarf mit der nächsten Vorschau die folgende Archivseite geprüft werden. Vorhandene Archiveinträge bleiben erhalten. Bei unlesbaren Quelldaten oder GitHub-Daten bricht der Import ab. Falls die Archivdatei geschrieben wurde, aber das Schreiben des Fortschritts fehlschlägt, wiederholt der nächste Aufruf dieselbe Seite.
 
 ## 0.5.8
 Der RSI-Parser wurde robuster gegen Änderungen am HTML-Aufbau der Comm-Link-Seite gemacht. `/preview` liefert bei einem Fehler zusätzliche technische Diagnosewerte, damit ein weiterer Fehler gezielt behoben werden kann.

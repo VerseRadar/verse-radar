@@ -1,5 +1,12 @@
 # Changelog – Verse Radar
 
+## 0.8.0 – Patch History als fortlaufendes Archiv
+- Die bisherige Grenze von zwölf gespeicherten Patch-Versionen entfällt. `/patch-history.html` zeigt alle gespeicherten Versionen, `/patches.html` weiterhin nur die fünf neuesten.
+- Die schreibfreie Vorschau `/preview/patches` ergänzt jeweils ältere Archivseiten, meldet Fortschritt und die Zahl neuer Versionen. `/run/patches` veröffentlicht unabhängig von News.
+- Der Fortschritt liegt in `public/data/patch-archive-state.json`. Er wird erst nach dem Archiv geschrieben; ein Fehler kann daher keine älteren Versionen überspringen. Bestehende Zusammenfassungen werden nicht durch schlechtere Quellen überschrieben.
+- Bei nicht lesbaren GitHub-Dateien, ungültigem Archiv, kaputter Quellenantwort oder wiederholter erster Quellseite bricht der Import ohne Archiv-Schreibzugriff ab. Automatische Veröffentlichung bleibt deaktiviert.
+- Archivablauf, fehlgeschlagene Quell- und GitHub-Aufrufe sowie der Wiederholungsfall nach einem fehlgeschlagenen Fortschritts-Schreibzugriff werden lokal getestet.
+
 ## 0.7.0 – News-Import überprüfen und bereinigen
 - `/preview/news` zeigt die veröffentlichbare News-Liste ohne GitHub-Schreibzugriff. `/run/news` veröffentlicht nur News und Metadaten.
 - Relevanz wird am Titel geprüft; der generische RSI-Platzhalter zählt nicht mehr als Suchtreffer. Technische `R-PU-ORS-*`-Kennungen und doppelte identische Roadmap-Titel werden ausgelassen. Wiederkehrende Wochenübersichten bleiben erhalten.

@@ -4,6 +4,7 @@
   try {
     const patches=await loadJSON("patches.json");
     target.innerHTML=patches.length?renderPatchHistory(patches):'<div class="empty-state">Noch keine Patch Notes vorhanden.</div>';
+    if(usingStaticData) document.querySelector(".page-intro").textContent="Archivdaten sind vorübergehend nicht erreichbar. Hier siehst du den im Paket gespeicherten Stand.";
   } catch (e) {
     target.innerHTML='<div class="empty-state">Patch History konnte nicht geladen werden.</div>';
   }

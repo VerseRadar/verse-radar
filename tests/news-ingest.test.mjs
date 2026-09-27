@@ -38,10 +38,10 @@ globalThis.fetch = async (target, options = {}) => {
     return new Response(html);
   }
   if (address.startsWith("https://api.star-citizen.wiki/api/comm-links?")) return Response.json({ data: archive });
-  if (address.includes("/contents/public/data/news.json?ref=main")) return failNewsRead ? new Response("Unavailable", { status: 503 }) : Response.json({ content: Buffer.from(JSON.stringify(oldNews)).toString("base64") });
+  if (address.includes("/contents/public/data/news.json?ref=main")) return failNewsRead ? new Response("Unavailable", { status: 503 }) : Response.json({ sha: "news-sha", content: Buffer.from(JSON.stringify(oldNews)).toString("base64") });
   if (address.includes("/contents/public/data/patches.json?ref=main")) {
     const patches = [{ sourceUrl: "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21330-Star-Citizen-Alpha-4101", summaryVersion: "0.6.8", summary: "Alpha 4.10.1 bringt Orison Relief Support. Der Patch enthält weitere Änderungen an Aufträgen und Fahrzeugen. Noch ein dritter Satz." }];
-    return Response.json({ content: Buffer.from(JSON.stringify(patches)).toString("base64") });
+    return Response.json({ sha: "patch-sha", content: Buffer.from(JSON.stringify(patches)).toString("base64") });
   }
   if (address.includes("/contents/public/data/news.json") && options.method === "PUT") return Response.json({ ok: true });
   if (address.includes("/contents/public/data/meta.json") && options.method === "PUT") return Response.json({ ok: true });
@@ -51,7 +51,7 @@ globalThis.fetch = async (target, options = {}) => {
 
 const env = { GITHUB_TOKEN: "test-token", GITHUB_REPO: "example/verse-radar", GITHUB_BRANCH: "main" };
 const health = await worker.fetch(new Request("https://example.com/health"), env);
-assert.equal((await health.json()).version, "0.7.0");
+assert.equal((await health.json()).version, "0.8.0");
 const patchApi = await worker.fetch(new Request("https://example.com/api/patches"), env);
 assert.equal(patchApi.headers.get("x-verse-radar-patches-source"), "github");
 

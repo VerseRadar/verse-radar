@@ -1,4 +1,4 @@
-/* Verse Radar 0.7.0 – RSI news + patch notes ingestion
+/* Verse Radar 0.8.0 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -12,7 +12,10 @@
 
 const COMM_LINK_URL = "https://robertsspaceindustries.com/en/comm-link?sort=publish_new";
 const MAX = 20;
-const PATCH_MAX = 12;
+const PATCH_PAGE_SIZE = 100;
+const PATCH_PAGES_PER_IMPORT = 2;
+const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
+const VERSION = "0.8.0";
 const PATCH_SEEDS = [
   { version: "Alpha 4.10", id: 21293, date: "2026-08-26T18:00:00.000Z" },
   { version: "Alpha 4.9", id: 21245, date: "2026-07-15T18:00:00.000Z" }
@@ -27,7 +30,7 @@ export default {
   async fetch(request, env) {
     const u = new URL(request.url);
     if (u.pathname === "/health") {
-      return json({ ok: true, service: "verse-radar-updater", version: "0.7.0" });
+      return json({ ok: true, service: "verse-radar-updater", version: VERSION });
     }
     if (u.pathname === "/preview") {
       try {
@@ -53,7 +56,12 @@ export default {
           ok: true,
           source: PATCH_NOTES_URL,
           count: result.patches.length,
+          newItems: result.newItems,
           aiItems: result.aiItems,
+          scannedPages: result.scannedPages,
+          nextPage: result.nextState.nextPage,
+          backfillComplete: result.nextState.complete,
+          published: false,
           items: result.patches,
           discovery: result.items.map(item => ({
             version: item.version,
@@ -78,16 +86,16 @@ export default {
         return json([]);
       } catch (e) { return json({ ok: false, error: e.message }, 500); }
     }
-    if (u.pathname === "/run" || u.pathname === "/run/news") {
+    if (u.pathname === "/run" || u.pathname === "/run/news" || u.pathname === "/run/patches") {
       if (env.RUN_SECRET && u.searchParams.get("key") !== env.RUN_SECRET) return json({ ok: false, error: "Unauthorized" }, 401);
-      try { return json(await updateSite(env, { includePatches: u.pathname === "/run" })); } catch (e) { return json({ ok: false, error: e.message }, 500); }
+      try { return json(await updateSite(env, { includeNews: u.pathname !== "/run/patches", includePatches: u.pathname !== "/run/news" })); } catch (e) { return json({ ok: false, error: e.message }, 500); }
     }
     if (u.pathname === "/debug/github") {
       try {
         const d = await githubDiagnostics(env, "public/data/news.json");
-        return json({ ok: true, version: "0.7.0", github: d });
+        return json({ ok: true, version: VERSION, github: d });
       } catch (e) {
-        return json({ ok: false, version: "0.7.0", error: e.message }, 500);
+        return json({ ok: false, version: VERSION, error: e.message }, 500);
       }
     }
     if (u.pathname === "/api/news") {
@@ -117,7 +125,7 @@ export default {
     }
     // Public website: let Cloudflare Static Assets serve /public.
     if (env.ASSETS) return env.ASSETS.fetch(request);
-    return new Response("Verse Radar 0.7.0", { headers: { "content-type": "text/plain;charset=utf-8" } });
+    return new Response(`Verse Radar ${VERSION}`, { headers: { "content-type": "text/plain;charset=utf-8" } });
   },
   async scheduled(_, env, ctx) {
     // Both data types require a reviewed preview before scheduled publishing.
@@ -459,42 +467,51 @@ async function updateSite(env, { includeNews = true, includePatches = true } = {
   const patchResult = includePatches ? await updatePatches(env) : null;
   const now = new Date().toISOString();
   const automation = includeNews && includePatches ? "Cloudflare Worker + RSI Comm-Link + RSI Patch Notes" : includeNews ? "Cloudflare Worker + RSI Comm-Link; Patch-Import pausiert" : "Cloudflare Worker + RSI Patch Notes; News-Import pausiert";
-  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation, version: "0.7.0", fetchedItems: newsResult?.fetchedItems ?? null, newItems: newsResult?.newItems ?? null, refreshedItems: newsResult?.refreshedItems ?? null, aiItems: newsResult?.aiItems ?? null, newsItems: newsResult?.news.length ?? null, patchItems: patchResult?.items.length ?? null, patchAiItems: patchResult?.aiItems ?? null };
+  const meta = { updatedAt: now, source: COMM_LINK_URL, patchSource: PATCH_NOTES_URL, mode: env.GITHUB_TOKEN && env.GITHUB_REPO ? "live" : "preview", automation, version: VERSION, fetchedItems: newsResult?.fetchedItems ?? null, newItems: newsResult?.newItems ?? null, refreshedItems: newsResult?.refreshedItems ?? null, aiItems: newsResult?.aiItems ?? null, newsItems: newsResult?.news.length ?? null, patchItems: patchResult?.patches.length ?? null, patchNewItems: patchResult?.newItems ?? null, patchNextPage: patchResult?.nextState.nextPage ?? null, patchBackfillComplete: patchResult?.nextState.complete ?? null, patchAiItems: patchResult?.aiItems ?? null };
 
   if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) {
-    return { ok: true, version: "0.7.0", published: false, ...meta, note: "GitHub Secrets fehlen; nichts zurückgeschrieben." };
+    return { ok: true, version: VERSION, published: false, ...meta, note: "GitHub Secrets fehlen; nichts zurückgeschrieben." };
   }
 
-  if (includeNews) await putGithub(env, "public/data/news.json", JSON.stringify(newsResult.news, null, 2) + "\n", "Verse Radar 0.7.0: update news");
-  if (includePatches) await putGithub(env, "public/data/patches.json", JSON.stringify(patchResult.patches, null, 2) + "\n", "Verse Radar 0.7.0: update patches");
-  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", "Verse Radar 0.7.0: update meta");
-  return { ok: true, version: "0.7.0", published: true, ...meta };
+  if (includePatches) {
+    // Publish the archive before advancing its cursor. A failed cursor write
+    // merely repeats a page; it can never skip unsaved older versions.
+    await putGithub(env, "public/data/patches.json", JSON.stringify(patchResult.patches, null, 2) + "\n", `Verse Radar ${VERSION}: extend patch archive`, patchResult.archiveSha);
+    await putGithub(env, PATCH_STATE_PATH, JSON.stringify(patchResult.nextState, null, 2) + "\n", `Verse Radar ${VERSION}: advance patch archive`, patchResult.stateSha);
+  }
+  if (includeNews) await putGithub(env, "public/data/news.json", JSON.stringify(newsResult.news, null, 2) + "\n", `Verse Radar ${VERSION}: update news`);
+  await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", `Verse Radar ${VERSION}: update meta`);
+  return { ok: true, version: VERSION, published: true, ...meta };
 }
 
 async function updatePatches(env) {
-  const { items } = await fetchPatchItems();
-  const existingData = await readGithubJSON(env, "public/data/patches.json", []);
-  const existing = Array.isArray(existingData) ? existingData : [];
+  const connected = Boolean(env.GITHUB_TOKEN && env.GITHUB_REPO);
+  const archive = connected ? await getGithubJSONStrict(env, "public/data/patches.json") : { data: [], sha: null };
+  const stateFile = connected ? await getGithubJSONStrict(env, PATCH_STATE_PATH, { allowMissing: true }) : { data: null, sha: null };
+  const existing = archive.data;
+  if (!Array.isArray(existing) || existing.some(x => !x || typeof x.version !== "string" || !x.version || !x.sourceUrl)) throw Error("Gespeichertes Patch-Archiv ungültig; Import abgebrochen.");
+  const existingVersions = existing.map(x => versionParts(x.version).join("."));
+  if (new Set(existingVersions).size !== existingVersions.length) throw Error("Doppelte Versionen im gespeicherten Patch-Archiv; Import abgebrochen.");
+  const state = parsePatchState(stateFile.data);
+  const { items, scannedPages, nextState } = await fetchPatchItems(state);
   const unique = dedupePatchItems(items).sort(comparePatchVersionsDesc);
-  const patches = [];
+  const byVersion = new Map(existing.map(x => [versionParts(x.version).join("."), x]));
   let aiItems = 0;
 
-  for (let i = 0; i < unique.length && i < PATCH_MAX; i++) {
+  for (let i = 0; i < unique.length; i++) {
     const item = unique[i];
-    const previous = unique[i + 1]?.version || null;
-    const old = existing.find(x => x.version === item.version && x.sourceUrl === item.sourceUrl);
-    if (old && old.summaryVersion === "0.6.8" && old.summary && old.fullSummary && Array.isArray(old.changes) && old.changes.length) {
-      patches.push({ ...old, previous });
-      continue;
-    }
+    const key = versionParts(item.version).join(".");
+    // Never replace a stored version because a later crawl has incomplete or
+    // differently formatted source data.
+    if (byVersion.has(key)) continue;
     let ai = null;
     if (env.OPENAI_API_KEY && item.content) {
-      try { ai = await summarizePatch(item, previous, env.OPENAI_API_KEY); aiItems++; } catch (_) {}
+      try { ai = await summarizePatch(item, null, env.OPENAI_API_KEY); aiItems++; } catch (_) {}
     }
-    patches.push({
+    byVersion.set(key, {
       version: item.version,
       date: item.date,
-      previous,
+      previous: null,
       summary: ai?.summary || item.fallbackSummary,
       changes: ai?.changes?.length ? ai.changes : buildPatchChanges(item),
       fullSummary: ai?.fullSummary || item.fallbackFullSummary,
@@ -504,16 +521,40 @@ async function updatePatches(env) {
       note: "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
     });
   }
-  return { patches, items: unique.slice(0, PATCH_MAX), aiItems };
+  const patches = [...byVersion.values()].sort(comparePatchVersionsDesc).map((p, i, all) => ({ ...p, previous: all[i + 1]?.version || null }));
+  return { patches, items: unique, newItems: patches.length - existing.length, aiItems, scannedPages, nextState, archiveSha: archive.sha, stateSha: stateFile.sha };
 }
 
-async function fetchPatchItems() {
+function parsePatchState(value) {
+  if (value == null) return { nextPage: 1, complete: false };
+  if (!value || !Number.isSafeInteger(value.nextPage) || value.nextPage < 1 || typeof value.complete !== "boolean") throw Error("Patch-Archivstand ungültig; Import abgebrochen.");
+  return { nextPage: value.nextPage, complete: value.complete };
+}
+
+async function fetchPatchItems(state) {
   const discovered = [];
-  try {
-    const apiUrl = "https://api.star-citizen.wiki/api/comm-links?page[size]=100&sort=-id";
-    const r = await fetch(apiUrl, { headers: { "user-agent": "Verse-Radar/0.7.0 (+independent fan site)", "accept": "application/json" } });
+  const scannedPages = [];
+  const pages = state.complete ? [1] : [...new Set([1, ...Array.from({ length: PATCH_PAGES_PER_IMPORT }, (_, i) => state.nextPage + i)])];
+  let lastPage = null;
+  let reachedEnd = false;
+  let firstPageIds = null;
+  for (const page of pages) {
+    if (lastPage !== null && page > lastPage) break;
+    const apiUrl = `https://api.star-citizen.wiki/api/comm-links?page[size]=${PATCH_PAGE_SIZE}&page[number]=${page}&sort=-id`;
+    const r = await fetch(apiUrl, { headers: { "user-agent": `Verse-Radar/${VERSION} (+independent fan site)`, "accept": "application/json" } });
+    if (!r.ok) throw Error(`Patch-Quelle Seite ${page}: HTTP ${r.status}; Import abgebrochen.`);
     const body = await r.json();
-    const records = Array.isArray(body?.data) ? body.data : [];
+    if (!Array.isArray(body?.data)) throw Error(`Patch-Quelle Seite ${page}: ungültige Antwort; Import abgebrochen.`);
+    if (Number.isSafeInteger(body?.meta?.current_page) && body.meta.current_page !== page) throw Error(`Patch-Quelle Seite ${page}: falsche Seitennummer; Import abgebrochen.`);
+    const records = body.data;
+    if (Number.isSafeInteger(body?.meta?.last_page)) lastPage = body.meta.last_page;
+    const pageIds = records.map(record => record?.id).filter(Boolean);
+    if (page > 1 && records.length && JSON.stringify(pageIds) === JSON.stringify(firstPageIds)) {
+      throw Error(`Patch-Quelle Seite ${page}: Paginierung wiederholt die erste Seite; Import abgebrochen.`);
+    }
+    if (page === 1) firstPageIds = pageIds;
+    scannedPages.push(page);
+    if (!records.length && page > 1) { reachedEnd = true; break; }
     for (const record of records) {
       const title = strip(record?.title || "");
       if (!/^Star Citizen Alpha \d+(?:\.\d+){1,2}(?:\.0)?(?:\s|:|$)/i.test(title)) continue;
@@ -526,7 +567,8 @@ async function fetchPatchItems() {
       if (content.length < 500) content = cleanPatchText(await fetchWikiUpdatePage(version, content));
       discovered.push({ version, date, sourceUrl, sourceId: id, content, fallbackSummary: fallbackPatchSummary(version, content), fallbackFullSummary: fallbackFullSummary(version, content) });
     }
-  } catch (_) {}
+  }
+  if (!scannedPages.length || (scannedPages.length === 1 && !discovered.length)) throw Error("Keine Patch Notes in der aktuellen Quelle erkannt; Import abgebrochen.");
 
   // RSI's patch index is sometimes only partially mirrored by the archive API.
   // Seed the current major patches so a temporary archive/index gap cannot hide them.
@@ -544,13 +586,16 @@ async function fetchPatchItems() {
   // A title variant (e.g. "Alpha 4.8: Tactical Strike") is not a separate
   // predecessor of the same numbered release. Never publish empty source text
   // as a generic patch summary.
-  const unique = dedupePatchItems(discovered).filter(item => item.content.length >= 500).sort(comparePatchVersionsDesc).slice(0, PATCH_MAX);
+  const unique = dedupePatchItems(discovered).filter(item => item.content.length >= 500).sort(comparePatchVersionsDesc);
   if (!unique.length) throw Error("Keine Patch Notes mit auswertbarem Quelltext erkannt.");
-  return { items: unique };
+  const lastScanned = scannedPages[scannedPages.length - 1];
+  const complete = state.complete || reachedEnd || (lastPage !== null && lastScanned >= lastPage);
+  return { items: unique, scannedPages, nextState: { nextPage: complete ? Math.max(lastScanned, state.nextPage) : lastScanned + 1, complete } };
 }
 
 function extractPatchContent(record) {
   const candidates = [
+    record?.translations?.en_EN,
     record?.content,
     record?.content_html,
     record?.content_text,
@@ -858,30 +903,51 @@ async function githubDiagnostics(env, path) {
   return result;
 }
 
-async function readGithubJSON(env, path, fallback) {
-  if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) return fallback;
+async function getGithubJSONStrict(env, path, { allowMissing = false } = {}) {
   const [owner, repo] = String(env.GITHUB_REPO || "").trim().split("/");
-  if (!owner || !repo) return fallback;
+  if (!env.GITHUB_TOKEN || !owner || !repo) throw Error("GitHub-Konfiguration fehlt; Import abgebrochen.");
   const branch = String(env.GITHUB_BRANCH || "main").trim() || "main";
   const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`;
+  const r = await fetch(api, { headers: gh(env.GITHUB_TOKEN) });
+  if (r.status === 404 && allowMissing) return { data: null, sha: null };
+  if (!r.ok) throw Error(`GitHub-Datei ${path} nicht lesbar (HTTP ${r.status}); Import abgebrochen.`);
+  const j = await r.json();
+  if (!j?.sha || typeof j.sha !== "string") throw Error(`GitHub-Datei ${path}: SHA fehlt; Import abgebrochen.`);
   try {
-    const r = await fetch(api, { headers: gh(env.GITHUB_TOKEN) });
-    if (!r.ok) return fallback;
-    const j = await r.json();
+    let value;
+    if (!j.content && Number(j.size) > 0) {
+      // GitHub omits the Base64 content for files above 1 MB. Request raw
+      // bytes without changing the SHA used for optimistic concurrency.
+      const raw = await fetch(api, { headers: { ...gh(env.GITHUB_TOKEN), accept: "application/vnd.github.raw+json" } });
+      if (!raw.ok) throw Error(`HTTP ${raw.status}`);
+      value = await raw.text();
+    } else {
     const b64 = String(j.content || "").replace(/\s/g, "");
     const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-    return JSON.parse(new TextDecoder().decode(bytes));
-  } catch { return fallback; }
+      value = new TextDecoder().decode(bytes);
+    }
+    return { data: JSON.parse(value), sha: j.sha };
+  } catch (e) { throw Error(`GitHub-Datei ${path} ungültig (${e.message}); Import abgebrochen.`); }
+}
+async function readGithubJSON(env, path, fallback) {
+  if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) return fallback;
+  try { return (await getGithubJSONStrict(env, path, { allowMissing: true })).data ?? fallback; }
+  catch { return fallback; }
 }
 function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return (h >>> 0).toString(16); }
-async function putGithub(env, path, content, message) {
+async function putGithub(env, path, content, message, expectedSha = undefined) {
   const [owner, repo] = env.GITHUB_REPO.split("/");
   const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
-  let sha; const old = await fetch(api, { headers: gh(env.GITHUB_TOKEN) }); if (old.ok) sha = (await old.json()).sha;
+  let sha = expectedSha;
+  if (sha === undefined) {
+    const old = await fetch(api, { headers: gh(env.GITHUB_TOKEN) });
+    if (old.ok) sha = (await old.json()).sha;
+    else if (old.status !== 404) throw Error(`GitHub-Datei ${path} vor dem Schreiben nicht prüfbar (HTTP ${old.status}); Import abgebrochen.`);
+  }
   const bytes = new TextEncoder().encode(content);
   let binary = ""; for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
   const body = { message, content: btoa(binary), branch: env.GITHUB_BRANCH || "main" }; if (sha) body.sha = sha;
   const r = await fetch(api, { method: "PUT", headers: { ...gh(env.GITHUB_TOKEN), "content-type": "application/json" }, body: JSON.stringify(body) });
-  if (!r.ok) throw Error(`GitHub update failed ${r.status}`);
+  if (!r.ok) throw Error(`GitHub update failed ${r.status} (${path}); gespeichertes Archiv nicht überschrieben.`);
 }
-const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": "Verse-Radar/0.7.0" });
+const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": `Verse-Radar/${VERSION}` });
