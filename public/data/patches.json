@@ -2848,7 +2848,7 @@
   {
     "version": "Alpha 3.2.1",
     "date": "2018-07-24T00:00:00.000Z",
-    "previous": null,
+    "previous": "Alpha 3.2.0",
     "summary": "Alpha 3.2.1: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
     "changes": [
       {
@@ -2859,6 +2859,155 @@
     ],
     "fullSummary": "Alpha 3.2.1 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
     "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.2.1",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.2.0",
+    "date": "2018-06-30T00:00:00.000Z",
+    "previous": "Alpha 3.1.4",
+    "summary": "Alpha 3.2.0: Bergbau und Rohstoffgewinnung werden erweitert oder angepasst. HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Gameplay",
+        "title": "Bergbau",
+        "description": "Bergbau und Rohstoffgewinnung werden erweitert oder angepasst."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Schiffsanzeigen",
+        "description": "HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Arena Commander",
+        "description": "Arena Commander erhält neue Spielmodi oder Anpassungen."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.2.0 enthält folgende dokumentierte Änderungen: Bergbau und Rohstoffgewinnung werden erweitert oder angepasst. HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.2.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.1.4",
+    "date": "2018-05-16T00:00:00.000Z",
+    "previous": "Alpha 3.1.2",
+    "summary": "Alpha 3.1.4: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.1.4 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.1.4",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.1.2",
+    "date": "2018-04-13T00:00:00.000Z",
+    "previous": "Alpha 3.1.1",
+    "summary": "Alpha 3.1.2: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.1.2 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.1.2",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.1.1",
+    "date": "2018-04-05T00:00:00.000Z",
+    "previous": "Alpha 3.1.0",
+    "summary": "Alpha 3.1.1: Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Charakter",
+        "title": "Charaktereditor",
+        "description": "Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.1.1 enthält folgende dokumentierte Änderungen: Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.1.1",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.1.0",
+    "date": "2018-03-31T00:00:00.000Z",
+    "previous": "Alpha 3.0.1",
+    "summary": "Alpha 3.1.0: Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Charakter",
+        "title": "Charaktereditor",
+        "description": "Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Schiffsanzeigen",
+        "description": "HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Arena Commander",
+        "description": "Arena Commander erhält neue Spielmodi oder Anpassungen."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.1.0 enthält folgende dokumentierte Änderungen: Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet. Arena Commander erhält neue Spielmodi oder Anpassungen. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.1.0",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.6",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.0.1",
+    "date": "2018-02-02T00:00:00.000Z",
+    "previous": null,
+    "summary": "Alpha 3.0.1: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.0.1 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.0.1",
     "sourceType": "Community Archive",
     "ai": false,
     "summaryVersion": "0.9.6",
