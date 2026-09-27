@@ -946,7 +946,7 @@
   {
     "version": "Alpha 4.0",
     "date": "2024-12-19T00:00:00.000Z",
-    "previous": null,
+    "previous": "Alpha 3.24.3",
     "summary": "Mit Pyro kommt ein zweites Sternensystem hinzu. Stationen in Pyro erhalten umkämpfte FPS-Zonen mit Fortschritt und Beute. Pyro ergänzt neue abbaubare Ressourcen und eigene Verteilungen. Die erste statische Server-Meshing-Version verteilt einen Shard auf mehrere Server. Der Übergang auf Alpha 4.0 setzt Fortschritt und Guthaben zurück.",
     "changes": [
       {
@@ -980,6 +980,233 @@
     "sourceType": "Patch Notes",
     "ai": false,
     "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 3.24.3",
+    "date": "2024-11-20T00:00:00.000Z",
+    "previous": "Alpha 3.24.2a",
+    "summary": "Alpha 3.24.3: Frachtverwaltung und persönliche Hangars werden überarbeitet. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Gameplay",
+        "title": "Fracht und Hangars",
+        "description": "Frachtverwaltung und persönliche Hangars werden überarbeitet."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.24.3 enthält folgende dokumentierte Änderungen: Frachtverwaltung und persönliche Hangars werden überarbeitet. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://robertsspaceindustries.com/comm-link/Patch-Notes/20309-Star-Citizen-Alpha-3243",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 3.24.2a",
+    "date": "2024-11-06T00:00:00.000Z",
+    "previous": "Alpha 3.24.2",
+    "summary": "Alpha 3.24.2a: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.24.2a enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://starcitizen.tools/Update:Star_Citizen_Alpha_3.24.2a",
+    "sourceType": "Community Archive",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
+  },
+  {
+    "version": "Alpha 3.24.2",
+    "date": "2024-10-18T00:00:00.000Z",
+    "previous": "Alpha 3.24.1",
+    "summary": "Alpha 3.24.2: Frachtverwaltung und persönliche Hangars werden überarbeitet. Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet. Die Zeus Mk II wird als neues Schiff ergänzt. Tempo, Treibstoffverbrauch oder Bedienung der Quantum-Reise werden angepasst. Neue Höhlentypen erweitern erkundbare Schauplätze.",
+    "changes": [
+      {
+        "category": "Gameplay",
+        "title": "Fracht und Hangars",
+        "description": "Frachtverwaltung und persönliche Hangars werden überarbeitet."
+      },
+      {
+        "category": "Charakter",
+        "title": "Charaktereditor",
+        "description": "Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Schiffsanzeigen",
+        "description": "HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Zeus Mk II",
+        "description": "Die Zeus Mk II wird als neues Schiff ergänzt."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Quantum-Reisen",
+        "description": "Tempo, Treibstoffverbrauch oder Bedienung der Quantum-Reise werden angepasst."
+      },
+      {
+        "category": "Orte",
+        "title": "Neue Höhlen",
+        "description": "Neue Höhlentypen erweitern erkundbare Schauplätze."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.24.2 enthält folgende dokumentierte Änderungen: Frachtverwaltung und persönliche Hangars werden überarbeitet. Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. HUD und Multifunktionsanzeigen der Schiffe werden überarbeitet. Die Zeus Mk II wird als neues Schiff ergänzt. Tempo, Treibstoffverbrauch oder Bedienung der Quantum-Reise werden angepasst. Neue Höhlentypen erweitern erkundbare Schauplätze. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://robertsspaceindustries.com/comm-link/Patch-Notes/20255-Star-Citizen-Alpha-3242",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 3.24.1",
+    "date": "2024-09-13T00:00:00.000Z",
+    "previous": "Alpha 3.24.0",
+    "summary": "Alpha 3.24.1: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.24.1 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://robertsspaceindustries.com/comm-link/Patch-Notes/20161-Star-Citizen-Alpha-3241",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 3.24.0",
+    "date": "2024-08-29T00:00:00.000Z",
+    "previous": "Alpha 3.23.1a",
+    "summary": "Alpha 3.24.0: Frachtverwaltung und persönliche Hangars werden überarbeitet. Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes. Der Zugriff auf Inventar und Ausrüstung wird angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Gameplay",
+        "title": "Fracht und Hangars",
+        "description": "Frachtverwaltung und persönliche Hangars werden überarbeitet."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Master Modes",
+        "description": "Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Inventar",
+        "description": "Der Zugriff auf Inventar und Ausrüstung wird angepasst."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.24.0 enthält folgende dokumentierte Änderungen: Frachtverwaltung und persönliche Hangars werden überarbeitet. Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes. Der Zugriff auf Inventar und Ausrüstung wird angepasst. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://robertsspaceindustries.com/comm-link/Patch-Notes/20087-Star-Citizen-Alpha-3240",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 3.23.1a",
+    "date": "2024-06-13T00:00:00.000Z",
+    "previous": "Alpha 3.23.1",
+    "summary": "Alpha 3.23.1a: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.23.1a enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://robertsspaceindustries.com/comm-link/Patch-Notes/20014-Star-Citizen-Alpha-3231a",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 3.23.1",
+    "date": "2024-05-16T00:00:00.000Z",
+    "previous": "Alpha 3.23.0",
+    "summary": "Alpha 3.23.1: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.23.1 enthält folgende dokumentierte Änderungen: Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://robertsspaceindustries.com/comm-link/Patch-Notes/19974-Star-Citizen-Alpha-3231",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.9.5",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 3.23.0",
+    "date": "2024-05-10T00:00:00.000Z",
+    "previous": null,
+    "summary": "Alpha 3.23.0: Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes. Vulkan ergänzt die Grafikschnittstellen des Spiels. Der Zugriff auf Inventar und Ausrüstung wird angepasst. Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. Der Ruf bei Fraktionen beeinflusst weitere Aufträge. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten.",
+    "changes": [
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Master Modes",
+        "description": "Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes."
+      },
+      {
+        "category": "Technik",
+        "title": "Vulkan-Grafik",
+        "description": "Vulkan ergänzt die Grafikschnittstellen des Spiels."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Inventar",
+        "description": "Der Zugriff auf Inventar und Ausrüstung wird angepasst."
+      },
+      {
+        "category": "Charakter",
+        "title": "Charaktereditor",
+        "description": "Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Rufsystem",
+        "description": "Der Ruf bei Fraktionen beeinflusst weitere Aufträge."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten."
+      }
+    ],
+    "fullSummary": "Alpha 3.23.0 enthält folgende dokumentierte Änderungen: Das Flug- und Kampfverhalten der Schiffe erhält die Master Modes. Vulkan ergänzt die Grafikschnittstellen des Spiels. Der Zugriff auf Inventar und Ausrüstung wird angepasst. Mehr Gesichter, Frisuren oder Anpassungen für eigene Figuren werden ergänzt. Der Ruf bei Fraktionen beeinflusst weitere Aufträge. Die Patch Notes dokumentieren Korrekturen und Stabilitätsarbeiten. Die verlinkte Quelle enthält die vollständigen Patch Notes.",
+    "sourceUrl": "https://robertsspaceindustries.com/comm-link/Patch-Notes/19915-Star-Citizen-Alpha-3230",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.9.5",
     "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
   }
 ]
