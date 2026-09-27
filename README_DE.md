@@ -1,4 +1,4 @@
-# Verse Radar 0.8.0
+# Verse Radar 0.8.1
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -28,6 +28,7 @@ Cron: alle 2 Stunden (`0 */2 * * *`).
 Ohne `NEWS_AUTO_PUBLISH=true` und ohne `PATCH_AUTO_PUBLISH=true` schreibt der Cron keine Daten. Der manuelle Endpunkt `/run/news` veröffentlicht nur News; `/run` veröffentlicht News und Patches. Falls `RUN_SECRET` gesetzt ist, benötigen beide Endpunkte den gewohnten Schlüssel.
 Version 0.7.0 entfernt technische Archiv-Einträge und ersetzt wiederholte News-Platzhalter mit vorsichtigen deutschen Beschreibungen, die auf dem Titel beruhen. Wo eine bereits geprüfte Patch-Zusammenfassung zur exakt selben Comm-Link-ID vorliegt, nutzt die News-Karte deren erste zwei Sätze. Artikelinhalte werden ohne brauchbare Quellbeschreibung oder KI-Schlüssel nicht als vollständig zusammengefasst ausgegeben.
 Die Patch-Seite zeigt höchstens fünf aktuelle Einträge; die History zeigt alle gespeicherten Versionen. Der Worker ergänzt bei jedem geprüften manuellen Patch-Import zwei ältere Archivseiten und behält bestehende Versionen. Wie weit das Archiv zurückreichen kann, hängt von der verfügbaren Patch-Quelle ab. Die geprüfte Patch-Aufbereitung bleibt auf `summaryVersion=0.6.8`.
+Version 0.8.1 übernimmt neue Einträge in die Patch History nur, wenn ihr RSI-Quelllink tatsächlich auf Patch Notes zeigt. Ältere bereits gespeicherte Update-Ankündigungen bleiben erhalten, werden aber als solche bezeichnet und mit ihrem echten RSI-Link versehen. Eine allgemeine Titelübereinstimmung wie „Alpha 4.7.2“ genügt nicht mehr für eine Patch Note.
 Der beigelegte statische Datenstand enthält 13 redaktionelle News und alle sechs geprüften Patches als Rückfall bei API-Ausfall. Der Datumsstand ist der bestätigte Erstimport vom 26.09.2026.
 
 ## Datenstruktur

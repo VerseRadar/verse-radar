@@ -2,7 +2,7 @@ const CONFIG = {
   referralUrl: "https://robertsspaceindustries.com/enlist?referral=DEINCODE",
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.8.0"
+  siteVersion: "0.8.1"
 };
 let usingStaticData = false;
 
@@ -68,10 +68,11 @@ function renderPatchChanges(changes){
   return `<div class="patch-changes">${changes.map(c=>`<div class="article"><span class="tag">${esc(c.category||"ÄNDERUNG")}</span><h3>${esc(c.title||"")}</h3><p>${esc(c.description||"")}</p></div>`).join("")}</div>`;
 }
 function renderPatches(items){
-  return items.slice(0,5).map(p=>`<article class="article patch-card" id="${encodeURIComponent(p.version)}"><div><span class="tag">PATCH NOTES</span><span class="date">${dateDE(p.date)}</span></div><h2>${esc(p.version)}</h2><p class="patch-lead">${esc(p.summary||"")}</p><h3>Wichtige Änderungen in ${esc(p.version)}</h3>${renderPatchChanges(p.changes)}<h3>Deutsche Zusammenfassung der Patch Notes</h3><p>${esc(p.fullSummary||"")}</p><p class="ai-note">${p.ai === true ? "KI-gestützte" : "Regelbasierte"} Zusammenfassung · Kein offizieller RSI-Text · ${sourceLink({sourceUrl:p.sourceUrl})}</p></article>`).join("");
+  return items.slice(0,5).map(p=>`<article class="article patch-card" id="${encodeURIComponent(p.version)}"><div><span class="tag">${patchIsAnnouncement(p)?"UPDATE-MELDUNG":"PATCH NOTES"}</span><span class="date">${dateDE(p.date)}</span></div><h2>${esc(p.version)}</h2><p class="patch-lead">${esc(p.summary||"")}</p><h3>Wichtige Änderungen in ${esc(p.version)}</h3>${renderPatchChanges(p.changes)}<h3>Deutsche Zusammenfassung ${patchIsAnnouncement(p)?"der Update-Meldung":"der Patch Notes"}</h3><p>${esc(p.fullSummary||"")}</p><p class="ai-note">${p.ai === true ? "KI-gestützte" : "Regelbasierte"} Zusammenfassung · Kein offizieller RSI-Text · ${sourceLink({sourceUrl:p.sourceUrl})}</p></article>`).join("");
 }
+function patchIsAnnouncement(p){return p.sourceType==="Release Info" || /\/comm-link\/transmission\//i.test(p.sourceUrl||"");}
 function renderPatchHistory(items){
-  return items.map((p,i)=>`<article class="article" id="${encodeURIComponent(p.version)}"><span class="tag">PATCH</span><span class="date">${dateDE(p.date)}</span><h2>${esc(p.version)}</h2><p>${esc(p.summary||"")}</p>${p.previous?`<p>Vorgängerversion: ${esc(p.previous)}</p>`:""}${i<5?`<p><a class="source" href="/patches.html#${encodeURIComponent(p.version)}">Zusammenfassung und Änderungen ↗</a> · ${sourceLink(p)}</p>`:`<details><summary>Zusammenfassung und Änderungen anzeigen</summary><h3>Wichtige Änderungen in ${esc(p.version)}</h3>${renderPatchChanges(p.changes)}<h3>Deutsche Zusammenfassung der Patch Notes</h3><p>${esc(p.fullSummary||"")}</p><p class="ai-note">${p.ai === true ? "KI-gestützte" : "Regelbasierte"} Zusammenfassung · Kein offizieller RSI-Text · ${sourceLink(p)}</p></details>`}</article>`).join("");
+  return items.map((p,i)=>`<article class="article" id="${encodeURIComponent(p.version)}"><span class="tag">${patchIsAnnouncement(p)?"UPDATE-MELDUNG":"PATCH"}</span><span class="date">${dateDE(p.date)}</span><h2>${esc(p.version)}</h2><p>${esc(p.summary||"")}</p>${p.previous?`<p>Vorgängerversion: ${esc(p.previous)}</p>`:""}${i<5?`<p><a class="source" href="/patches.html#${encodeURIComponent(p.version)}">Zusammenfassung und Änderungen ↗</a> · ${sourceLink(p)}</p>`:`<details><summary>Zusammenfassung und Änderungen anzeigen</summary><h3>Wichtige Änderungen in ${esc(p.version)}</h3>${renderPatchChanges(p.changes)}<h3>Deutsche Zusammenfassung ${patchIsAnnouncement(p)?"der Update-Meldung":"der Patch Notes"}</h3><p>${esc(p.fullSummary||"")}</p><p class="ai-note">${p.ai === true ? "KI-gestützte" : "Regelbasierte"} Zusammenfassung · Kein offizieller RSI-Text · ${sourceLink(p)}</p></details>`}</article>`).join("");
 }
 async function home(){
   document.querySelectorAll("#referral-link").forEach(a=>a.href=CONFIG.referralUrl);

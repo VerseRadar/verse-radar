@@ -8,16 +8,17 @@ const patchesPath = 'public/data/patches.json';
 const statePath = 'public/data/patch-archive-state.json';
 const origin = 'https://example.test';
 const sourceText = 'Gameplay mission balance improvements, cargo, ships and bug fixes. '.repeat(15);
-const entry = (id, version) => ({ id, title: `Star Citizen Alpha ${version}`, created_at: '2026-01-01', content: sourceText });
+const entry = (id, version, channel = 'Patch-Notes') => ({ id, title: `Star Citizen Alpha ${version}`, created_at: '2026-01-01', content: sourceText, channel, rsi_url: `https://robertsspaceindustries.com/en/comm-link/${channel}/${id}-Star-Citizen-Alpha-${version}` });
 const pages = {
   1: [entry(501, '4.10.1'), entry(500, '4.10')],
-  2: [entry(490, '4.9'), entry(480, '4.8')],
+  2: [entry(490, '4.9'), entry(480, '4.8'), entry(472, '4.7.2', 'transmission')],
   3: [entry(470, '4.7')]
 };
 const stored = new Map([
   [patchesPath, { sha: 'sha-1', data: [
     { version: 'Alpha 4.10.1', previous: 'Alpha 4.10', sourceUrl: 'https://robertsspaceindustries.com/first', summary: 'Geprüft 4.10.1' },
-    { version: 'Alpha 4.10', previous: null, sourceUrl: 'https://robertsspaceindustries.com/second', summary: 'Geprüft 4.10' }
+    { version: 'Alpha 4.10', previous: null, sourceUrl: 'https://robertsspaceindustries.com/second', summary: 'Geprüft 4.10' },
+    { version: 'Alpha 4.8.1', previous: null, sourceUrl: 'https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21177-Star-Citizen-Alpha-4.8.1', summary: 'Bestehende Update-Meldung' }
   ] }]
 ]);
 const calls = [];
@@ -25,6 +26,7 @@ let sourceFailure = false;
 let githubFailure = false;
 let stateWriteFailure = false;
 let repeatFirstPage = false;
+let missingSourceUrl = false;
 
 globalThis.fetch = async (input, init = {}) => {
   const url = new URL(String(input));
@@ -33,7 +35,8 @@ globalThis.fetch = async (input, init = {}) => {
   if (url.host === 'api.star-citizen.wiki' && url.pathname === '/api/comm-links') {
     const page = Number(url.searchParams.get('page[number]'));
     if (sourceFailure && page === 2) return new Response('', { status: 503 });
-    return Response.json({ data: repeatFirstPage && page === 2 ? pages[1] : pages[page] || [], meta: { current_page: page, last_page: 3 } });
+    const records = repeatFirstPage && page === 2 ? pages[1] : pages[page] || [];
+    return Response.json({ data: missingSourceUrl && page === 2 ? [{ ...records[0], rsi_url: '' }, ...records.slice(1)] : records, meta: { current_page: page, last_page: 3 } });
   }
   if (url.host === 'api.github.com' && url.pathname.includes('/contents/')) {
     const path = url.pathname.split('/contents/')[1];
@@ -61,8 +64,11 @@ assert.equal((await request('/run/patches')).status, 401);
 assert.deepEqual(writes(), []);
 const first = await (await request('/preview/patches')).json();
 assert.equal(first.published, false);
-assert.equal(first.count, 4);
+assert.equal(first.count, 5);
 assert.equal(first.newItems, 2);
+assert.equal(first.items.some(p => p.version === 'Alpha 4.7.2'), false);
+assert.equal(first.items.find(p => p.version === 'Alpha 4.8.1').sourceType, 'Release Info');
+assert.match(first.items.find(p => p.version === 'Alpha 4.8.1').sourceUrl, /\/transmission\/21177-/);
 assert.deepEqual(first.scannedPages, [1, 2]);
 assert.equal(first.nextPage, 3);
 assert.equal(first.items.find(p => p.version === 'Alpha 4.10').summary, 'Geprüft 4.10');
@@ -80,10 +86,14 @@ repeatFirstPage = true;
 assert.equal((await request('/run/patches?key=private')).status, 500);
 assert.deepEqual(writes(), []);
 repeatFirstPage = false;
+missingSourceUrl = true;
+assert.equal((await request('/run/patches?key=private')).status, 500);
+assert.deepEqual(writes(), []);
+missingSourceUrl = false;
 
 stateWriteFailure = true;
 assert.equal((await request('/run/patches?key=private')).status, 500);
-assert.equal(stored.get(patchesPath).data.length, 4);
+assert.equal(stored.get(patchesPath).data.length, 5);
 assert.equal(stored.has(statePath), false);
 stateWriteFailure = false;
 
@@ -97,7 +107,7 @@ assert.equal(stored.get(statePath).data.nextPage, 3);
 calls.length = 0;
 const second = await (await request('/preview/patches')).json();
 assert.deepEqual(second.scannedPages, [1, 3]);
-assert.equal(second.count, 5);
+assert.equal(second.count, 6);
 assert.equal(second.newItems, 1);
 assert.equal(second.backfillComplete, true);
 assert.equal(second.items.at(-1).previous, null);
@@ -106,7 +116,7 @@ assert.deepEqual(writes(), []);
 
 const final = await (await request('/run/patches?key=private')).json();
 assert.equal(final.published, true);
-assert.equal(stored.get(patchesPath).data.length, 5);
+assert.equal(stored.get(patchesPath).data.length, 6);
 assert.equal(stored.get(statePath).data.complete, true);
 assert.equal(stored.get(patchesPath).data[0].summary, 'Geprüft 4.10.1');
 

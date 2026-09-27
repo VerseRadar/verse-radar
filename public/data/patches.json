@@ -191,7 +191,8 @@
       }
     ],
     "fullSummary": "Return of XenoThreat steht als Event im Mittelpunkt dieses Updates.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21206-Star-Citizen-Alpha-4.8.3",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21206-Star-Citizen-Alpha-483",
+    "sourceType": "Release Info",
     "ai": false,
     "summaryVersion": "0.6.8",
     "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
@@ -209,7 +210,8 @@
       }
     ],
     "fullSummary": "Defend Location – Ship Battles V3 kombiniert Verteidigung und Eskorte. Unterschiedliche Schauplätze und Schwierigkeitsgrade sowie Gegner wie Ace Pilots beeinflussen Missionsablauf, Reputation und Belohnungen.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21177-Star-Citizen-Alpha-4.8.1",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21177-Star-Citizen-Alpha-481",
+    "sourceType": "Release Info",
     "ai": false,
     "summaryVersion": "0.6.8",
     "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
@@ -217,7 +219,7 @@
   {
     "version": "Alpha 4.8",
     "date": "2026-05-15T18:00:00.000Z",
-    "previous": "Alpha 4.7.2",
+    "previous": null,
     "summary": "Mehrere neue Waffen bzw. Ausrüstungsgegenstände wurden hinzugefügt, darunter neue FPS-Waffen und schwere Ausrüstung. Die experimentelle VR-Unterstützung wurde bei Headtracking, Cursor, Rendering und OpenXR erweitert. Die Tactical Strike Group erweitert das Missionsangebot. Der Patch enthält zahlreiche Stabilitäts-, Crash- und Performance-Korrekturen.",
     "changes": [
       {
@@ -243,18 +245,6 @@
     ],
     "fullSummary": "Die experimentelle VR-Unterstützung erhält Verbesserungen für Headtracking, Stereo-Cursor, Kioske, Wasser-Rendering und OpenXR. Die Tactical Strike Group ergänzt das Missionsangebot. Zusätzlich enthält der Patch zahlreiche Stabilitäts-, Crash- und Performance-Fixes.",
     "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21168-Star-Citizen-Alpha-4.8",
-    "ai": false,
-    "summaryVersion": "0.6.8",
-    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
-  },
-  {
-    "version": "Alpha 4.7.2",
-    "date": "2026-04-22T16:00:00.000Z",
-    "previous": null,
-    "summary": "Alpha 4.7.2 enthält Gameplay-, Technik- und Fehlerbehebungsänderungen laut den offiziellen Patch Notes.",
-    "changes": [],
-    "fullSummary": "Alpha 4.7.2 enthält Gameplay-, Technik-, Missions- und Fehlerbehebungsänderungen. Die vollständige Liste ist über die offizielle Originalquelle abrufbar.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21125-Star-Citizen-Alpha-4.7.2",
     "ai": false,
     "summaryVersion": "0.6.8",
     "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."

@@ -1,5 +1,10 @@
 # Changelog – Verse Radar
 
+## 0.8.1 – Originalquellen der Patch History prüfen
+- Titel wie „Star Citizen Alpha 4.7.2“ können Update-Ankündigungen sein. Nur RSI-Links aus dem Kanal `Patch-Notes` werden neu als Patch Notes archiviert; vorhandene Zusammenfassungen bleiben erhalten.
+- Die zwei bereits gespeicherten Update-Ankündigungen 4.8.1 und 4.8.3 erhalten ihre echten Transmission-Links und werden sichtbar als „UPDATE-MELDUNG“ gekennzeichnet.
+- Das neue Archiv überspringt dadurch 4.7.2 und sucht auf weiteren Archivseiten nach echten älteren Patch Notes. Vorschau und Fehlerfälle werden erneut geprüft.
+
 ## 0.8.0 – Patch History als fortlaufendes Archiv
 - Die bisherige Grenze von zwölf gespeicherten Patch-Versionen entfällt. `/patch-history.html` zeigt alle gespeicherten Versionen, `/patches.html` weiterhin nur die fünf neuesten.
 - Die schreibfreie Vorschau `/preview/patches` ergänzt jeweils ältere Archivseiten, meldet Fortschritt und die Zahl neuer Versionen. `/run/patches` veröffentlicht unabhängig von News.

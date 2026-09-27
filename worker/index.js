@@ -1,4 +1,4 @@
-/* Verse Radar 0.8.0 – RSI news + patch notes ingestion
+/* Verse Radar 0.8.1 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -15,7 +15,13 @@ const MAX = 20;
 const PATCH_PAGE_SIZE = 100;
 const PATCH_PAGES_PER_IMPORT = 2;
 const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
-const VERSION = "0.8.0";
+const VERSION = "0.8.1";
+// These two release announcements were imported as patch notes before the
+// source channel was checked. Keep their summaries, repair their RSI links.
+const LEGACY_RELEASE_LINKS = new Map([
+  ["4.8.3", "https://robertsspaceindustries.com/en/comm-link/transmission/21206-Star-Citizen-Alpha-483"],
+  ["4.8.1", "https://robertsspaceindustries.com/en/comm-link/transmission/21177-Star-Citizen-Alpha-481"]
+]);
 const PATCH_SEEDS = [
   { version: "Alpha 4.10", id: 21293, date: "2026-08-26T18:00:00.000Z" },
   { version: "Alpha 4.9", id: 21245, date: "2026-07-15T18:00:00.000Z" }
@@ -495,7 +501,12 @@ async function updatePatches(env) {
   const state = parsePatchState(stateFile.data);
   const { items, scannedPages, nextState } = await fetchPatchItems(state);
   const unique = dedupePatchItems(items).sort(comparePatchVersionsDesc);
-  const byVersion = new Map(existing.map(x => [versionParts(x.version).join("."), x]));
+  const byVersion = new Map(existing.map(x => {
+    const key = versionParts(x.version).join(".");
+    const corrected = LEGACY_RELEASE_LINKS.get(key);
+    return [key, corrected && /\/Patch-Notes\//i.test(x.sourceUrl)
+      ? { ...x, sourceUrl: corrected, sourceType: "Release Info" } : x];
+  }));
   let aiItems = 0;
 
   for (let i = 0; i < unique.length; i++) {
@@ -516,6 +527,7 @@ async function updatePatches(env) {
       changes: ai?.changes?.length ? ai.changes : buildPatchChanges(item),
       fullSummary: ai?.fullSummary || item.fallbackFullSummary,
       sourceUrl: item.sourceUrl,
+      sourceType: "Patch Notes",
       ai: Boolean(ai),
       summaryVersion: "0.6.8",
       note: "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
@@ -558,10 +570,14 @@ async function fetchPatchItems(state) {
     for (const record of records) {
       const title = strip(record?.title || "");
       if (!/^Star Citizen Alpha \d+(?:\.\d+){1,2}(?:\.0)?(?:\s|:|$)/i.test(title)) continue;
+      // Titles alone also match marketing transmissions such as Alpha 4.7.2.
+      // Only a real RSI Patch-Notes URL qualifies for the patch archive.
+      const sourceUrl = String(record?.rsi_url || record?.url || "");
+      if (!sourceUrl) throw Error(`Patch-Quelle ID ${record?.id || "?"}: Original-URL fehlt; Import abgebrochen.`);
+      if (!/^https:\/\/robertsspaceindustries\.com\/(?:en\/)?comm-link\/Patch-Notes\/\d+-/i.test(sourceUrl)) continue;
       const id = Number(record?.id); if (!id) continue;
       const version = normalizePatchVersion(title.replace(/^Star Citizen /i, "").trim());
       const date = validDate(record?.created_at) || validDate(record?.published_at) || new Date().toISOString();
-      const sourceUrl = officialPatchUrl(id, title);
       let content = cleanPatchText(extractPatchContent(record));
       if (content.length < 500) content = cleanPatchText(await fetchPatchDetail(id, content));
       if (content.length < 500) content = cleanPatchText(await fetchWikiUpdatePage(version, content));
