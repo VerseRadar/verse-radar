@@ -1,5 +1,10 @@
 # Changelog – Verse Radar
 
+## 0.8.2 – GitHub-Konflikte beim Patch-Import abfangen
+- Vor dem Archiv-Schreibzugriff wird der aktuelle GitHub-Stand erneut gelesen. Bei 409-Konflikten versucht der Worker bis zu drei Mal, neue Patches mit inzwischen gespeicherten Versionen zusammenzuführen.
+- Der Archiv-Cursor wird erst nach erfolgreicher Archiv-Aktualisierung geschrieben und kann einen inzwischen weiter fortgeschrittenen Stand nicht zurücksetzen.
+- Lokale Tests prüfen Konflikte, gleichzeitige Archiv-Erweiterungen und Fehler ohne Cursor-Fortschritt.
+
 ## 0.8.1 – Originalquellen der Patch History prüfen
 - Titel wie „Star Citizen Alpha 4.7.2“ können Update-Ankündigungen sein. Nur RSI-Links aus dem Kanal `Patch-Notes` werden neu als Patch Notes archiviert; vorhandene Zusammenfassungen bleiben erhalten.
 - Die zwei bereits gespeicherten Update-Ankündigungen 4.8.1 und 4.8.3 erhalten ihre echten Transmission-Links und werden sichtbar als „UPDATE-MELDUNG“ gekennzeichnet.

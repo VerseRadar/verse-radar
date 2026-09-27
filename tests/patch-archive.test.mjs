@@ -27,6 +27,9 @@ let githubFailure = false;
 let stateWriteFailure = false;
 let repeatFirstPage = false;
 let missingSourceUrl = false;
+let archiveConflictOnce = false;
+let archiveConflictAlways = false;
+const externalPatch = { version: 'Alpha 4.6', previous: null, sourceUrl: 'https://robertsspaceindustries.com/external', summary: 'Parallel gespeicherter Patch' };
 
 globalThis.fetch = async (input, init = {}) => {
   const url = new URL(String(input));
@@ -50,6 +53,12 @@ globalThis.fetch = async (input, init = {}) => {
       const body = JSON.parse(init.body);
       const old = stored.get(path);
       assert.equal(body.sha || null, old?.sha || null, `SHA mismatch for ${path}`);
+      if (path === patchesPath && archiveConflictAlways) return new Response('', { status: 409 });
+      if (path === patchesPath && archiveConflictOnce) {
+        archiveConflictOnce = false;
+        stored.set(path, { sha: `sha-parallel-${calls.length}`, data: [...old.data, externalPatch] });
+        return new Response('', { status: 409 });
+      }
       stored.set(path, { sha: `sha-${calls.length}`, data: JSON.parse(Buffer.from(body.content, 'base64').toString('utf8')) });
       return Response.json({ ok: true });
     }
@@ -91,9 +100,18 @@ assert.equal((await request('/run/patches?key=private')).status, 500);
 assert.deepEqual(writes(), []);
 missingSourceUrl = false;
 
+archiveConflictAlways = true;
+assert.equal((await request('/run/patches?key=private')).status, 500);
+assert.equal(stored.get(patchesPath).data.length, 3);
+assert.equal(stored.has(statePath), false);
+archiveConflictAlways = false;
+calls.length = 0;
+
+archiveConflictOnce = true;
 stateWriteFailure = true;
 assert.equal((await request('/run/patches?key=private')).status, 500);
-assert.equal(stored.get(patchesPath).data.length, 5);
+assert.equal(stored.get(patchesPath).data.length, 6);
+assert.equal(stored.get(patchesPath).data.find(p => p.version === 'Alpha 4.6').summary, externalPatch.summary);
 assert.equal(stored.has(statePath), false);
 stateWriteFailure = false;
 
@@ -107,7 +125,7 @@ assert.equal(stored.get(statePath).data.nextPage, 3);
 calls.length = 0;
 const second = await (await request('/preview/patches')).json();
 assert.deepEqual(second.scannedPages, [1, 3]);
-assert.equal(second.count, 6);
+assert.equal(second.count, 7);
 assert.equal(second.newItems, 1);
 assert.equal(second.backfillComplete, true);
 assert.equal(second.items.at(-1).previous, null);
@@ -116,7 +134,7 @@ assert.deepEqual(writes(), []);
 
 const final = await (await request('/run/patches?key=private')).json();
 assert.equal(final.published, true);
-assert.equal(stored.get(patchesPath).data.length, 6);
+assert.equal(stored.get(patchesPath).data.length, 7);
 assert.equal(stored.get(statePath).data.complete, true);
 assert.equal(stored.get(patchesPath).data[0].summary, 'Geprüft 4.10.1');
 

@@ -1,4 +1,4 @@
-/* Verse Radar 0.8.1 – RSI news + patch notes ingestion
+/* Verse Radar 0.8.2 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -15,7 +15,7 @@ const MAX = 20;
 const PATCH_PAGE_SIZE = 100;
 const PATCH_PAGES_PER_IMPORT = 2;
 const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
-const VERSION = "0.8.1";
+const VERSION = "0.8.2";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -482,12 +482,66 @@ async function updateSite(env, { includeNews = true, includePatches = true } = {
   if (includePatches) {
     // Publish the archive before advancing its cursor. A failed cursor write
     // merely repeats a page; it can never skip unsaved older versions.
-    await putGithub(env, "public/data/patches.json", JSON.stringify(patchResult.patches, null, 2) + "\n", `Verse Radar ${VERSION}: extend patch archive`, patchResult.archiveSha);
-    await putGithub(env, PATCH_STATE_PATH, JSON.stringify(patchResult.nextState, null, 2) + "\n", `Verse Radar ${VERSION}: advance patch archive`, patchResult.stateSha);
+    const savedPatches = await publishPatchArchive(env, patchResult.patches);
+    meta.patchItems = savedPatches.length;
+    await publishPatchCursor(env, patchResult.nextState);
   }
   if (includeNews) await putGithub(env, "public/data/news.json", JSON.stringify(newsResult.news, null, 2) + "\n", `Verse Radar ${VERSION}: update news`);
   await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", `Verse Radar ${VERSION}: update meta`);
   return { ok: true, version: VERSION, published: true, ...meta };
+}
+
+function validateArchiveEntries(entries) {
+  if (!Array.isArray(entries) || entries.some(x => !x || typeof x.version !== "string" || !x.version || !x.sourceUrl)) throw Error("Gespeichertes Patch-Archiv ungültig; Import abgebrochen.");
+  const keys = entries.map(x => versionParts(x.version).join("."));
+  if (new Set(keys).size !== keys.length) throw Error("Doppelte Versionen im gespeicherten Patch-Archiv; Import abgebrochen.");
+}
+
+function correctLegacyLink(entry) {
+  const key = versionParts(entry.version).join(".");
+  const corrected = LEGACY_RELEASE_LINKS.get(key);
+  return corrected && /\/Patch-Notes\//i.test(entry.sourceUrl)
+    ? { ...entry, sourceUrl: corrected, sourceType: "Release Info" } : entry;
+}
+
+async function publishPatchArchive(env, proposed) {
+  const path = "public/data/patches.json";
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const latest = await getGithubJSONStrict(env, path);
+    validateArchiveEntries(latest.data);
+    // GitHub can change while the source pages are fetched. Keep every entry
+    // currently in the repository, and append only genuinely new versions.
+    const merged = new Map(latest.data.map(p => [versionParts(p.version).join("."), correctLegacyLink(p)]));
+    for (const p of proposed) {
+      const key = versionParts(p.version).join(".");
+      if (!merged.has(key)) merged.set(key, p);
+    }
+    const sorted = [...merged.values()].sort(comparePatchVersionsDesc);
+    const archive = sorted.map((p, i) => ({ ...p, previous: sorted[i + 1]?.version || null }));
+    try {
+      await putGithub(env, path, JSON.stringify(archive, null, 2) + "\n", `Verse Radar ${VERSION}: extend patch archive`, latest.sha);
+      return archive;
+    } catch (e) {
+      if (e.status !== 409 || attempt === 2) throw e;
+      await new Promise(resolve => setTimeout(resolve, 150 * (attempt + 1)));
+    }
+  }
+}
+
+async function publishPatchCursor(env, desired) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const latest = await getGithubJSONStrict(env, PATCH_STATE_PATH, { allowMissing: true });
+    const current = parsePatchState(latest.data);
+    const next = { nextPage: Math.max(current.nextPage, desired.nextPage), complete: current.complete || desired.complete };
+    if (latest.data && current.nextPage === next.nextPage && current.complete === next.complete) return;
+    try {
+      await putGithub(env, PATCH_STATE_PATH, JSON.stringify(next, null, 2) + "\n", `Verse Radar ${VERSION}: advance patch archive`, latest.sha);
+      return;
+    } catch (e) {
+      if (e.status !== 409 || attempt === 2) throw e;
+      await new Promise(resolve => setTimeout(resolve, 150 * (attempt + 1)));
+    }
+  }
 }
 
 async function updatePatches(env) {
@@ -495,18 +549,11 @@ async function updatePatches(env) {
   const archive = connected ? await getGithubJSONStrict(env, "public/data/patches.json") : { data: [], sha: null };
   const stateFile = connected ? await getGithubJSONStrict(env, PATCH_STATE_PATH, { allowMissing: true }) : { data: null, sha: null };
   const existing = archive.data;
-  if (!Array.isArray(existing) || existing.some(x => !x || typeof x.version !== "string" || !x.version || !x.sourceUrl)) throw Error("Gespeichertes Patch-Archiv ungültig; Import abgebrochen.");
-  const existingVersions = existing.map(x => versionParts(x.version).join("."));
-  if (new Set(existingVersions).size !== existingVersions.length) throw Error("Doppelte Versionen im gespeicherten Patch-Archiv; Import abgebrochen.");
+  validateArchiveEntries(existing);
   const state = parsePatchState(stateFile.data);
   const { items, scannedPages, nextState } = await fetchPatchItems(state);
   const unique = dedupePatchItems(items).sort(comparePatchVersionsDesc);
-  const byVersion = new Map(existing.map(x => {
-    const key = versionParts(x.version).join(".");
-    const corrected = LEGACY_RELEASE_LINKS.get(key);
-    return [key, corrected && /\/Patch-Notes\//i.test(x.sourceUrl)
-      ? { ...x, sourceUrl: corrected, sourceType: "Release Info" } : x];
-  }));
+  const byVersion = new Map(existing.map(x => [versionParts(x.version).join("."), correctLegacyLink(x)]));
   let aiItems = 0;
 
   for (let i = 0; i < unique.length; i++) {
@@ -964,6 +1011,10 @@ async function putGithub(env, path, content, message, expectedSha = undefined) {
   let binary = ""; for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
   const body = { message, content: btoa(binary), branch: env.GITHUB_BRANCH || "main" }; if (sha) body.sha = sha;
   const r = await fetch(api, { method: "PUT", headers: { ...gh(env.GITHUB_TOKEN), "content-type": "application/json" }, body: JSON.stringify(body) });
-  if (!r.ok) throw Error(`GitHub update failed ${r.status} (${path}); gespeichertes Archiv nicht überschrieben.`);
+  if (!r.ok) {
+    const error = new Error(`GitHub update failed ${r.status} (${path}); gespeichertes Archiv nicht überschrieben.`);
+    error.status = r.status;
+    throw error;
+  }
 }
 const gh = t => ({ accept: "application/vnd.github+json", authorization: `Bearer ${t}`, "x-github-api-version": "2022-11-28", "user-agent": `Verse-Radar/${VERSION}` });
