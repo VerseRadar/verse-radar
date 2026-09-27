@@ -219,7 +219,7 @@
   {
     "version": "Alpha 4.8",
     "date": "2026-05-15T18:00:00.000Z",
-    "previous": null,
+    "previous": "Alpha 4.7",
     "summary": "Mehrere neue Waffen bzw. Ausrüstungsgegenstände wurden hinzugefügt, darunter neue FPS-Waffen und schwere Ausrüstung. Die experimentelle VR-Unterstützung wurde bei Headtracking, Cursor, Rendering und OpenXR erweitert. Die Tactical Strike Group erweitert das Missionsangebot. Der Patch enthält zahlreiche Stabilitäts-, Crash- und Performance-Korrekturen.",
     "changes": [
       {
@@ -245,6 +245,65 @@
     ],
     "fullSummary": "Die experimentelle VR-Unterstützung erhält Verbesserungen für Headtracking, Stereo-Cursor, Kioske, Wasser-Rendering und OpenXR. Die Tactical Strike Group ergänzt das Missionsangebot. Zusätzlich enthält der Patch zahlreiche Stabilitäts-, Crash- und Performance-Fixes.",
     "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21168-Star-Citizen-Alpha-4.8",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
+    "version": "Alpha 4.7",
+    "date": "2026-03-25T00:00:00.000Z",
+    "previous": null,
+    "summary": "Alpha 4.7 erweitert Nyx mit Operation Breaker Stations: In den Stationen warten Kämpfe, Rätsel und abbaubare Rohstoffe. Das Inventar wurde mit zwei Fenstern und Zugriff auf nahe Container überarbeitet. Crafting startet mit dem Item Fabricator, Bauplänen und Materialqualität, die sich auf hergestellte Gegenstände auswirkt. Dazu kommen die RSI Aurora Mk II, Änderungen an Schilden, Rüstung und Radar sowie weitere Anlaufstellen in Nyx. Experimentelle VR-Funktionen und zahlreiche Fehlerkorrekturen runden das Update ab.",
+    "changes": [
+      {
+        "category": "Missionen",
+        "title": "Operation Breaker Stations",
+        "description": "In Nyx werden QV Breaker Stations über Aufträge erschlossen: Kämpfe, Gefahren und Rätsel führen zu Rohstoffen im Asteroiden."
+      },
+      {
+        "category": "Gameplay",
+        "title": "Inventar überarbeitet",
+        "description": "Zwei Inventarfenster, nahe Container als Tabs sowie Suche, Sortierung und Filter vereinfachen das Verwalten von Gegenständen."
+      },
+      {
+        "category": "Herstellung",
+        "title": "Crafting und Baupläne",
+        "description": "Mit dem Item Fabricator lassen sich Gegenstände anhand von Bauplänen und gesammelten Materialien herstellen."
+      },
+      {
+        "category": "Bergbau",
+        "title": "Materialqualität",
+        "description": "Abgebaute Rohstoffe erhalten Qualitätswerte; die Qualität eingesetzter Materialien beeinflusst die Werte hergestellter Gegenstände."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Aurora Mk II",
+        "description": "Die RSI Aurora Mk II wird als neues Schiff eingeführt."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Schilde, Rüstung und Radar",
+        "description": "Schutzsysteme wurden neu abgestimmt; Radar-Komponenten und radarbasierte Zielhilfe kommen hinzu."
+      },
+      {
+        "category": "Orte",
+        "title": "Stationen in Nyx",
+        "description": "People's Service Stations bieten neue Anlaufstellen und können als Heimatort gewählt werden."
+      },
+      {
+        "category": "VR",
+        "title": "Experimentelle VR-Unterstützung",
+        "description": "Cursor, Oberfläche und Rendering für VR wurden weiterentwickelt."
+      },
+      {
+        "category": "Technik",
+        "title": "Fehlerbehebungen",
+        "description": "Über 150 Fehler- und Absturzkorrekturen seit Alpha 4.6 sind dokumentiert."
+      }
+    ],
+    "fullSummary": "Alpha 4.7 bringt Operation Breaker Stations nach Nyx. In diesen Aufträgen kämpfen sich Spieler durch Gegner und Gefahren, lösen Rätsel und nehmen eine Bergbaustation wieder in Betrieb, um an Rohstoffe im Asteroiden zu gelangen. Stationen können exklusiv oder gemeinsam zugänglich sein. Das Inventar erhält eine neue Oberfläche mit zwei Fenstern. Nahe Container, Rucksäcke und Körper erscheinen als auswählbare Tabs; Suche, Sortierung und Filter helfen beim Umlagern und Ausrüsten. Das neue Crafting nutzt den Item Fabricator und Baupläne. Gesammelte und abgebaute Materialien besitzen Qualitätswerte, die die Werte des hergestellten Gegenstands beeinflussen. Auch die Verteilung von abbaubaren Rohstoffen wurde angepasst. Bei Schiffen kommt die RSI Aurora Mk II hinzu. Schilde und Rüstung wurden neu abgestimmt; Radar-Komponenten und radarbasierte Zielhilfe verändern die technischen Möglichkeiten der Fahrzeuge. In Nyx bieten People's Service Stations zusätzliche Anlaufstellen und mögliche Heimatorte. Die experimentelle VR-Unterstützung erhält Verbesserungen bei Cursor, Oberfläche und Rendering. Laut Patch Notes wurden seit Alpha 4.6 zudem über 150 Fehler und Abstürze korrigiert.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21070-Star-Citizen-Alpha-47",
+    "sourceType": "Patch Notes",
     "ai": false,
     "summaryVersion": "0.6.8",
     "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
