@@ -1,4 +1,4 @@
-/* Verse Radar 0.8.2 – RSI news + patch notes ingestion
+/* Verse Radar 0.8.3 – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -15,7 +15,7 @@ const MAX = 20;
 const PATCH_PAGE_SIZE = 100;
 const PATCH_PAGES_PER_IMPORT = 2;
 const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
-const VERSION = "0.8.2";
+const VERSION = "0.8.3";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -58,6 +58,12 @@ export default {
       try {
         // Use the same transformation as /run, but never write GitHub here.
         const result = await updatePatches(env);
+        if (u.searchParams.get("diagnostic") === "1") {
+          return json({ ok: true, version: VERSION, published: false,
+            count: result.patches.length, newItems: result.newItems,
+            scannedPages: result.scannedPages, nextPage: result.nextState.nextPage,
+            backfillComplete: result.nextState.complete, pageDiagnostics: result.pageDiagnostics });
+        }
         return json({
           ok: true,
           source: PATCH_NOTES_URL,
@@ -68,6 +74,7 @@ export default {
           nextPage: result.nextState.nextPage,
           backfillComplete: result.nextState.complete,
           published: false,
+          pageDiagnostics: result.pageDiagnostics,
           items: result.patches,
           discovery: result.items.map(item => ({
             version: item.version,
@@ -551,7 +558,7 @@ async function updatePatches(env) {
   const existing = archive.data;
   validateArchiveEntries(existing);
   const state = parsePatchState(stateFile.data);
-  const { items, scannedPages, nextState } = await fetchPatchItems(state);
+  const { items, scannedPages, nextState, pageDiagnostics } = await fetchPatchItems(state);
   const unique = dedupePatchItems(items).sort(comparePatchVersionsDesc);
   const byVersion = new Map(existing.map(x => [versionParts(x.version).join("."), correctLegacyLink(x)]));
   let aiItems = 0;
@@ -581,7 +588,7 @@ async function updatePatches(env) {
     });
   }
   const patches = [...byVersion.values()].sort(comparePatchVersionsDesc).map((p, i, all) => ({ ...p, previous: all[i + 1]?.version || null }));
-  return { patches, items: unique, newItems: patches.length - existing.length, aiItems, scannedPages, nextState, archiveSha: archive.sha, stateSha: stateFile.sha };
+  return { patches, items: unique, newItems: patches.length - existing.length, aiItems, scannedPages, nextState, pageDiagnostics, archiveSha: archive.sha, stateSha: stateFile.sha };
 }
 
 function parsePatchState(value) {
@@ -593,6 +600,7 @@ function parsePatchState(value) {
 async function fetchPatchItems(state) {
   const discovered = [];
   const scannedPages = [];
+  const pageDiagnostics = [];
   const pages = state.complete ? [1] : [...new Set([1, ...Array.from({ length: PATCH_PAGES_PER_IMPORT }, (_, i) => state.nextPage + i)])];
   let lastPage = null;
   let reachedEnd = false;
@@ -613,6 +621,17 @@ async function fetchPatchItems(state) {
     }
     if (page === 1) firstPageIds = pageIds;
     scannedPages.push(page);
+    const alphaRecords = records.filter(record => /^Star Citizen Alpha/i.test(strip(record?.title || "")) || Number(record?.id) === 21070);
+    pageDiagnostics.push({ page, records: records.length,
+      firstId: pageIds[0] ?? null, lastId: pageIds[pageIds.length - 1] ?? null,
+      sourceLastPage: lastPage,
+      alphaRecords: alphaRecords.slice(0, 25).map(record => {
+        const sourceUrl = String(record?.rsi_url || record?.url || "");
+        return { id: record?.id ?? null, title: strip(record?.title || ""),
+          channel: record?.channel ?? null, sourceUrl,
+          accepted: /^Star Citizen Alpha \d+(?:\.\d+){1,2}(?:\.0)?(?:\s|:|$)/i.test(strip(record?.title || "")) &&
+            /^https:\/\/robertsspaceindustries\.com\/(?:en\/)?comm-link\/Patch-Notes\/\d+-/i.test(sourceUrl) };
+      }) });
     if (!records.length && page > 1) { reachedEnd = true; break; }
     for (const record of records) {
       const title = strip(record?.title || "");
@@ -653,7 +672,7 @@ async function fetchPatchItems(state) {
   if (!unique.length) throw Error("Keine Patch Notes mit auswertbarem Quelltext erkannt.");
   const lastScanned = scannedPages[scannedPages.length - 1];
   const complete = state.complete || reachedEnd || (lastPage !== null && lastScanned >= lastPage);
-  return { items: unique, scannedPages, nextState: { nextPage: complete ? Math.max(lastScanned, state.nextPage) : lastScanned + 1, complete } };
+  return { items: unique, scannedPages, pageDiagnostics, nextState: { nextPage: complete ? Math.max(lastScanned, state.nextPage) : lastScanned + 1, complete } };
 }
 
 function extractPatchContent(record) {

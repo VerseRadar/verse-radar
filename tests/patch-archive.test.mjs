@@ -71,6 +71,13 @@ const writes = () => calls.filter(c => c.method === 'PUT').map(c => c.url.split(
 
 assert.equal((await request('/run/patches')).status, 401);
 assert.deepEqual(writes(), []);
+const diagnostic = await (await request('/preview/patches?diagnostic=1')).json();
+assert.equal(diagnostic.published, false);
+assert.equal(diagnostic.items, undefined);
+assert.deepEqual(diagnostic.pageDiagnostics.map(p => p.page), [1, 2]);
+assert.equal(diagnostic.pageDiagnostics[1].alphaRecords.find(p => p.title === 'Star Citizen Alpha 4.7.2').accepted, false);
+assert.equal(diagnostic.pageDiagnostics[1].alphaRecords.find(p => p.title === 'Star Citizen Alpha 4.9').accepted, true);
+assert.deepEqual(writes(), []);
 const first = await (await request('/preview/patches')).json();
 assert.equal(first.published, false);
 assert.equal(first.count, 5);
@@ -125,6 +132,7 @@ assert.equal(stored.get(statePath).data.nextPage, 3);
 calls.length = 0;
 const second = await (await request('/preview/patches')).json();
 assert.deepEqual(second.scannedPages, [1, 3]);
+assert.deepEqual(second.pageDiagnostics.map(p => p.page), [1, 3]);
 assert.equal(second.count, 7);
 assert.equal(second.newItems, 1);
 assert.equal(second.backfillComplete, true);

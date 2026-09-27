@@ -1,5 +1,10 @@
 # Changelog – Verse Radar
 
+## 0.8.3 – Quelllücken im Patch-Archiv sichtbar machen
+- Die Patch-Vorschau zeigt für jede geprüfte API-Seite Anzahl und ID-Bereich sowie Alpha-Titel, RSI-URL und Filterergebnis.
+- `/preview/patches?diagnostic=1` gibt nur die kompakte Diagnose zurück, ohne Zusammenfassungen oder GitHub-Schreibzugriff.
+- Der gespeicherte Patch-Stand und der Archiv-Cursor werden durch die Diagnose nicht verändert.
+
 ## 0.8.2 – GitHub-Konflikte beim Patch-Import abfangen
 - Vor dem Archiv-Schreibzugriff wird der aktuelle GitHub-Stand erneut gelesen. Bei 409-Konflikten versucht der Worker bis zu drei Mal, neue Patches mit inzwischen gespeicherten Versionen zusammenzuführen.
 - Der Archiv-Cursor wird erst nach erfolgreicher Archiv-Aktualisierung geschrieben und kann einen inzwischen weiter fortgeschrittenen Stand nicht zurücksetzen.
