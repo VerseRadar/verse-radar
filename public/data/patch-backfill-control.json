@@ -1,19 +1,38 @@
 {
-  "status": "running",
+  "status": "paused",
   "lastRun": {
-    "at": "2026-09-27T22:04:19.589Z",
-    "patchItems": 96,
-    "newItems": 8,
-    "nextPage": 33,
+    "at": "2026-09-27T22:06:19.430Z",
+    "patchItems": 102,
+    "newItems": 6,
+    "nextPage": 35,
     "backfillComplete": false,
-    "historicalMissingItems": 8,
-    "historicalDeferredItems": 8,
-    "historicalUnusableItems": 0,
-    "historicalUnusableVersions": []
+    "historicalMissingItems": 2,
+    "historicalDeferredItems": 0,
+    "historicalUnusableItems": 2,
+    "historicalUnusableVersions": [
+      {
+        "version": "Alpha 3.1.3",
+        "reason": "Patchtext nicht ausreichend auswertbar",
+        "sourceContentLength": 363,
+        "matchedChanges": [
+          "Fehlerbehebungen"
+        ]
+      },
+      {
+        "version": "Alpha 3.0.0",
+        "reason": "Patchtext nicht ausreichend auswertbar",
+        "sourceContentLength": 35551,
+        "matchedChanges": [
+          "Schiffsanzeigen",
+          "Arena Commander",
+          "Fehlerbehebungen"
+        ]
+      }
+    ]
   },
   "sessionId": "7e0651df-a18c-437f-960d-f7efd3a7748c",
-  "leaseId": "c2086f1e-b207-4adb-a088-4e4e076989b2",
-  "leaseUntil": "2026-09-27T22:16:16.342Z",
-  "lastError": null,
-  "changedAt": "2026-09-27T22:04:23.036Z"
+  "leaseId": null,
+  "leaseUntil": null,
+  "lastError": "2 historische Quelle(n) unbrauchbar; bitte prüfen.",
+  "changedAt": "2026-09-27T22:06:23.133Z"
 }
