@@ -2,7 +2,7 @@ const CONFIG = {
   referralUrl: "https://robertsspaceindustries.com/enlist?referral=DEINCODE",
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.10.3"
+  siteVersion: "0.10.4"
 };
 let usingStaticData = false;
 

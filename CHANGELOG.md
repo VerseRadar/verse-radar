@@ -1,5 +1,13 @@
 # Changelog – Verse Radar
 
+## 0.10.4 – Quelltextgestützte News als zuschaltbare Vorschau
+
+- Echte Artikeltexte statt bloßer Titel als Grundlage für optional erzeugte deutsche Zusammenfassungen.
+- Höchstens drei Kandidaten pro Lauf; Belegstelle muss wörtlich im Artikeltext stehen.
+- Fehlerhafte, leere oder nicht belegte Antworten ersetzen keine gespeicherten News.
+- Neue Vorschauwerte `articleAiEnabled` und `articleDiagnostics`; KI-Modus benötigt `NEWS_ARTICLE_AI=true` und `OPENAI_API_KEY`.
+- News-Automatik weiterhin ausgeschaltet; Archivdaten bleiben von der Update-ZIP unberührt.
+
 ## 0.10.3 – Unsichere News-Themen zurücknehmen
 - Die Vorschau mit 0.10.2 zeigte wiederholte, teils unpassende Themen und fehlerhafte Formulierungen wie „um der Roadmap“. Die allgemeine Worttreffer-Regel wird entfernt.
 - Bereits veröffentlichte News-Kurztexte bleiben erhalten; der geprüfte Roadmap-Beitrag vom 9. September wird korrekt als „Aus dem Artikeltext“ gekennzeichnet.
