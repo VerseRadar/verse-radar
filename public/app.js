@@ -1,13 +1,12 @@
 const CONFIG = {
-  referralUrl: "https://robertsspaceindustries.com/enlist?referral=DEINCODE",
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.11.2"
+  siteVersion: "0.12.0"
 };
 let usingStaticData = false;
 
 async function loadJSON(name){
-  const url = name === "news.json" ? CONFIG.newsEndpoint : name === "patches.json" ? "/api/patches" : name === "freefly.json" ? "/api/freefly" : name === "events.json" ? "/api/events" : CONFIG.dataBase+name;
+  const url = name === "news.json" ? CONFIG.newsEndpoint : name === "patches.json" ? "/api/patches" : name === "freefly.json" ? "/api/freefly" : name === "events.json" ? "/api/events" : name === "deals.json" ? "/api/deals" : name === "referral.json" ? "/api/referral" : CONFIG.dataBase+name;
   let r;
   try { r=await fetch(url,{cache:"no-store"}); }
   catch (e) {
@@ -23,6 +22,7 @@ async function loadJSON(name){
   if(name === "news.json" && r.headers?.get("x-verse-radar-news-source") === "static-fallback") usingStaticData = true;
   if(name === "patches.json" && r.headers?.get("x-verse-radar-patches-source") === "static-fallback") usingStaticData = true;
   if((name === "events.json" || name === "freefly.json") && r.headers?.get("x-verse-radar-event-source") === "static-fallback") usingStaticData = true;
+  if(name === "deals.json" && r.headers?.get("x-verse-radar-deals-source") === "static-fallback") usingStaticData = true;
   const data=await r.json();
   if(name === "news.json" && !Array.isArray(data)) return loadStaticNews();
   if(name === "patches.json" && !Array.isArray(data)) return loadStaticPatches();
@@ -48,6 +48,14 @@ function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt
 function dateDE(v){if(!v)return "—"; const d=new Date(v); return Number.isNaN(d.getTime())?esc(v):new Intl.DateTimeFormat("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"}).format(d);}
 function isFuture(v){const d=new Date(v);return !Number.isNaN(d.getTime())&&d.getTime()>Date.now();}
 function isOfficialSource(value){try{const u=new URL(value);return u.protocol==="https:"&&u.hostname==="robertsspaceindustries.com";}catch{return false;}}
+function validPrice(value){return (typeof value==="number"||typeof value==="string")&&/^\d+(?:\.\d{1,2})?$/.test(String(value))&&Number(value)>0&&Number(value)<100000;}
+function liveDeals(items,now=Date.now()){
+  if(!Array.isArray(items))return [];
+  return items.filter(d=>d&&d.active===true&&d.name&&isOfficialSource(d.sourceUrl)&&validPrice(d.price)&&["USD","EUR"].includes(d.currency)&&Number.isFinite(Date.parse(d.checkedAt))&&Date.parse(d.checkedAt)<=now&&Date.parse(d.checkedAt)>now-48*3600000&&Number.isFinite(Date.parse(d.validUntil))&&Date.parse(d.validUntil)>now&&(!d.oldPrice||validPrice(d.oldPrice)&&Number(d.oldPrice)>Number(d.price)))
+    .sort((a,b)=>Date.parse(a.validUntil)-Date.parse(b.validUntil));
+}
+function dealPrice(amount,currency){return new Intl.NumberFormat("de-DE",{style:"currency",currency}).format(Number(amount));}
+function renderDeals(items){return items.map(d=>`<article class="article"><span class="tag">${esc(d.type==="Game Package"?"GAME PACKAGE":"ANGEBOT")}</span><h2>${esc(d.name)}</h2><p>${d.oldPrice?`<s>${dealPrice(d.oldPrice,d.currency)}</s> `:""}<strong>${dealPrice(d.price,d.currency)}</strong></p>${d.note?`<p>${esc(d.note)}</p>`:""}<p class="ai-note">Zuletzt geprüft: ${dateDE(d.checkedAt)} · Angebot gültig höchstens bis: ${dateDE(d.validUntil)}. Preis und Bedingungen bitte bei RSI kontrollieren.</p><p>${sourceLink(d)}</p></article>`).join("")||'<article class="article"><p>Derzeit keine aktuell geprüften Angebote eingetragen.</p></article>';}
 function confirmedTime(value){return typeof value==="string"&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)&&Number.isFinite(Date.parse(value));}
 function activeEvents(items,now=Date.now()){
   if(!Array.isArray(items))return [];
@@ -77,7 +85,7 @@ function radarContacts(news,events){
   const count=document.querySelector("#radar-count"); if(count)count.textContent=`${contacts.length} Kontakte`;
 }
 function renderStats(news,patches,deals,events){
-  const map={"stat-news":news.length,"stat-patches":patches.length,"stat-deals":deals.filter(d=>d.active).length,"stat-events":events.length};
+  const map={"stat-news":news.length,"stat-patches":patches.length,"stat-deals":liveDeals(deals).length,"stat-events":events.length};
   Object.entries(map).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.textContent=v;});
 }
 function renderPatchChanges(changes){
@@ -107,14 +115,21 @@ async function freeFlyPage(){
     document.querySelector("#event-news").innerHTML=renderEventNews(eventNews(news));
   }catch(e){console.error(e);status.innerHTML='<p class="page-intro">Free-Fly- und Event-Daten konnten nicht geladen werden.</p>';}
 }
+function setReferral(referral){
+  const url=referral?.enabled&&typeof referral.url==="string"&&isOfficialSource(referral.url)&&!referral.url.includes("DEINCODE")?referral.url:null;
+  for(const id of ["referral-link","ref-main"]){const link=document.querySelector("#"+id);if(link){link.hidden=!url;if(url)link.href=url;else link.removeAttribute("href");}}
+  const info=document.querySelector("#ref-main-status");if(info)info.textContent=url?"Über diesen Link können Vorteile für Verse Radar entstehen.":"Der persönliche Referral-Link ist noch nicht eingerichtet. Informationen zum Programm findest du bei RSI.";
+}
+async function dealsPage(){const target=document.querySelector("#deals");if(!target)return;try{target.innerHTML=renderDeals(liveDeals(await loadJSON("deals.json")))}catch(e){console.error(e);target.innerHTML='<p class="page-intro">Angebote konnten nicht geladen werden.</p>';}}
+async function referralPage(){if(!document.querySelector("#ref-main"))return;try{setReferral(await loadJSON("referral.json"))}catch{setReferral(null)}}
 async function home(){
-  document.querySelectorAll("#referral-link").forEach(a=>a.href=CONFIG.referralUrl);
   const status=document.querySelector("#data-status");
   try{
-    const [news,patches,deals,events,freefly,meta]=await Promise.all(["news.json","patches.json","deals.json","events.json","freefly.json","meta.json"].map(loadJSON));
+    const [news,patches,deals,events,freefly,meta,referral]=await Promise.all([...["news.json","patches.json","deals.json","events.json","freefly.json","meta.json"].map(loadJSON),loadJSON("referral.json").catch(()=>({enabled:false}))]);
+    setReferral(referral);
     document.querySelector("#top-news").innerHTML=renderNews(news,3);
     document.querySelector("#latest-patches").innerHTML=patches.slice(0,5).map(p=>`<a class="list-row" href="/patches.html#${encodeURIComponent(p.version)}"><span><b>${esc(p.version)}</b><small>${esc(p.summary||"").slice(0,55)}${(p.summary||"").length>55?"…":""}</small></span><span>${dateDE(p.date)}</span></a>`).join("");
-    document.querySelector("#latest-deals").innerHTML=deals.filter(d=>d.active).slice(0,4).map(d=>`<a class="list-row deal-row" href="${esc(d.url||"/deals.html")}" ${d.url?.startsWith("http")?'target="_blank" rel="noopener"':''}><span>${esc(d.name)}</span><strong>${esc(d.price||"Angebot")}</strong></a>`).join("") || '<p class="page-intro">Aktuell keine bekannten Angebote.</p>';
+    document.querySelector("#latest-deals").innerHTML=liveDeals(deals).slice(0,4).map(d=>`<a class="list-row deal-row" href="/deals.html"><span>${esc(d.name)}</span><strong>${dealPrice(d.price,d.currency)}</strong></a>`).join("") || '<p class="page-intro">Aktuell keine geprüften Angebote.</p>';
     const liveEvents=activeEvents(events); document.querySelector("#events").innerHTML=liveEvents.slice(0,5).map(e=>`<a class="list-row" href="${esc(e.sourceUrl)}" target="_blank" rel="noopener noreferrer"><span><b>${esc(e.name)}</b><small>${esc(e.type||"Event")}</small></span><span>${dateDE(e.start)}</span></a>`).join("") || '<p class="page-intro">Keine bestätigten kommenden Events eingetragen.</p>';
     const ff=document.querySelector("#free-fly");
     const fly=freeFlyState(freefly);
@@ -134,4 +149,4 @@ async function listing(){
   }catch(e){target.innerHTML='<div class="empty-state">News konnten nicht geladen werden.</div>';}
 }
 function setupMenu(){document.querySelector(".menu-toggle")?.addEventListener("click",()=>document.querySelector(".site-header").classList.toggle("menu-open"));}
-document.addEventListener("DOMContentLoaded",()=>{setupMenu(); if(location.pathname.endsWith("/")||location.pathname.endsWith("index.html"))home(); listing(); freeFlyPage();});
+document.addEventListener("DOMContentLoaded",()=>{setupMenu(); if(location.pathname.endsWith("/")||location.pathname.endsWith("index.html"))home(); listing(); freeFlyPage(); dealsPage(); referralPage();});

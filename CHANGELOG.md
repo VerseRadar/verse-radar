@@ -1,5 +1,13 @@
 # Changelog – Verse Radar
 
+## 0.12.0 – Geprüfte Deals und funktionierender Referral-Link
+
+- Die Deals-Seite zeigt nur geprüfte Game Packages und Angebote mit offizieller Shopseite, Preis, Währung und Ende.
+- 48-Stunden-Grenze für die Preisprüfung; abgelaufene oder alte Angebote verschwinden automatisch.
+- `/manage/deals` mit vorhandenem `RUN_SECRET`, Vorschau, GitHub-Schutz gegen konkurrierende Änderungen und Live-Daten über `/api/deals`.
+- Referral-Platzhalterlink entfernt. Button nur bei gültigem `REFERRAL_URL` sichtbar; keine Änderungen an News oder Patches.
+- Keine automatischen Preisbehauptungen und kein OpenAI-Key nötig.
+
 ## 0.11.2 – Verwaltungsseite ohne Asset-Bindung
 
 - `/manage/events` wird direkt aus dem Worker ausgeliefert und benötigt keine `env.ASSETS`-Bindung oder separate CSS-Datei.

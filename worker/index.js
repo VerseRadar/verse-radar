@@ -22,7 +22,7 @@ const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
 const PATCH_BACKFILL_PATH = "public/data/patch-backfill-control.json";
 const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "0.11.2";
+const VERSION = "0.12.0";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -146,6 +146,20 @@ export default {
     }
     if (u.pathname === "/backfill") return backfillPage();
     if (u.pathname === "/manage/events") return eventAdminPage();
+    if (u.pathname === "/manage/deals") return dealAdminPage();
+    if (["/manage/deals/state", "/manage/deals/preview", "/manage/deals/publish"].includes(u.pathname)) {
+      if (!env.RUN_SECRET) return json({ ok: false, error: "RUN_SECRET fehlt." }, 503);
+      if (request.headers.get("x-run-secret") !== env.RUN_SECRET) return json({ ok: false, error: "Unauthorized" }, 401);
+      const state = u.pathname.endsWith("/state");
+      if (request.method !== (state ? "GET" : "POST")) return json({ ok: false, error: state ? "GET erforderlich" : "POST erforderlich" }, 405);
+      if (!state && request.headers.get("origin") && request.headers.get("origin") !== u.origin) return json({ ok: false, error: "Andere Herkunft nicht erlaubt" }, 403);
+      try {
+        if (state) return json({ ok: true, version: VERSION, deals: (await getDealsStrict(env)).data });
+        const raw = await request.text();
+        if (raw.length > 8000) return json({ ok: false, error: "Eingabe zu groß" }, 413);
+        return json({ ok: true, version: VERSION, ...await editDealData(env, JSON.parse(raw), u.pathname.endsWith("/publish")) });
+      } catch (e) { return json({ ok: false, error: e.message }, e.status === 409 ? 409 : 400); }
+    }
     if (u.pathname === "/manage/events/state" || u.pathname === "/manage/events/preview" || u.pathname === "/manage/events/publish") {
       if (!env.RUN_SECRET) return json({ ok: false, error: "RUN_SECRET fehlt." }, 503);
       if (request.headers.get("x-run-secret") !== env.RUN_SECRET) return json({ ok: false, error: "Unauthorized" }, 401);
@@ -296,6 +310,18 @@ export default {
         return json(u.pathname === "/api/events" ? [] : { active: false });
       } catch (e) { return json({ ok: false, error: e.message }, 500); }
     }
+    if (u.pathname === "/api/deals") {
+      try {
+        const deals = await readGithubJSON(env, DEAL_DATA_PATH, null);
+        if (Array.isArray(deals)) return new Response(JSON.stringify(deals), { headers: { "content-type": "application/json;charset=utf-8", "cache-control": "no-store", "x-verse-radar-deals-source": "github" } });
+        if (env.ASSETS) {
+          const fallback = await env.ASSETS.fetch(new Request(new URL("/data/deals.json", u.origin), request));
+          return new Response(await fallback.text(), { status: fallback.status, headers: { "content-type": "application/json;charset=utf-8", "cache-control": "no-store", "x-verse-radar-deals-source": "static-fallback" } });
+        }
+        return json([]);
+      } catch (e) { return json({ ok: false, error: e.message }, 500); }
+    }
+    if (u.pathname === "/api/referral") return json({ enabled: Boolean(validReferralUrl(env.REFERRAL_URL)), url: validReferralUrl(env.REFERRAL_URL) });
     // Public website: let Cloudflare Static Assets serve /public.
     if (env.ASSETS) return env.ASSETS.fetch(request);
     return new Response(`Verse Radar ${VERSION}`, { headers: { "content-type": "text/plain;charset=utf-8" } });
@@ -323,8 +349,70 @@ function eventAdminPage() {
   } });
 }
 
+// Self-contained editor: no optional Cloudflare static asset binding required.
+const DEAL_ADMIN_HTML = "<!doctype html><html lang=\"de\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><meta name=\"robots\" content=\"noindex,nofollow\"><title>Deals pflegen – Verse Radar</title>\n<style>*{box-sizing:border-box}body{margin:0;background:#041016;color:#e2eaea;font:15px/1.5 system-ui,Arial,sans-serif}.site-header{padding:20px;border-bottom:1px solid #24404b}.site-header a{color:#79f05c;text-decoration:none;font-weight:700}.page{padding:35px 20px;max-width:850px;margin:auto}.eyebrow{color:#79f05c;font-size:10px;letter-spacing:.15em}.page-intro{color:#93aab0}.editor fieldset{border:1px solid #24404b;border-radius:8px;padding:20px;margin:22px 0}.editor label{display:block;margin:12px 0;font-size:13px}.editor input,.editor textarea,.editor select{display:block;width:100%;max-width:650px;margin-top:5px;background:#071219;border:1px solid #24404b;color:#e2eaea;border-radius:4px;padding:10px;font:inherit}.editor button{background:#184f29;color:#e2eaea;border:1px solid #5dcc62;border-radius:5px;padding:10px 15px;margin:8px 8px 0 0;cursor:pointer}.editor button:disabled{opacity:.45;cursor:default}.editor pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#071219;border:1px solid #24404b;padding:15px;border-radius:5px}.entry{border-top:1px solid #24404b;margin-top:12px;padding-top:12px}</style></head>\n<body><header class=\"site-header\"><a href=\"/\">VERSE RADAR</a></header><main class=\"page editor\"><div class=\"eyebrow\">VERSE RADAR · VERWALTUNG</div><h1>Deals & Game Packages pflegen</h1><p class=\"page-intro\">Nur einen selbst auf der verlinkten RSI-Shopseite geprüften Preis eintragen. Ein Angebot erscheint längstens bis zum Ende oder 48 Stunden nach der letzten Prüfung. Vor jeder Veröffentlichung die Vorschau kontrollieren.</p>\n<label>Vorhandenes RUN_SECRET<input id=\"secret\" type=\"password\" autocomplete=\"off\" placeholder=\"Nur hier im Browser eingeben\"></label><button id=\"load\" type=\"button\">Gespeicherte Angebote laden</button>\n<fieldset><legend>Geprüftes Angebot</legend>\n<label>Name<input id=\"name\" placeholder=\"Name des offiziellen Angebots\"></label>\n<label>Art<select id=\"type\"><option value=\"Game Package\">Game Package</option><option value=\"Sonstiges Angebot\">Sonstiges Angebot</option></select></label>\n<label>Konkrete RSI-Shopseite<input id=\"source\" type=\"url\" placeholder=\"https://robertsspaceindustries.com/pledge/Packages/…\"></label>\n<label>Angebotspreis<input id=\"price\" inputmode=\"decimal\" placeholder=\"z. B. 45.00\"></label>\n<label>Vergleichspreis (optional, nur wenn auf der Quelle bestätigt)<input id=\"old-price\" inputmode=\"decimal\"></label>\n<label>Währung<select id=\"currency\"><option value=\"USD\">USD</option><option value=\"EUR\">EUR</option></select></label>\n<label>Ende laut Angebot (deine lokale Uhrzeit)<input id=\"until\" type=\"datetime-local\"></label>\n<label>Kurzer Hinweis (optional)<textarea id=\"note\" rows=\"3\" maxlength=\"400\"></textarea></label>\n<button id=\"preview\" type=\"button\">Angebot prüfen</button><div id=\"saved\"></div>\n</fieldset><h2>Vorschau</h2><pre id=\"result\">Noch nichts geprüft.</pre><button id=\"publish\" type=\"button\" disabled>Geprüfte Änderung veröffentlichen</button>\n</main><script>\nconst byId=id=>document.getElementById(id),output=byId('result');let pending=null;\nfunction iso(id){const value=byId(id).value;return value&&Number.isFinite(new Date(value).getTime())?new Date(value).toISOString():''}\nfunction local(value){if(!value)return '';const d=new Date(value);if(!Number.isFinite(d.getTime()))return '';const n=v=>String(v).padStart(2,'0');return `${d.getFullYear()}-${n(d.getMonth()+1)}-${n(d.getDate())}T${n(d.getHours())}:${n(d.getMinutes())}`}\nfunction invalidate(){pending=null;byId('publish').disabled=true}\nasync function call(action,payload){const key=byId('secret').value;if(!key)throw Error('Bitte zuerst RUN_SECRET eingeben.');const r=await fetch('/manage/deals/'+action,{method:action==='state'?'GET':'POST',headers:{'x-run-secret':key,'content-type':'application/json'},body:payload?JSON.stringify(payload):undefined,cache:'no-store'});const body=await r.json();if(!r.ok||!body.ok)throw Error(body.error||`HTTP ${r.status}`);return body}\nfunction show(value){output.textContent=typeof value==='string'?value:JSON.stringify(value,null,2)}\nasync function preview(payload){try{invalidate();const result=await call('preview',payload);pending={...payload,expectedSha:result.expectedSha};show({hinweis:'Preis, Währung, Ende und offiziellen Shop-Link vor dem Veröffentlichen prüfen.',vorschau:result.proposal});byId('publish').disabled=false}catch(e){show(e.message)}}\nasync function load(){try{invalidate();const state=await call('state');const root=byId('saved');root.replaceChildren();for(const deal of state.deals){const row=document.createElement('div');row.className='entry';const name=document.createElement('span');name.textContent=`${deal.name||'Unbenannt'} · ${deal.price||'?'} ${deal.currency||''} · geprüft: ${deal.checkedAt?new Date(deal.checkedAt).toLocaleString('de-DE'):'nicht bestätigt'}`;const fill=document.createElement('button');fill.textContent='Erneut prüfen';fill.type='button';fill.addEventListener('click',()=>{byId('name').value=deal.name||'';byId('type').value=deal.type||'Game Package';byId('source').value=deal.sourceUrl||'';byId('price').value=deal.price??'';byId('old-price').value=deal.oldPrice??'';byId('currency').value=deal.currency||'USD';byId('until').value=local(deal.validUntil);byId('note').value=deal.note||'';invalidate()});const remove=document.createElement('button');remove.textContent='Entfernen – Vorschau';remove.type='button';remove.addEventListener('click',()=>preview({action:'remove',data:{sourceUrl:deal.sourceUrl}}));row.append(name,fill,remove);root.append(row)}show(`Gespeichert: ${state.deals.length} Angebot(e). Nur innerhalb von 48 Stunden geprüfte Angebote sind sichtbar.`)}catch(e){show(e.message)}}\nbyId('load').addEventListener('click',load);\nbyId('preview').addEventListener('click',()=>preview({action:'set',data:{name:byId('name').value,type:byId('type').value,sourceUrl:byId('source').value,price:byId('price').value,oldPrice:byId('old-price').value,currency:byId('currency').value,validUntil:iso('until'),note:byId('note').value}}));\nbyId('publish').addEventListener('click',async()=>{if(!pending)return;try{const result=await call('publish',pending);invalidate();await load();show(`Änderung gespeichert. Der sichtbare Stand ist auf /deals.html und /api/deals prüfbar. Gespeicherte Angebote: ${result.count}.`)}catch(e){invalidate();show(e.message)}});\nfor(const field of document.querySelectorAll('input,textarea,select'))field.addEventListener('input',invalidate);\n</script></body></html>\n";
+function dealAdminPage() {
+  return new Response(DEAL_ADMIN_HTML, { headers: {
+    "content-type": "text/html;charset=utf-8", "cache-control": "no-store", "referrer-policy": "no-referrer",
+    "x-frame-options": "DENY", "content-security-policy": "default-src 'none'; connect-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'"
+  } });
+}
+
 const FREE_FLY_DATA_PATH = "public/data/freefly.json";
 const EVENT_DATA_PATH = "public/data/events.json";
+const DEAL_DATA_PATH = "public/data/deals.json";
+
+function validReferralUrl(raw) {
+  try {
+    const url = new URL(raw);
+    const code = url.searchParams.get("referral") || "";
+    if (url.protocol !== "https:" || url.hostname !== "robertsspaceindustries.com" || url.pathname.replace(/\/$/, "") !== "/enlist" || url.username || url.password || url.port || !/^[a-z0-9]{4,32}$/i.test(code) || /^DEINCODE$/i.test(code)) return null;
+    url.hash = "";
+    return url.toString();
+  } catch { return null; }
+}
+
+async function getDealsStrict(env) {
+  const result = await getGithubJSONStrict(env, DEAL_DATA_PATH);
+  if (!Array.isArray(result.data)) throw Error("Gespeicherte Angebote ungültig; nichts verändert.");
+  return result;
+}
+
+function checkedDealFields(data) {
+  const name = String(data?.name || "").trim();
+  if (name.length < 5 || name.length > 150) throw Error("Angebotsname muss zwischen 5 und 150 Zeichen haben.");
+  if (!["Game Package", "Sonstiges Angebot"].includes(data.type)) throw Error("Angebotsart auswählen.");
+  const sourceUrl = officialEventLink(data.sourceUrl);
+  if (!/\/(?:pledge|store)\//i.test(new URL(sourceUrl).pathname)) throw Error("Bitte die konkrete offizielle RSI-Shopseite verlinken.");
+  const price = Number(data.price), oldPrice = data.oldPrice === "" || data.oldPrice == null ? null : Number(data.oldPrice);
+  if (!Number.isFinite(price) || price <= 0 || price >= 100000 || !/^\d+(?:\.\d{1,2})?$/.test(String(data.price))) throw Error("Preis als Zahl mit maximal zwei Nachkommastellen eingeben.");
+  if (oldPrice !== null && (!Number.isFinite(oldPrice) || oldPrice <= price || !/^\d+(?:\.\d{1,2})?$/.test(String(data.oldPrice)))) throw Error("Vergleichspreis muss höher als der Angebotspreis sein.");
+  if (!["USD", "EUR"].includes(data.currency)) throw Error("Währung auswählen.");
+  const validUntil = editorDate(data.validUntil);
+  if (Date.parse(validUntil) <= Date.now()) throw Error("Das Angebot ist bereits abgelaufen.");
+  const note = String(data.note || "").trim();
+  if (note.length > 400) throw Error("Hinweis zu lang (maximal 400 Zeichen).");
+  return { name, type: data.type, sourceUrl, price, oldPrice, currency: data.currency, note, validUntil, checkedAt: new Date().toISOString(), active: true };
+}
+
+async function editDealData(env, input, publish) {
+  if (!["set", "remove"].includes(input?.action)) throw Error("Unbekannte Angebotsaktion.");
+  const current = await getDealsStrict(env);
+  if (publish && (!input.expectedSha || input.expectedSha !== current.sha)) {
+    const error = new Error("Angebote wurden seit der Vorschau geändert. Bitte erneut prüfen."); error.status = 409; throw error;
+  }
+  let next;
+  if (input.action === "remove") {
+    const url = officialEventLink(input.data?.sourceUrl);
+    if (!current.data.some(x => x.sourceUrl === url)) throw Error("Angebot nicht gefunden.");
+    next = current.data.filter(x => x.sourceUrl !== url);
+  } else {
+    const entry = checkedDealFields(input.data);
+    next = current.data.filter(x => x.sourceUrl !== entry.sourceUrl).concat(entry);
+  }
+  if (publish) await putGithub(env, DEAL_DATA_PATH, JSON.stringify(next, null, 2) + "\n", `Verse Radar ${VERSION}: deal ${input.action}`, current.sha);
+  return { published: publish, action: input.action, count: next.length, proposal: next, expectedSha: publish ? undefined : current.sha };
+}
 
 function officialEventLink(raw) {
   let url;

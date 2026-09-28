@@ -1,4 +1,4 @@
-# Verse Radar 0.11.2
+# Verse Radar 0.12.0
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -18,6 +18,7 @@ Der Worker liest die offizielle RSI Comm-Link-Seite ein, erkennt aktuelle Comm-L
 - Secret: `OPENAI_API_KEY` (optional)
 - Secret: `GITHUB_TOKEN` (für automatisches Zurückschreiben)
 - Secret: `RUN_SECRET` (für die neue Steuerungsseite erforderlich; für die älteren `/run`-Aufrufe optional)
+- Variable optional: `REFERRAL_URL` = eigener vollständiger RSI-Enlist-Link. Ohne gültigen Link bleibt der Referral-Button verborgen; keinen Platzhalter eintragen.
 - Variable: `GITHUB_REPO` = `VerseRadar/verse-radar`
 - Variable optional: `GITHUB_BRANCH` = `main`
 - Variable optional: `MAX_ITEMS`
@@ -53,6 +54,8 @@ Jeder Durchlauf nutzt die bestehende Begrenzung von acht historischen Versionen 
 **0.11.1:** Unter `/manage/events` lassen sich bestätigte Free-Fly- und Event-Zeiträume ohne Bearbeitung von JSON-Dateien eintragen. Das vorhandene `RUN_SECRET` eingeben und **Gespeicherten Stand laden** wählen; für Events kann eine bereits veröffentlichte Event-Meldung Titel und RSI-Link vorbelegen. Start und Ende anhand der offiziellen Meldung in lokaler Uhrzeit eintragen, **prüfen** und erst danach **Geprüfte Änderung veröffentlichen** wählen. Deaktivieren und Entfernen haben ebenfalls eine Vorschau. Die Veröffentlichung nutzt den vorhandenen GitHub-Zugang und aktualisiert `public/data/freefly.json` oder `public/data/events.json`. Die Website liest beide Dateien über `/api/freefly` und `/api/events` direkt aus GitHub und zeigt Änderungen ohne erneutes ZIP-Deployment. Das Secret gehört nur in die geschützte Eingabemaske, niemals in einen Link oder Chat. Ohne tatsächlich bestätigte Termine gibt es nichts einzutragen; die Event-Meldungen aus 0.11.0 funktionieren weiter. Keine neuen Secrets, API-Kosten oder Änderungen an News/Patches.
 
 **0.11.2:** `/manage/events` wird direkt vom Worker ausgeliefert. In 0.11.1 konnte die Seite „Site assets missing“ zeigen, weil die vorhandene Worker-Konfiguration keine `ASSETS`-Bindung bereitstellt. Ein zusätzlicher Cloudflare-Schalter ist nicht nötig. Nach dem Update `/health` (Version 0.11.2) und dann `/manage/events` prüfen: Die Verwaltungsseite muss sichtbar sein. Erst nach Eingabe des vorhandenen `RUN_SECRET` lassen sich gespeicherte Termine laden; ohne bestätigte Termine muss nichts veröffentlicht werden.
+
+**0.12.0:** `/manage/deals` ist eine eigenständig vom Worker ausgelieferte Eingabeseite für nachweislich auf der offiziellen RSI-Shopseite geprüfte Game Packages und sonstige Angebote. Das vorhandene `RUN_SECRET` eingeben, **Gespeicherte Angebote laden**, Angaben und Ende selbst auf der offiziellen Shopseite prüfen, **Angebot prüfen**, Vorschau kontrollieren und erst danach veröffentlichen. Über `/api/deals` liest die Website die gespeicherten Angebote ohne neues Deployment. Sichtbar bleiben ausschließlich Einträge mit gültigem Shoplink, Preis/Währung, Endzeitpunkt und Prüfung innerhalb der letzten 48 Stunden. Reicht eine dieser Angaben nicht, bleibt die Angebotsliste leer. Das Formular **Erneut prüfen** lädt gespeicherte Werte, ersetzt aber keine echte Kontrolle der RSI-Seite. Für eine erneute Anzeige nach 48 Stunden ist eine weitere Prüfung und Veröffentlichung erforderlich. Alle gespeicherten Dateien unter `public/data/` bleiben außerhalb der ZIP. `REFERRAL_URL` ist eine optionale Cloudflare-Variable für einen eigenen tatsächlich gültigen RSI-Enlist-Link; ohne sie zeigen Startseite und Referral-Seite keinen funktionslosen Platzhalter-Button. Dieses Update braucht keinen OpenAI-Key. Nach dem Einspielen `/health` (0.12.0), `/deals.html`, `/referral.html` und `/manage/deals` prüfen; leere Angebote sind bei fehlenden geprüften Daten richtig.
 Version 0.7.0 entfernt technische Archiv-Einträge und ersetzt wiederholte News-Platzhalter mit vorsichtigen deutschen Beschreibungen, die auf dem Titel beruhen. Wo eine bereits geprüfte Patch-Zusammenfassung zur exakt selben Comm-Link-ID vorliegt, nutzt die News-Karte deren erste zwei Sätze. Artikelinhalte werden ohne brauchbare Quellbeschreibung oder KI-Schlüssel nicht als vollständig zusammengefasst ausgegeben.
 Die Patch-Seite zeigt höchstens fünf aktuelle Einträge; die History zeigt alle gespeicherten Versionen. Der Worker ergänzt bei jedem geprüften manuellen Patch-Import zwei ältere Archivseiten und behält bestehende Versionen. Wie weit das Archiv zurückreichen kann, hängt von der verfügbaren Patch-Quelle ab. Die geprüfte Patch-Aufbereitung bleibt auf `summaryVersion=0.6.8`.
 Version 0.8.1 übernimmt neue Einträge in die Patch History nur, wenn ihr RSI-Quelllink tatsächlich auf Patch Notes zeigt. Ältere bereits gespeicherte Update-Ankündigungen bleiben erhalten, werden aber als solche bezeichnet und mit ihrem echten RSI-Link versehen. Eine allgemeine Titelübereinstimmung wie „Alpha 4.7.2“ genügt nicht mehr für eine Patch Note.
@@ -101,7 +104,7 @@ Im Browser werden diese Dateien über `/data/...` geladen, weil `public/` bei Cl
 Der RSI-Parser wurde robuster gegen Änderungen am HTML-Aufbau der Comm-Link-Seite gemacht. `/preview` liefert bei einem Fehler zusätzliche technische Diagnosewerte, damit ein weiterer Fehler gezielt behoben werden kann.
 
 ## Was bewusst manuell bleibt
-Deals werden noch nicht automatisch aus dem Pledge Store übernommen. Das soll erst mit einer belastbaren offiziellen/strukturierten Quelle passieren, damit keine veralteten Preise auf der Seite landen.
+Deals werden noch nicht automatisch aus dem Pledge Store übernommen. Bis eine belastbare Quelle vorliegt, werden nur manuell geprüfte Angebote mit Ablauf- und Prüfdatum angezeigt.
 
 ## Rechtlicher Fan-Hinweis
 Vor Veröffentlichung die aktuellen RSI-Fankit/Fan-Site-Vorgaben prüfen und den offiziellen Hinweis sichtbar übernehmen. Inhalte werden nur zusammengefasst; Originalquellen werden verlinkt.

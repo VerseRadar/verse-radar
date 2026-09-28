@@ -17,3 +17,5 @@ main{max-width:var(--max);margin:auto;padding:0 24px}.hero{min-height:430px;disp
 /* Verse Radar 0.4 */
 .automation-panel{display:grid;grid-template-columns:1.4fr 1fr;gap:28px;align-items:center;margin:42px 0;padding:28px;border:1px solid var(--line);border-radius:9px;background:linear-gradient(120deg,rgba(8,23,30,.96),rgba(5,12,17,.96));position:relative;overflow:hidden}.automation-panel:after{content:"";position:absolute;inset:auto -10% -70%;height:160px;background:radial-gradient(ellipse,rgba(121,240,92,.08),transparent 65%);pointer-events:none}.automation-panel h2{margin:7px 0 6px;font-size:25px}.automation-panel p{margin:0;color:var(--muted);font-size:13px;max-width:700px}.pipeline{display:flex;justify-content:flex-end;align-items:center;gap:10px;font-size:9px;letter-spacing:.12em;color:var(--green)}.pipeline span{border:1px solid #28523a;border-radius:4px;padding:10px 11px;background:#071712}.pipeline i{font-style:normal;color:var(--cyan)}
 @media(max-width:900px){.automation-panel{grid-template-columns:1fr}.pipeline{justify-content:flex-start}}
+
+.button[hidden]{display:none}
