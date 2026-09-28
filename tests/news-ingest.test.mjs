@@ -23,7 +23,7 @@ const archive = [
     : url(id, title.toLowerCase().replace(/[^a-z0-9]+/g, '-')) }));
 archive.push({ id: 21340, title: 'Star Citizen Alpha 4.10.2', created_at: '2026-09-22', rsi_url: 'https://robertsspaceindustries.com/comm-link/SCW/21340-API' });
 archive.push({ id: 21341, title: 'Star Citizen Alpha 4.10.3', created_at: '2026-09-22', rsi_url: 'https://robertsspaceindustries.com/en/comm-link/transmission/20000-wrong-article' });
-archive.find(x => x.id === 21314).published_at = "2026-08-26T18:00:00.000Z";
+archive.find(x => x.id === 21314).published_at = "2026-09-09T20:00:00.000Z";
 
 const oldUrl = url(21339, "this-week-in-star-citizen");
 const oldNews = [
@@ -56,7 +56,7 @@ globalThis.fetch = async (target, options = {}) => {
 
 const env = { GITHUB_TOKEN: "test-token", GITHUB_REPO: "example/verse-radar", GITHUB_BRANCH: "main" };
 const health = await worker.fetch(new Request("https://example.com/health"), env);
-assert.equal((await health.json()).version, "0.10.0");
+assert.equal((await health.json()).version, "0.10.1");
 const patchApi = await worker.fetch(new Request("https://example.com/api/patches"), env);
 assert.equal(patchApi.headers.get("x-verse-radar-patches-source"), "github");
 
@@ -68,21 +68,24 @@ const preview = await worker.fetch(new Request("https://example.com/preview/news
 assert.equal(preview.status, 200);
 const body = await preview.json();
 assert.equal(body.published, false);
-assert.equal(body.fetchedItems, 8);
-assert.equal(body.count, 9);
+assert.equal(body.fetchedItems, 9);
+assert.equal(body.count, 10);
 assert.equal(body.refreshedItems, 1);
 assert.equal(body.aiItems, 0);
-assert.equal(body.newItems, 7);
-assert.equal(body.items.filter(x => x.title === "This Week in Star Citizen").length, 2);
-assert.equal(body.items.filter(x => x.title.startsWith("Roadmap Roundup")).length, 1);
-assert.equal(body.items.find(x => x.title.startsWith("Roadmap Roundup")).date, "2026-08-26T18:00:00.000Z");
+assert.equal(body.newItems, 8);
+assert.equal(body.items.filter(x => x.title.startsWith("This Week in Star Citizen - ")).length, 2);
+assert.equal(body.items.filter(x => x.title.startsWith("Roadmap Roundup")).length, 2);
+assert.equal(body.items.find(x => x.title === 'Roadmap Roundup - September 9, 2026').date, "2026-09-09T20:00:00.000Z");
+assert.match(body.items.find(x => x.title === 'Roadmap Roundup - September 9, 2026').sourceUrl, /21314-Roadmap-Roundup-September-9-2026/);
+assert.match(body.items.find(x => x.title === 'Roadmap Roundup - September 9, 2026').summary, /Orison Relief Support/);
 assert.equal(body.items.some(x => x.title.startsWith("R-PU-ORS-")), false);
 assert.equal(body.items.some(x => x.title === "Star Citizen Alpha 4.10.2" || x.title === "Star Citizen Alpha 4.10.3"), false);
 assert.equal(body.items.find(x => x.title === 'Star Citizen Alpha 4.10.1').sourceUrl, archive.find(x => x.id === 21330).rsi_url);
 assert.equal(body.items.some(x => x.sourceUrl === "https://robertsspaceindustries.com/en/comm-link"), false);
 assert.equal(body.items.some(x => x.summary === placeholder), false);
 assert.ok(body.items.find(x => x.id === hash(oldUrl)).summary.includes("Wochenüberblick"));
-assert.equal(body.items.find(x => x.title === "Star Citizen Alpha 4.10.1").summary, "Alpha 4.10.1 bringt Orison Relief Support. Der Patch enthält weitere Änderungen an Aufträgen und Fahrzeugen.");
+assert.match(body.items.find(x => x.id === hash(oldUrl)).title, /September 21, 2026/);
+assert.equal(body.items.find(x => x.title === "Star Citizen Alpha 4.10.1").summary, "Alpha 4.10.1 bringt Orison Relief Support.");
 assert.equal(body.items.find(x => x.title === "Star Citizen Alpha 4.10.1").summaryBasis, "Patch Notes");
 assert.ok(body.items.some(x => x.id === "valid-old"));
 assert.equal(calls.some(x => x.method === "PUT"), false);

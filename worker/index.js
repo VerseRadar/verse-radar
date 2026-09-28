@@ -22,7 +22,7 @@ const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
 const PATCH_BACKFILL_PATH = "public/data/patch-backfill-control.json";
 const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "0.10.0";
+const VERSION = "0.10.1";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -125,7 +125,17 @@ const HISTORICAL_SHORT_RELEASES = {
 const VERSION_RE = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?$/;
 const PATCH_NOTES_URL = "https://robertsspaceindustries.com/en/patch-notes";
 const RELEVANT = /patch|alpha\s*\d|free\s*fly|foundation festival|fleet week|invictus|iae|event|roadmap|ship showdown|siege|monthly report|this week in star citizen|live experience|pirate week|subscriber|vehicle|ship|aegis|argo|anvil|kruger|sabre|aurora|gameplay|engineering|q\s*&\s*a|letter from the chairman/i;
-const NEWS_SUMMARY_VERSION = "0.10.0";
+const NEWS_SUMMARY_VERSION = "0.10.1";
+// The archived metadata for this article still names the August edition;
+// RSI redirects its old URL to the September 9 edition with the same ID.
+const NEWS_SOURCE_CORRECTIONS = {
+  21314: {
+    oldTitle: "Roadmap Roundup - August 26, 2026",
+    title: "Roadmap Roundup - September 9, 2026",
+    url: "https://robertsspaceindustries.com/en/comm-link/transmission/21314-Roadmap-Roundup-September-9-2026",
+    summary: "Orison Relief Support ist laut Roadmap für ein kommendes 4.10.x-Update vorgesehen. Alpha 4.11 wurde auf das vierte Quartal 2026 verschoben."
+  }
+};
 const OLD_NEWS_PLACEHOLDER = "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.";
 
 export default {
@@ -421,22 +431,30 @@ async function fetchRSIItems() {
 
 function normalizeWikiCommLink(record) {
   const id = Number(record?.id);
-  const title = strip(record?.title || "");
+  let title = strip(record?.title || "");
   if (!Number.isInteger(id) || id <= 0 || !validTitle(title)) return null;
   // The archive sometimes returns a placeholder URL such as /comm-link/SCW/…
   // and a title alone does not establish whether the article is a patch note
   // or a transmission. Only use a supplied, matching RSI article link.
-  const url = cleanUrl(record?.rsi_url);
+  let url = cleanUrl(record?.rsi_url);
   if (!url || !isArticleUrl(url) || /\/SCW\/|\-API(?:[/?#]|$)/i.test(url) || Number(new URL(url).pathname.match(/\/(\d+)-/)?.[1]) !== id) return null;
+  const correction = NEWS_SOURCE_CORRECTIONS[id];
+  if (correction && title === correction.oldTitle) { title = correction.title; url = correction.url; }
   let date = record?.published_at ? validDate(record.published_at) : null;
   if (!date && record?.created_at) date = validDate(record.created_at);
   if (!date && record?.created_at_human) {
     const d = new Date(record.created_at_human);
     if (!Number.isNaN(d.getTime())) date = d.toISOString();
   }
+  // The archive omits the edition date from recurring weekly headlines.
+  // The published UTC calendar date identifies each edition unambiguously.
+  if (/^This Week in Star Citizen$/i.test(title) && date) {
+    title += " - " + new Intl.DateTimeFormat("en-US", { timeZone: "UTC", month: "long", day: "numeric", year: "numeric" }).format(new Date(date));
+  }
   return {
     title,
     url,
+    verifiedSummary: correction && title === correction.title ? correction.summary : null,
     date: date || new Date().toISOString(),
     description: "",
     sourceId: id
@@ -611,12 +629,13 @@ function isNewsPlaceholder(summary) {
 }
 
 function fallbackNewsSummary(item) {
+  if (item.verifiedSummary) return item.verifiedSummary;
   const title = strip(item.title);
   let match;
-  if (/^this week in star citizen$/i.test(title)) return "RSI veröffentlicht einen neuen Wochenüberblick zu Star Citizen. Die konkreten Themen stehen in der Originalmeldung.";
+  if (/^this week in star citizen(?:\s*[-–]\s*.*)?$/i.test(title)) return `Wochenüberblick vom ${new Intl.DateTimeFormat("de-DE", { timeZone: "UTC", day: "numeric", month: "long", year: "numeric" }).format(new Date(item.date))}. Die konkreten Themen stehen in der Originalmeldung.`;
   if ((match = title.match(/^q\s*&\s*a:\s*(.+)$/i))) return `Fragen und Antworten zu ${match[1]}. Die einzelnen Aussagen stehen in der Originalmeldung.`;
   if (/^roadmap roundup/i.test(title)) return `RSI veröffentlicht „${title}“. Welche Punkte des Entwicklungsplans besprochen werden, steht in der Originalmeldung.`;
-  if ((match = title.match(/^star citizen monthly report:\s*(.+)$/i))) return `Monatsbericht zur Entwicklung von Star Citizen für ${match[1]}. Die behandelten Arbeiten stehen in der Originalmeldung.`;
+  if ((match = title.match(/^star citizen monthly report:\s*(.+)$/i))) return `Monatsbericht zur Entwicklung von Star Citizen für ${match[1].replace(/\bJanuary\b/i, "Januar").replace(/\bFebruary\b/i, "Februar").replace(/\bMarch\b/i, "März").replace(/\bMay\b/i, "Mai").replace(/\bJune\b/i, "Juni").replace(/\bJuly\b/i, "Juli").replace(/\bOctober\b/i, "Oktober").replace(/\bDecember\b/i, "Dezember")}. Die behandelten Arbeiten stehen in der Originalmeldung.`;
   if (/ship showdown.*winners/i.test(title)) return `RSI gibt in „${title}“ die Gewinner des Ship Showdown bekannt. Die Ergebnisse stehen in der Originalmeldung.`;
   if (/^star citizen alpha\s*\d/i.test(title)) return `Offizielle Mitteilung zu ${title}. Die konkreten Änderungen findest du in den verlinkten Patch Notes.`;
   if (/letter from the chairman/i.test(title)) return `Brief des Chairman unter dem Titel „${title}“. Den Wortlaut findest du in der Originalmeldung.`;
@@ -632,7 +651,9 @@ function patchNewsSummary(item, patches) {
   const patch = patches.find(x => x.summaryVersion === "0.6.8" && Number(x.sourceUrl?.match(/\/(\d+)-/)?.[1]) === articleId);
   if (!patch?.summary) return "";
   // Use only the beginning of the already reviewed patch summary on news cards.
-  return patch.summary.split(/(?<=[.!?])\s+(?=[A-ZÄÖÜ])/u).slice(0, 2).join(" ").trim();
+  // The second fragment can end at an abbreviation such as "bzw.". The
+  // first complete sentence already conveys the main point of a news card.
+  return patch.summary.split(/(?<=[.!?])\s+(?=[A-ZÄÖÜ])/u)[0].trim();
 }
 
 function extractDateFromSlug(url) {

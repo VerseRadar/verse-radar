@@ -1,5 +1,11 @@
 # Changelog – Verse Radar
 
+## 0.10.1 – News-Vorschau nach echten Daten berichtigen
+- Die Patch-Kurzfassung endet nun am Ende des ersten vollständigen Satzes; die in der Vorschau abgeschnittene Abkürzung „bzw.“ entfällt.
+- Der Roadmap-Artikel mit ID 21314 erhält den geprüften RSI-Titel und Link vom 9. September sowie konkrete Änderungspunkte zu Orison Relief Support und Alpha 4.11.
+- Wöchentliche Meldungen erhalten ihr jeweiliges Veröffentlichungsdatum im Titel und im deutschen Kurztext; der Juli-Monatsbericht nennt den Monat auf Deutsch.
+- News bleiben weiterhin vor einer gemeinsamen Sichtprüfung der Vorschau unveröffentlicht.
+
 ## 0.10.0 – News-Quellen und Patch-Kennzeichnung berichtigen
 - News aus der strukturierten Ersatzquelle übernehmen nur noch belegte RSI-Artikel-URLs, die zur Artikel-ID passen. Unbrauchbare Archiv-Platzhalter und erfundene Transmission-Links entfallen.
 - Wenn alte und neue URLs zur selben Comm-Link-ID gehören, erscheint nur ein News-Eintrag.
