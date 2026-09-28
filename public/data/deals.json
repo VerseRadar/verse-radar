@@ -1,16 +1,16 @@
 [
   {
-    "name": "dasdasd",
+    "name": "dasdasdasd",
     "type": "Game Package",
     "sourceUrl": "https://robertsspaceindustries.com/en/pledge/Packages/Citizen-Starter-Pack",
-    "imageUrl": "https://robertsspaceindustries.com/i/5a536fe5412375c5c2030c53ddce3aa37936a6ab/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskvt6saXuoAnaUxfEHYamwgZAevTMLjULE)/source.webp",
-    "price": 55.32,
+    "imageUrl": "https://robertsspaceindustries.com/i/eb7d403b9304ca99b38e36f4bd3ba501b8319168/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResj6972NTEHJ13waHWWiwa59DCCcZxnZ4B8)/source.webp",
+    "price": 34.32,
     "oldPrice": 77.64,
     "currency": "EUR",
-    "referralEligible": true,
+    "referralEligible": false,
     "gameAccessConfirmed": true,
     "contents": {
-      "ship": "Avenger Titan",
+      "ship": "Aurora Mk II",
       "extras": [
         "6 Monate Versicherung",
         "10.000 UEC",
@@ -18,9 +18,9 @@
       ]
     },
     "note": "",
-    "validUntil": "2026-10-09T21:06:00.000Z",
-    "checkedAt": "2026-09-28T21:08:18.643Z",
-    "officialEndProvided": true,
+    "validUntil": "2026-10-05T21:09:23.275Z",
+    "checkedAt": "2026-09-28T21:09:23.275Z",
+    "officialEndProvided": false,
     "active": true
   }
 ]
