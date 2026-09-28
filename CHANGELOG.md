@@ -1,5 +1,22 @@
 # Changelog – Verse Radar
 
+## 0.12.5 – Bildkatalog und einfacher Game-Package-Editor
+
+- Schiffssuche in der Verwaltung schlägt bereits gespeicherte Bilder vor.
+- Neues Package-Bild kann nur für das jeweilige Angebot verwendet werden; Standardbild wird nur bewusst ersetzt.
+- Bildkatalog bleibt nach Ablauf oder Entfernung eines Angebots erhalten.
+- Spielzugangstext aus einzelnen Angeboten entfernt; einmalige Bestätigung in der Verwaltung und Hinweis oben auf der Deals-Seite.
+- Referral-Hinweis und Link für neue RSI-Konten auf der Deals-Seite ergänzt; Vorteile für Verse Radar offengelegt.
+- Bildvorschau, Kommapreise, manuelle Referral-Einschätzung und sieben Tage Anzeige aus 0.12.4 enthalten.
+
+## 0.12.4 – Preise, Referral und Bildvorschau
+
+- Bildvorschau durch Freigabe offizieller RSI-Bilder in der Sicherheitsrichtlinie repariert.
+- Angezeigte EUR-Preise inklusive deutscher MwSt.; Eingabe und Vorschau im deutschen Kommaformat.
+- Referral-Einschätzung als manuelles Ja/Nein statt USD-Vorsteuerbetrag.
+- Automatisches Ausblenden ohne offizielles Enddatum erst nach sieben Tagen ohne neue Prüfung.
+- Gespeicherte Daten und bereits hinterlegter Referral-Link bleiben erhalten.
+
 ## 0.12.3 – Bilder für Game Packages
 
 - Bild des Packages oder Schiffs auf der Angebotsseite ergänzt.
