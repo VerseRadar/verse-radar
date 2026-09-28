@@ -22,7 +22,7 @@ const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
 const PATCH_BACKFILL_PATH = "public/data/patch-backfill-control.json";
 const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "0.12.5";
+const VERSION = "0.12.6";
 const DEFAULT_REFERRAL_URL = "https://www.robertsspaceindustries.com/enlist?referral=STAR-6KT2-XJBC";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.

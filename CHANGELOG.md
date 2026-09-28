@@ -1,5 +1,10 @@
 # Changelog – Verse Radar
 
+## 0.12.6 – Mehrzeilige Hinweise
+
+- Zeilenumbrüche und Leerzeilen aus dem Angebots-Hinweisfeld werden auf der Deals-Seite sichtbar.
+- Alle Funktionen und Korrekturen aus 0.12.5 enthalten; gespeicherte Daten bleiben erhalten.
+
 ## 0.12.5 – Bildkatalog und einfacher Game-Package-Editor
 
 - Schiffssuche in der Verwaltung schlägt bereits gespeicherte Bilder vor.
