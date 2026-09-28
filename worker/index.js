@@ -22,7 +22,7 @@ const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
 const PATCH_BACKFILL_PATH = "public/data/patch-backfill-control.json";
 const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "0.11.0";
+const VERSION = "0.11.1";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -145,6 +145,21 @@ export default {
       return json({ ok: true, service: "verse-radar-updater", version: VERSION });
     }
     if (u.pathname === "/backfill") return backfillPage();
+    if (u.pathname === "/manage/events") return env.ASSETS ? env.ASSETS.fetch(new Request(new URL("/event-admin.html", u.origin), request)) : new Response("Site assets missing", { status: 503 });
+    if (u.pathname === "/manage/events/state" || u.pathname === "/manage/events/preview" || u.pathname === "/manage/events/publish") {
+      if (!env.RUN_SECRET) return json({ ok: false, error: "RUN_SECRET fehlt." }, 503);
+      if (request.headers.get("x-run-secret") !== env.RUN_SECRET) return json({ ok: false, error: "Unauthorized" }, 401);
+      const state = u.pathname.endsWith("/state");
+      if (request.method !== (state ? "GET" : "POST")) return json({ ok: false, error: state ? "GET erforderlich" : "POST erforderlich" }, 405);
+      if (!state && request.headers.get("origin") && request.headers.get("origin") !== u.origin) return json({ ok: false, error: "Andere Herkunft nicht erlaubt" }, 403);
+      try {
+        if (state) return json({ ok: true, version: VERSION, ...await eventEditorState(env) });
+        const raw = await request.text();
+        if (raw.length > 8000) return json({ ok: false, error: "Eingabe zu groß" }, 413);
+        const input = JSON.parse(raw);
+        return json({ ok: true, version: VERSION, ...await editEventData(env, input, u.pathname.endsWith("/publish")) });
+      } catch (e) { return json({ ok: false, error: e.message }, e.status === 409 ? 409 : 400); }
+    }
     if (u.pathname === "/backfill/status" || u.pathname === "/backfill/start" || u.pathname === "/backfill/stop") {
       if (!env.RUN_SECRET) return json({ ok: false, error: "Für die Importsteuerung RUN_SECRET als Worker-Secret einrichten." }, 503);
       if (request.headers.get("x-run-secret") !== env.RUN_SECRET) return json({ ok: false, error: "Unauthorized" }, 401);
@@ -266,6 +281,21 @@ export default {
         return json({ ok: false, error: e.message }, 500);
       }
     }
+    if (u.pathname === "/api/freefly" || u.pathname === "/api/events") {
+      const path = u.pathname === "/api/freefly" ? FREE_FLY_DATA_PATH : EVENT_DATA_PATH;
+      const asset = u.pathname === "/api/freefly" ? "/data/freefly.json" : "/data/events.json";
+      try {
+        const data = await readGithubJSON(env, path, null);
+        if (u.pathname === "/api/events" ? Array.isArray(data) : data && typeof data === "object" && !Array.isArray(data)) {
+          return new Response(JSON.stringify(data), { headers: { "content-type": "application/json;charset=utf-8", "cache-control": "no-store", "x-verse-radar-event-source": "github" } });
+        }
+        if (env.ASSETS) {
+          const fallback = await env.ASSETS.fetch(new Request(new URL(asset, u.origin), request));
+          return new Response(await fallback.text(), { status: fallback.status, headers: { "content-type": "application/json;charset=utf-8", "cache-control": "no-store", "x-verse-radar-event-source": "static-fallback" } });
+        }
+        return json(u.pathname === "/api/events" ? [] : { active: false });
+      } catch (e) { return json({ ok: false, error: e.message }, 500); }
+    }
     // Public website: let Cloudflare Static Assets serve /public.
     if (env.ASSETS) return env.ASSETS.fetch(request);
     return new Response(`Verse Radar ${VERSION}`, { headers: { "content-type": "text/plain;charset=utf-8" } });
@@ -283,6 +313,76 @@ export default {
 };
 
 const json = (x, s = 200) => new Response(JSON.stringify(x, null, 2), { status: s, headers: { "content-type": "application/json;charset=utf-8", "cache-control": "no-store" } });
+
+const FREE_FLY_DATA_PATH = "public/data/freefly.json";
+const EVENT_DATA_PATH = "public/data/events.json";
+
+function officialEventLink(raw) {
+  let url;
+  try { url = new URL(raw); } catch { throw Error("Offizieller RSI-Link fehlt oder ist ungültig."); }
+  if (url.protocol !== "https:" || url.hostname !== "robertsspaceindustries.com" || url.username || url.password || url.port) throw Error("Nur HTTPS-Links zu robertsspaceindustries.com erlaubt.");
+  url.hash = "";
+  return url.toString();
+}
+
+function editorDate(raw) {
+  if (typeof raw !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2}:\d{2})$/.test(raw) || !Number.isFinite(Date.parse(raw))) throw Error("Start und Ende benötigen ein vollständiges Datum mit Uhrzeit und Zeitzone.");
+  return new Date(raw).toISOString();
+}
+
+function checkedEventFields(data) {
+  if (!data || typeof data !== "object") throw Error("Termindaten fehlen.");
+  const start = editorDate(data.start), end = editorDate(data.end);
+  if (Date.parse(end) <= Date.parse(start)) throw Error("Ende muss nach dem Beginn liegen.");
+  if (Date.parse(end) <= Date.now()) throw Error("Ein bereits beendeter Termin kann nicht veröffentlicht werden.");
+  const sourceUrl = officialEventLink(data.sourceUrl);
+  const summary = String(data.summary || "").trim();
+  if (summary.length > 400) throw Error("Beschreibung zu lang (maximal 400 Zeichen).");
+  return { start, end, sourceUrl, summary };
+}
+
+async function eventEditorState(env) {
+  const [freeFly, events] = await Promise.all([
+    getGithubJSONStrict(env, FREE_FLY_DATA_PATH), getGithubJSONStrict(env, EVENT_DATA_PATH)
+  ]);
+  if (!freeFly.data || typeof freeFly.data !== "object" || Array.isArray(freeFly.data) || !Array.isArray(events.data)) throw Error("Gespeicherte Termin-Dateien ungültig; nichts verändert.");
+  return { freeFly: freeFly.data, events: events.data };
+}
+
+async function editEventData(env, input, publish) {
+  const kind = input?.kind, action = input?.action;
+  if (!["freefly", "event"].includes(kind)) throw Error("Unbekannte Terminart.");
+  if (kind === "freefly" ? !["set", "disable"].includes(action) : !["set", "remove"].includes(action)) throw Error("Unbekannte Aktion.");
+  const path = kind === "freefly" ? FREE_FLY_DATA_PATH : EVENT_DATA_PATH;
+  const current = await getGithubJSONStrict(env, path);
+  if (kind === "event" ? !Array.isArray(current.data) : !current.data || typeof current.data !== "object" || Array.isArray(current.data)) throw Error("Gespeicherte Termindaten ungültig; nichts verändert.");
+  if (publish && (!input.expectedSha || input.expectedSha !== current.sha)) {
+    const error = new Error("Daten wurden seit der Vorschau geändert. Bitte erneut prüfen."); error.status = 409; throw error;
+  }
+  let next;
+  if (kind === "freefly") {
+    if (action === "disable") next = { ...current.data, active: false };
+    else {
+      const title = String(input.data?.title || "").trim();
+      if (title.length < 5 || title.length > 150) throw Error("Free-Fly-Titel muss zwischen 5 und 150 Zeichen haben.");
+      next = { active: true, title, ...checkedEventFields(input.data), pageUrl: "/free-fly.html" };
+    }
+  } else {
+    const items = current.data;
+    if (action === "remove") {
+      const sourceUrl = officialEventLink(input.data?.sourceUrl), start = editorDate(input.data?.start);
+      if (!items.some(x => x.sourceUrl === sourceUrl && x.start === start)) throw Error("Termin nicht gefunden.");
+      next = items.filter(x => x.sourceUrl !== sourceUrl || x.start !== start);
+    } else {
+      const name = String(input.data?.name || "").trim();
+      if (name.length < 5 || name.length > 150) throw Error("Event-Name muss zwischen 5 und 150 Zeichen haben.");
+      const event = { name, type: "Event", ...checkedEventFields(input.data) };
+      next = items.filter(x => x.sourceUrl !== event.sourceUrl || x.start !== event.start).concat(event).sort((a, b) => Date.parse(a.start) - Date.parse(b.start));
+    }
+  }
+  if (publish) await putGithub(env, path, JSON.stringify(next, null, 2) + "\n", `Verse Radar ${VERSION}: ${kind} ${action}`, current.sha);
+  return { published: publish, kind, action, itemCount: kind === "event" ? next.length : undefined, proposal: next, expectedSha: publish ? undefined : current.sha };
+}
 
 function parseBackfillControl(data) {
   if (data == null) return { status: "paused", lastRun: null };

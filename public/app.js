@@ -2,12 +2,12 @@ const CONFIG = {
   referralUrl: "https://robertsspaceindustries.com/enlist?referral=DEINCODE",
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.11.0"
+  siteVersion: "0.11.1"
 };
 let usingStaticData = false;
 
 async function loadJSON(name){
-  const url = name === "news.json" ? CONFIG.newsEndpoint : name === "patches.json" ? "/api/patches" : CONFIG.dataBase+name;
+  const url = name === "news.json" ? CONFIG.newsEndpoint : name === "patches.json" ? "/api/patches" : name === "freefly.json" ? "/api/freefly" : name === "events.json" ? "/api/events" : CONFIG.dataBase+name;
   let r;
   try { r=await fetch(url,{cache:"no-store"}); }
   catch (e) {
@@ -22,6 +22,7 @@ async function loadJSON(name){
   }
   if(name === "news.json" && r.headers?.get("x-verse-radar-news-source") === "static-fallback") usingStaticData = true;
   if(name === "patches.json" && r.headers?.get("x-verse-radar-patches-source") === "static-fallback") usingStaticData = true;
+  if((name === "events.json" || name === "freefly.json") && r.headers?.get("x-verse-radar-event-source") === "static-fallback") usingStaticData = true;
   const data=await r.json();
   if(name === "news.json" && !Array.isArray(data)) return loadStaticNews();
   if(name === "patches.json" && !Array.isArray(data)) return loadStaticPatches();

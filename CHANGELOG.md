@@ -1,5 +1,13 @@
 # Changelog – Verse Radar
 
+## 0.11.1 – Bestätigte Zeiträume einfach pflegen
+
+- `/manage/events`: geschütztes Formular mit vorhandenem `RUN_SECRET`, Vorschau und getrennter Veröffentlichung.
+- Event-Meldungen können Titel und offiziellen Quelllink im Formular vorbelegen; Start und Ende bleiben prüfpflichtig.
+- GitHub speichert bestätigte Zeiträume mit Schutz vor konkurrierenden Änderungen; Free Fly deaktivieren und Event entfernen ebenfalls möglich.
+- `/api/freefly` und `/api/events` liefern neue Daten sofort an die Website, ohne ein neues Deployment.
+- News und Patch-History unverändert; kein zusätzlicher API-Key oder KI-Dienst nötig.
+
 ## 0.11.0 – Free Fly und Events klar anzeigen
 
 - Free-Fly-Seite mit getrenntem Status, bestätigten Terminen und Event-Meldungen aus vorhandenen News.
