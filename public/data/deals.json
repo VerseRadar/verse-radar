@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "name": "Citizen Starter Pack",
+    "type": "Game Package",
+    "sourceUrl": "https://robertsspaceindustries.com/en/pledge/Packages/Citizen-Starter-Pack",
+    "imageUrl": "https://robertsspaceindustries.com/i/eb7d403b9304ca99b38e36f4bd3ba501b8319168/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResj6972NTEHJ13waHWWiwa59DCCcZxnZ4B8)/source.webp",
+    "price": 46.59,
+    "oldPrice": 62.12,
+    "currency": "EUR",
+    "referralEligible": true,
+    "gameAccessConfirmed": true,
+    "contents": {
+      "ship": "Aurora Mk II",
+      "extras": [
+        "6 Monate Versicherung",
+        "10.000 UEC",
+        "Self-Land Hangar"
+      ]
+    },
+    "note": "Dies ist ein Testhinweis für die Darstellung auf Verse Radar.\nDiese Zeile ist etwas länger, damit du den Zeilenumbruch auf dem Handy und am Computer prüfen kannst.\n\nTest mit Umlauten: Ä, Ö, Ü und ß. Dazu ein Preis: 58,24 €.\nLetzte Zeile für den Abstand zum nächsten Bereich.",
+    "validUntil": "2026-10-05T20:57:41.009Z",
+    "checkedAt": "2026-09-28T20:57:41.009Z",
+    "officialEndProvided": false,
+    "active": true
+  }
+]
