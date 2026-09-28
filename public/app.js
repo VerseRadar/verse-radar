@@ -2,7 +2,7 @@ const CONFIG = {
   referralUrl: "https://robertsspaceindustries.com/enlist?referral=DEINCODE",
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.10.4"
+  siteVersion: "0.11.0"
 };
 let usingStaticData = false;
 
@@ -46,7 +46,23 @@ async function loadStaticPatches(){
 function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
 function dateDE(v){if(!v)return "—"; const d=new Date(v); return Number.isNaN(d.getTime())?esc(v):new Intl.DateTimeFormat("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"}).format(d);}
 function isFuture(v){const d=new Date(v);return !Number.isNaN(d.getTime())&&d.getTime()>Date.now();}
-function activeEvents(items){return items.filter(e=>{const start=Date.parse(e.start||e.date),end=e.end?Date.parse(e.end):start;return Number.isFinite(start)&&Number.isFinite(end)&&end>=Date.now();}).sort((a,b)=>Date.parse(a.start||a.date)-Date.parse(b.start||b.date));}
+function isOfficialSource(value){try{const u=new URL(value);return u.protocol==="https:"&&u.hostname==="robertsspaceindustries.com";}catch{return false;}}
+function confirmedTime(value){return typeof value==="string"&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)&&Number.isFinite(Date.parse(value));}
+function activeEvents(items,now=Date.now()){
+  if(!Array.isArray(items))return [];
+  return items.filter(e=>e&&e.name&&confirmedTime(e.start)&&confirmedTime(e.end)&&Date.parse(e.end)>Date.parse(e.start)&&Date.parse(e.end)>now&&isOfficialSource(e.sourceUrl))
+    .sort((a,b)=>Date.parse(a.start)-Date.parse(b.start));
+}
+function freeFlyState(data,now=Date.now()){
+  const confirmed=Boolean(data?.active&&data.title&&confirmedTime(data.start)&&confirmedTime(data.end)&&Date.parse(data.end)>Date.parse(data.start)&&isOfficialSource(data.sourceUrl));
+  if(!confirmed||Date.parse(data.end)<=now)return {status:"inactive",title:"Kein Free Fly aktiv",summary:"Derzeit ist kein bestätigter Free Fly eingetragen. Termine und Teilnahmebedingungen findest du bei RSI.",sourceUrl:"https://robertsspaceindustries.com/en/flyfree",dateText:""};
+  const range=`${new Intl.DateTimeFormat("de-DE",{timeZone:"Europe/Berlin",dateStyle:"medium",timeStyle:"short"}).format(new Date(data.start))} – ${new Intl.DateTimeFormat("de-DE",{timeZone:"Europe/Berlin",dateStyle:"medium",timeStyle:"short"}).format(new Date(data.end))} Uhr`;
+  return {status:Date.parse(data.start)<=now?"active":"upcoming",title:data.title,summary:data.summary||"Teilnahme und Bedingungen stehen in der offiziellen Meldung.",sourceUrl:data.sourceUrl,dateText:range};
+}
+function eventNews(items,now=Date.now()){
+  if(!Array.isArray(items))return [];
+  return items.filter(n=>["EVENT","FREE FLY"].includes(n.category)&&isOfficialSource(n.sourceUrl)&&Number.isFinite(Date.parse(n.date))&&Date.parse(n.date)<=now&&Date.parse(n.date)>now-90*86400000).sort((a,b)=>Date.parse(b.date)-Date.parse(a.date));
+}
 function timeDE(v){if(!v)return ""; const d=new Date(v); return Number.isNaN(d.getTime())?"":new Intl.DateTimeFormat("de-DE",{hour:"2-digit",minute:"2-digit"}).format(d);}
 function relative(v){const d=new Date(v), diff=Date.now()-d.getTime(); if(Number.isNaN(d.getTime()))return ""; const h=Math.round(diff/36e5); if(h<1)return "gerade eben"; if(h<24)return `vor ${h} Std.`; const days=Math.round(h/24); return days===1?"gestern":`vor ${days} Tagen`;}
 function sourceLink(n){return n.sourceUrl?`<a class="source" href="${esc(n.sourceUrl)}" target="_blank" rel="noopener noreferrer">${/https?:\/\/(?:www\.)?starcitizen\.tools\//i.test(n.sourceUrl)?"Community-Archiv":"Originalquelle"} ↗</a>`:"";}
@@ -74,6 +90,22 @@ function patchIsAnnouncement(p){return p.sourceType==="Release Info" || p.source
 function renderPatchHistory(items){
   return items.map((p,i)=>`<article class="article" id="${encodeURIComponent(p.version)}"><span class="tag">${patchIsAnnouncement(p)?"UPDATE-MELDUNG":"PATCH"}</span><span class="date">${dateDE(p.date)}</span><h2>${esc(p.version)}</h2><p>${esc(p.summary||"")}</p>${p.previous?`<p>Vorgängerversion: ${esc(p.previous)}</p>`:""}${i<5?`<p><a class="source" href="/patches.html#${encodeURIComponent(p.version)}">Zusammenfassung und Änderungen ↗</a> · ${sourceLink(p)}</p>`:`<details><summary>Zusammenfassung und Änderungen anzeigen</summary><h3>Wichtige Änderungen in ${esc(p.version)}</h3>${renderPatchChanges(p.changes)}<h3>Deutsche Zusammenfassung ${patchIsAnnouncement(p)?"der Update-Meldung":"der Patch Notes"}</h3><p>${esc(p.fullSummary||"")}</p><p class="ai-note">${p.ai === true ? "KI-gestützte" : "Regelbasierte"} Zusammenfassung · Kein offizieller RSI-Text · ${sourceLink(p)}</p></details>`}</article>`).join("");
 }
+function renderConfirmedEvents(items){
+  return items.map(e=>`<article class="article"><span class="tag">BESTÄTIGTER TERMIN</span><h3>${esc(e.name)}</h3><p>${dateDE(e.start)} – ${dateDE(e.end)}</p>${e.summary?`<p>${esc(e.summary)}</p>`:""}<p>${sourceLink(e)}</p></article>`).join("")||'<p class="page-intro">Derzeit keine bestätigten laufenden oder kommenden Termine eingetragen.</p>';
+}
+function renderEventNews(items){
+  return items.slice(0,8).map(n=>`<article class="article"><span class="tag">${esc(n.category)} · MELDUNG VOM ${dateDE(n.date)}</span><h3>${esc(n.title)}</h3><p>${esc(n.summary||"")}</p><p>${sourceLink(n)}</p></article>`).join("")||'<p class="page-intro">Keine aktuellen Event-Meldungen vorhanden.</p>';
+}
+async function freeFlyPage(){
+  const status=document.querySelector("#freefly-page");if(!status)return;
+  try{
+    const [data,events,news]=await Promise.all(["freefly.json","events.json","news.json"].map(loadJSON));
+    const fly=freeFlyState(data);
+    status.innerHTML=`<article class="article"><span class="tag">${fly.status==="active"?"JETZT AKTIV":fly.status==="upcoming"?"BESTÄTIGT · DEMNÄCHST":"DERZEIT INAKTIV"}</span><h2>${esc(fly.title)}</h2>${fly.dateText?`<p>${esc(fly.dateText)}</p>`:""}<p>${esc(fly.summary)}</p><p>${sourceLink(fly)}</p></article>`;
+    document.querySelector("#confirmed-events").innerHTML=renderConfirmedEvents(activeEvents(events));
+    document.querySelector("#event-news").innerHTML=renderEventNews(eventNews(news));
+  }catch(e){console.error(e);status.innerHTML='<p class="page-intro">Free-Fly- und Event-Daten konnten nicht geladen werden.</p>';}
+}
 async function home(){
   document.querySelectorAll("#referral-link").forEach(a=>a.href=CONFIG.referralUrl);
   const status=document.querySelector("#data-status");
@@ -82,9 +114,10 @@ async function home(){
     document.querySelector("#top-news").innerHTML=renderNews(news,3);
     document.querySelector("#latest-patches").innerHTML=patches.slice(0,5).map(p=>`<a class="list-row" href="/patches.html#${encodeURIComponent(p.version)}"><span><b>${esc(p.version)}</b><small>${esc(p.summary||"").slice(0,55)}${(p.summary||"").length>55?"…":""}</small></span><span>${dateDE(p.date)}</span></a>`).join("");
     document.querySelector("#latest-deals").innerHTML=deals.filter(d=>d.active).slice(0,4).map(d=>`<a class="list-row deal-row" href="${esc(d.url||"/deals.html")}" ${d.url?.startsWith("http")?'target="_blank" rel="noopener"':''}><span>${esc(d.name)}</span><strong>${esc(d.price||"Angebot")}</strong></a>`).join("") || '<p class="page-intro">Aktuell keine bekannten Angebote.</p>';
-    const liveEvents=activeEvents(events); document.querySelector("#events").innerHTML=liveEvents.slice(0,5).map(e=>`<div class="list-row"><span><b>${esc(e.name)}</b><small>${esc(e.type||"Event")}</small></span><span>${esc(e.dateText||dateDE(e.start))}</span></div>`).join("") || '<p class="page-intro">Keine bestätigten kommenden Events eingetragen.</p>';
+    const liveEvents=activeEvents(events); document.querySelector("#events").innerHTML=liveEvents.slice(0,5).map(e=>`<a class="list-row" href="${esc(e.sourceUrl)}" target="_blank" rel="noopener noreferrer"><span><b>${esc(e.name)}</b><small>${esc(e.type||"Event")}</small></span><span>${dateDE(e.start)}</span></a>`).join("") || '<p class="page-intro">Keine bestätigten kommenden Events eingetragen.</p>';
     const ff=document.querySelector("#free-fly");
-    if(freefly.active){ff.classList.remove("hidden");document.querySelector("#freefly-title").textContent=freefly.title;document.querySelector("#freefly-dates").textContent=freefly.dateText;document.querySelector("#freefly-text").textContent=freefly.summary;document.querySelector("#freefly-link").href=freefly.pageUrl;}
+    const fly=freeFlyState(freefly);
+    if(fly.status==="active"){ff.classList.remove("hidden");document.querySelector("#freefly-title").textContent=fly.title;document.querySelector("#freefly-dates").textContent=fly.dateText;document.querySelector("#freefly-text").textContent=fly.summary;document.querySelector("#freefly-link").href="/free-fly.html";}
     radarContacts(news,liveEvents); renderStats(news,patches,deals,liveEvents);
     if(status){if(usingStaticData){status.classList.remove("online");status.innerHTML=`<span></span> Gespeicherter Datenstand: ${dateDE(meta.updatedAt)} · ${timeDE(meta.updatedAt)} Uhr`;}else{status.classList.add("online");status.innerHTML=`<span></span> Datenstand: ${dateDE(meta.updatedAt)} · ${timeDE(meta.updatedAt)} Uhr <b>● ONLINE</b>`;}}
     const badge=document.querySelector(".demo-badge"); if(badge)badge.textContent=`VERSION ${CONFIG.siteVersion} · LIVE PIPELINE`;
@@ -100,4 +133,4 @@ async function listing(){
   }catch(e){target.innerHTML='<div class="empty-state">News konnten nicht geladen werden.</div>';}
 }
 function setupMenu(){document.querySelector(".menu-toggle")?.addEventListener("click",()=>document.querySelector(".site-header").classList.toggle("menu-open"));}
-document.addEventListener("DOMContentLoaded",()=>{setupMenu(); if(location.pathname.endsWith("/")||location.pathname.endsWith("index.html"))home(); listing();});
+document.addEventListener("DOMContentLoaded",()=>{setupMenu(); if(location.pathname.endsWith("/")||location.pathname.endsWith("index.html"))home(); listing(); freeFlyPage();});

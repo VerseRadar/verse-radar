@@ -8,7 +8,7 @@ const patches = JSON.parse(await read("../public/data/patches.json"));
 const page = await read("../public/patches.html");
 const ctx = {
   document: { addEventListener() {} },
-  Intl, Date, encodeURIComponent,
+  Intl, Date, URL, encodeURIComponent,
   fetch: async () => ({ ok: true, headers: { get: () => "static-fallback" }, json: async () => news })
 };
 vm.createContext(ctx);
@@ -37,9 +37,22 @@ ctx.document.querySelector = selector => nodes[selector] || null;
 ctx.radarContacts(news, Array.from({ length: 4 }, () => ({ name: "Event" })));
 assert.equal(nodes["#radar-count"].textContent, "10 Kontakte");
 assert.equal(nodes["#radar-contacts"].innerHTML.includes("undefined%"), false);
-const tomorrow = new Date(Date.now() + 86400000).toISOString();
-const yesterday = new Date(Date.now() - 86400000).toISOString();
-assert.equal(ctx.activeEvents([{ name: "Ohne Datum" }, { name: "Vergangen", start: yesterday }, { name: "Bestätigt", start: tomorrow }]).length, 1);
+const now = Date.parse("2026-09-28T12:00:00Z");
+const yesterday = "2026-09-27T12:00:00Z", tomorrow = "2026-09-29T12:00:00Z", nextWeek = "2026-10-05T12:00:00Z";
+const official = "https://robertsspaceindustries.com/en/comm-link/transmission/21339-example";
+const scheduled = { name: "Bestätigt", start: tomorrow, end: nextWeek, sourceUrl: official };
+assert.equal(ctx.activeEvents([{ name: "Ohne Datum" }, { name: "Abgelaufen", start: yesterday, end: now-1, sourceUrl: official }, { name: "Ohne Ende", start: tomorrow, sourceUrl: official }, { ...scheduled, sourceUrl: "javascript:alert(1)" }, scheduled],now).length, 1);
+assert.equal(ctx.activeEvents([scheduled],now)[0].name,"Bestätigt");
+const freeFly = { active: true, title: "Test Free Fly", start: yesterday, end: tomorrow, sourceUrl: official, summary: "Bestätigter Test." };
+assert.equal(ctx.freeFlyState(freeFly,now).status,"active");
+assert.equal(ctx.freeFlyState({ ...freeFly, start: tomorrow, end: nextWeek },now).status,"upcoming");
+assert.equal(ctx.freeFlyState(freeFly,Date.parse(nextWeek)).status,"inactive");
+assert.equal(ctx.freeFlyState({ ...freeFly, end: null },now).status,"inactive");
+assert.equal(ctx.freeFlyState({ ...freeFly, sourceUrl: "https://example.com/event" },now).status,"inactive");
+assert.equal(ctx.eventNews([{ title: "Pirate Week", date: yesterday, category: "EVENT", sourceUrl: official }, { title: "Alte News", date: "2026-01-01T12:00:00Z", category: "EVENT", sourceUrl: official }, { title: "Falsche Quelle", date: yesterday, category: "FREE FLY", sourceUrl: "https://example.com/" }],now).length,1);
+assert.match(ctx.renderConfirmedEvents([scheduled]),/Bestätigt/);
+assert.match(ctx.renderEventNews([{ title: "Pirate Week",date:yesterday,category:"EVENT",sourceUrl:official }]),/MELDUNG VOM/);
+assert.ok((await read("../public/free-fly.html")).includes('id="event-news"'));
 await ctx.loadJSON("news.json");
 assert.equal(vm.runInContext("usingStaticData", ctx), true);
 console.log("Statischer Datenstand, fünf Patch Notes, sechs History-Einträge und Rückfallkennzeichnung: OK");

@@ -1,4 +1,4 @@
-# Verse Radar 0.10.4
+# Verse Radar 0.11.0
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -16,7 +16,6 @@ Der Worker liest die offizielle RSI Comm-Link-Seite ein, erkennt aktuelle Comm-L
 
 ### Cloudflare Variablen/Secrets
 - Secret: `OPENAI_API_KEY` (optional)
-- Variable optional: `NEWS_ARTICLE_AI` = `true` für deutsche Artikelzusammenfassungen **nur bei vorhandenem `OPENAI_API_KEY`**. API-Nutzung kann Kosten verursachen; ohne beide Einstellungen bleiben bestehende News unangetastet.
 - Secret: `GITHUB_TOKEN` (für automatisches Zurückschreiben)
 - Secret: `RUN_SECRET` (für die neue Steuerungsseite erforderlich; für die älteren `/run`-Aufrufe optional)
 - Variable: `GITHUB_REPO` = `VerseRadar/verse-radar`
@@ -49,7 +48,7 @@ Jeder Durchlauf nutzt die bestehende Begrenzung von acht historischen Versionen 
 
 **0.10.3:** Die allgemeine Themen-Erkennung aus 0.10.2 erwies sich in der Vorschau als unzuverlässig. Diese Regeln sind entfernt. Die bereits mit 0.10.1 veröffentlichten 21 News bleiben unverändert; für den zuvor geprüften Roadmap-Artikel wird die Quellenkennzeichnung berichtigt. Die 0.10.2-Vorschau bitte nicht mit `/run/news` veröffentlichen. Update einspielen und mit `/preview/news` kontrollieren: `newItems` sollte 0 sein und automatisch erfundene Themenlisten sollten fehlen. News-Automatik bleibt deaktiviert.
 
-**0.10.4:** Redaktionelle Artikel erhalten nur mit `NEWS_ARTICLE_AI=true` **und** `OPENAI_API_KEY` eine neue deutsche Zusammenfassung. Der Worker liest dazu den eigentlichen Artikeltext, bearbeitet höchstens drei Kandidaten pro Lauf und akzeptiert die Antwort nur mit einer wortwörtlich darin vorhandenen Belegstelle. Aus einem bloßen Titel wird kein KI-Text mehr erzeugt. Ist ein Artikel nicht lesbar oder die Textstelle fehlt, bleibt die bisherige News bestehen. `/preview/news` zeigt `articleAiEnabled` und `articleDiagnostics`; vor `/run/news` bitte besonders die dort neu als `KI` markierten Texte prüfen. Die Vorschau kann bei aktiviertem Modus ebenfalls API-Kosten auslösen. Nach der Veröffentlichung der ersten drei Artikel können weitere Läufe die übrigen titelbasierten News verbessern. Die News-Automatik bleibt aus.
+**0.11.0:** Die Free-Fly-Seite zeigt jetzt drei getrennte Bereiche: den Status eines bestätigten Free Fly, bestätigte laufende und kommende Termine sowie aktuelle Event-Meldungen aus den bereits veröffentlichten News. Eine Event-Meldung enthält noch keinen bestätigten Termin. Die Startseite hebt einen Free Fly nur hervor, wenn in `public/data/freefly.json` `active: true`, `title`, `start`, `end` und eine offizielle RSI-`sourceUrl` hinterlegt sind **und** der aktuelle Zeitpunkt zwischen Start und Ende liegt. Nach dem Ende verschwindet die Hervorhebung automatisch. Für Einträge in `public/data/events.json` sind `name`, `start`, `end` und eine offizielle RSI-`sourceUrl` notwendig; abgelaufene Termine werden nicht als kommende Events angezeigt. `start` und `end` müssen vollständige ISO-Zeitangaben mit Zeitzone sein (zum Beispiel `2026-10-01T18:00:00+02:00`). Ohne bestätigte Daten bleiben die Terminfelder leer; die Event-Meldungen sind davon unabhängig. Kein OpenAI-Key und keine neue Worker-Variable erforderlich. Nach dem Einspielen `/health`, die Startseite und `/free-fly.html` prüfen. Alle bestehenden Dateien unter `public/data/` bleiben bei diesem Update unangetastet.
 Version 0.7.0 entfernt technische Archiv-Einträge und ersetzt wiederholte News-Platzhalter mit vorsichtigen deutschen Beschreibungen, die auf dem Titel beruhen. Wo eine bereits geprüfte Patch-Zusammenfassung zur exakt selben Comm-Link-ID vorliegt, nutzt die News-Karte deren erste zwei Sätze. Artikelinhalte werden ohne brauchbare Quellbeschreibung oder KI-Schlüssel nicht als vollständig zusammengefasst ausgegeben.
 Die Patch-Seite zeigt höchstens fünf aktuelle Einträge; die History zeigt alle gespeicherten Versionen. Der Worker ergänzt bei jedem geprüften manuellen Patch-Import zwei ältere Archivseiten und behält bestehende Versionen. Wie weit das Archiv zurückreichen kann, hängt von der verfügbaren Patch-Quelle ab. Die geprüfte Patch-Aufbereitung bleibt auf `summaryVersion=0.6.8`.
 Version 0.8.1 übernimmt neue Einträge in die Patch History nur, wenn ihr RSI-Quelllink tatsächlich auf Patch Notes zeigt. Ältere bereits gespeicherte Update-Ankündigungen bleiben erhalten, werden aber als solche bezeichnet und mit ihrem echten RSI-Link versehen. Eine allgemeine Titelübereinstimmung wie „Alpha 4.7.2“ genügt nicht mehr für eine Patch Note.

@@ -36,8 +36,6 @@ const oldNews = [
 
 const calls = [];
 let failNewsRead = false;
-let articleMode = "off";
-const articleText = "The weekly update confirms a new cargo mission in the Stanton system with additional delivery destinations and revised rewards. ".repeat(9);
 globalThis.fetch = async (target, options = {}) => {
   const address = String(target);
   calls.push({ address, method: options.method || "GET" });
@@ -46,17 +44,6 @@ globalThis.fetch = async (target, options = {}) => {
     return new Response(html);
   }
   if (address.startsWith("https://api.star-citizen.wiki/api/comm-links?")) return Response.json({ data: archive });
-  if (articleMode !== "off" && address.startsWith("https://robertsspaceindustries.com/en/comm-link/transmission/")) {
-    if (address.includes("21339-")) return new Response(`<nav>${"Ship Showdown Free Fly ".repeat(100)}</nav><article><h1>This Week in Star Citizen</h1><p>${articleText}</p></article>`);
-    return new Response("<nav>Ship Showdown Free Fly and many unrelated site links.</nav>");
-  }
-  if (address === "https://api.openai.com/v1/responses") {
-    const body = JSON.parse(options.body);
-    assert.match(body.input, /cargo mission in the Stanton system/);
-    assert.doesNotMatch(body.input, /Ship Showdown Free Fly/);
-    assert.equal(body.text.format.type, "json_schema");
-    return Response.json({ output: [{ content: [{ type: "output_text", text: JSON.stringify({ summary: "Der Wochenüberblick bestätigt eine neue Frachtmission im Stanton-System mit weiteren Lieferzielen und überarbeiteten Belohnungen.", evidence: articleMode === "invalid" ? "Not part of article" : "new cargo mission in the Stanton system with additional delivery destinations" }) }] }] });
-  }
   if (address.includes("/contents/public/data/news.json?ref=main")) return failNewsRead ? new Response("Unavailable", { status: 503 }) : Response.json({ sha: "news-sha", content: Buffer.from(JSON.stringify(oldNews)).toString("base64") });
   if (address.includes("/contents/public/data/patches.json?ref=main")) {
     const patches = [{ sourceUrl: "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21330-Star-Citizen-Alpha-4101", summaryVersion: "0.6.8", summary: "Alpha 4.10.1 bringt Orison Relief Support. Der Patch enthält weitere Änderungen an Aufträgen und Fahrzeugen. Noch ein dritter Satz." }];
@@ -70,7 +57,7 @@ globalThis.fetch = async (target, options = {}) => {
 
 const env = { GITHUB_TOKEN: "test-token", GITHUB_REPO: "example/verse-radar", GITHUB_BRANCH: "main" };
 const health = await worker.fetch(new Request("https://example.com/health"), env);
-assert.equal((await health.json()).version, "0.10.4");
+assert.equal((await health.json()).version, "0.11.0");
 const patchApi = await worker.fetch(new Request("https://example.com/api/patches"), env);
 assert.equal(patchApi.headers.get("x-verse-radar-patches-source"), "github");
 
@@ -86,7 +73,6 @@ assert.equal(body.fetchedItems, 9);
 assert.equal(body.count, 10);
 assert.equal(body.refreshedItems, 2);
 assert.equal(body.aiItems, 0);
-assert.equal(body.articleAiEnabled, false);
 assert.equal(body.newItems, 7);
 assert.equal(body.items.filter(x => x.title.startsWith("This Week in Star Citizen - ")).length, 2);
 assert.equal(body.items.filter(x => x.title.startsWith("Roadmap Roundup")).length, 2);
@@ -105,26 +91,6 @@ assert.equal(body.items.find(x => x.title === "Star Citizen Alpha 4.10.1").summa
 assert.equal(body.items.find(x => x.title === "Star Citizen Alpha 4.10.1").summaryBasis, "Patch Notes");
 assert.ok(body.items.some(x => x.id === "valid-old"));
 assert.equal(calls.some(x => x.method === "PUT"), false);
-
-calls.length = 0;
-articleMode = "ready";
-const aiPreview = await worker.fetch(new Request("https://example.com/preview/news"), { ...env, OPENAI_API_KEY: "test-key", NEWS_ARTICLE_AI: "true" });
-const aiBody = await aiPreview.json();
-assert.equal(aiBody.aiItems, 1);
-assert.equal(aiBody.articleDiagnostics.length, 3);
-assert.equal(aiBody.articleDiagnostics[0].status, "ready");
-assert.equal(aiBody.articleDiagnostics[1].status, "skipped");
-assert.equal(aiBody.items.find(x => x.id === hash(oldUrl)).summaryBasis, "KI");
-assert.equal(aiBody.items.find(x => x.id === hash(oldUrl)).ai, true);
-assert.equal(calls.filter(x => x.address === "https://api.openai.com/v1/responses").length, 1);
-assert.equal(calls.some(x => x.method === "PUT"), false);
-
-articleMode = "invalid";
-const rejected = await (await worker.fetch(new Request("https://example.com/preview/news"), { ...env, OPENAI_API_KEY: "test-key", NEWS_ARTICLE_AI: "true" })).json();
-assert.equal(rejected.aiItems, 0);
-assert.match(rejected.articleDiagnostics[0].reason, /Textstelle/);
-assert.notEqual(rejected.items.find(x => x.id === hash(oldUrl)).summaryBasis, "KI");
-articleMode = "off";
 
 const blocked = await worker.fetch(new Request("https://example.com/run/news"), { ...env, RUN_SECRET: "private" });
 assert.equal(blocked.status, 401);

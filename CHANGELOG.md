@@ -1,12 +1,12 @@
 # Changelog – Verse Radar
 
-## 0.10.4 – Quelltextgestützte News als zuschaltbare Vorschau
+## 0.11.0 – Free Fly und Events klar anzeigen
 
-- Echte Artikeltexte statt bloßer Titel als Grundlage für optional erzeugte deutsche Zusammenfassungen.
-- Höchstens drei Kandidaten pro Lauf; Belegstelle muss wörtlich im Artikeltext stehen.
-- Fehlerhafte, leere oder nicht belegte Antworten ersetzen keine gespeicherten News.
-- Neue Vorschauwerte `articleAiEnabled` und `articleDiagnostics`; KI-Modus benötigt `NEWS_ARTICLE_AI=true` und `OPENAI_API_KEY`.
-- News-Automatik weiterhin ausgeschaltet; Archivdaten bleiben von der Update-ZIP unberührt.
+- Free-Fly-Seite mit getrenntem Status, bestätigten Terminen und Event-Meldungen aus vorhandenen News.
+- Aktive Free-Fly-Hervorhebung auf der Startseite nur innerhalb eines bestätigten Start- und Endzeitraums; sie endet automatisch.
+- Event-Termine nur mit vollständiger Zeitangabe und offizieller RSI-Quelle; abgelaufene Events verschwinden aus der Vorschau.
+- Event-Meldungen bleiben als Meldungen erkennbar und werden nicht zu vermeintlich laufenden Events.
+- Keine zusätzlichen Zugänge oder laufenden API-Kosten; News- und Patchdaten bleiben in der Update-ZIP ausgeschlossen.
 
 ## 0.10.3 – Unsichere News-Themen zurücknehmen
 - Die Vorschau mit 0.10.2 zeigte wiederholte, teils unpassende Themen und fehlerhafte Formulierungen wie „um der Roadmap“. Die allgemeine Worttreffer-Regel wird entfernt.
