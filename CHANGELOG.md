@@ -1,5 +1,13 @@
 # Changelog – Verse Radar
 
+## 0.12.1 – Referral-Link und flexible Angebotsprüfung
+
+- Vom Betreiber bereitgestellten Referral-Link hinterlegt; offizielle www-Adresse und Bindestriche im Code werden akzeptiert.
+- Referral-Button wird ohne zusätzliche Worker-Variable aktiv; Bedingungen bleiben bei RSI nachzulesen.
+- Ein offiziell nicht genanntes Angebotsende kann leer bleiben; die Anzeige endet dann spätestens 48 Stunden nach Prüfung.
+- Offiziell genanntes Enddatum bleibt separat erkennbar; die Preisprüfung muss trotzdem frisch sein.
+- Shopseiten mit oder ohne www-Adresse zulässig; News- und Patchdaten bleiben unverändert.
+
 ## 0.12.0 – Geprüfte Deals und funktionierender Referral-Link
 
 - Die Deals-Seite zeigt nur geprüfte Game Packages und Angebote mit offizieller Shopseite, Preis, Währung und Ende.

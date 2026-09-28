@@ -1,7 +1,7 @@
 const CONFIG = {
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.12.0"
+  siteVersion: "0.12.1"
 };
 let usingStaticData = false;
 
@@ -47,7 +47,7 @@ async function loadStaticPatches(){
 function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
 function dateDE(v){if(!v)return "—"; const d=new Date(v); return Number.isNaN(d.getTime())?esc(v):new Intl.DateTimeFormat("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"}).format(d);}
 function isFuture(v){const d=new Date(v);return !Number.isNaN(d.getTime())&&d.getTime()>Date.now();}
-function isOfficialSource(value){try{const u=new URL(value);return u.protocol==="https:"&&u.hostname==="robertsspaceindustries.com";}catch{return false;}}
+function isOfficialSource(value){try{const u=new URL(value);return u.protocol==="https:"&&["robertsspaceindustries.com","www.robertsspaceindustries.com"].includes(u.hostname);}catch{return false;}}
 function validPrice(value){return (typeof value==="number"||typeof value==="string")&&/^\d+(?:\.\d{1,2})?$/.test(String(value))&&Number(value)>0&&Number(value)<100000;}
 function liveDeals(items,now=Date.now()){
   if(!Array.isArray(items))return [];
@@ -55,7 +55,7 @@ function liveDeals(items,now=Date.now()){
     .sort((a,b)=>Date.parse(a.validUntil)-Date.parse(b.validUntil));
 }
 function dealPrice(amount,currency){return new Intl.NumberFormat("de-DE",{style:"currency",currency}).format(Number(amount));}
-function renderDeals(items){return items.map(d=>`<article class="article"><span class="tag">${esc(d.type==="Game Package"?"GAME PACKAGE":"ANGEBOT")}</span><h2>${esc(d.name)}</h2><p>${d.oldPrice?`<s>${dealPrice(d.oldPrice,d.currency)}</s> `:""}<strong>${dealPrice(d.price,d.currency)}</strong></p>${d.note?`<p>${esc(d.note)}</p>`:""}<p class="ai-note">Zuletzt geprüft: ${dateDE(d.checkedAt)} · Angebot gültig höchstens bis: ${dateDE(d.validUntil)}. Preis und Bedingungen bitte bei RSI kontrollieren.</p><p>${sourceLink(d)}</p></article>`).join("")||'<article class="article"><p>Derzeit keine aktuell geprüften Angebote eingetragen.</p></article>';}
+function renderDeals(items){return items.map(d=>`<article class="article"><span class="tag">${esc(d.type==="Game Package"?"GAME PACKAGE":"ANGEBOT")}</span><h2>${esc(d.name)}</h2><p>${d.oldPrice?`<s>${dealPrice(d.oldPrice,d.currency)}</s> `:""}<strong>${dealPrice(d.price,d.currency)}</strong></p>${d.note?`<p>${esc(d.note)}</p>`:""}<p class="ai-note">Zuletzt geprüft: ${dateDE(d.checkedAt)} · ${d.officialEndProvided?"Offizielles Ende laut Eintrag":"Anzeige spätestens bis"}: ${dateDE(d.validUntil)}. Preis und Bedingungen bitte bei RSI kontrollieren.</p><p>${sourceLink(d)}</p></article>`).join("")||'<article class="article"><p>Derzeit keine aktuell geprüften Angebote eingetragen.</p></article>';}
 function confirmedTime(value){return typeof value==="string"&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)&&Number.isFinite(Date.parse(value));}
 function activeEvents(items,now=Date.now()){
   if(!Array.isArray(items))return [];

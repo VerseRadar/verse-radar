@@ -35,13 +35,19 @@ assert.equal(writes, 0);
 const preview = await (await worker.fetch(request("/manage/deals/preview", proposal), env)).json();
 assert.equal(preview.published, false);
 assert.equal(preview.proposal[0].price, 45);
+assert.equal(preview.proposal[0].officialEndProvided, true);
+const withoutEnd = await (await worker.fetch(request("/manage/deals/preview", { ...proposal, data: { ...proposal.data, validUntil: "" } }), env)).json();
+assert.equal(withoutEnd.proposal[0].officialEndProvided, false);
+assert.ok(Date.parse(withoutEnd.proposal[0].validUntil)-Date.parse(withoutEnd.proposal[0].checkedAt) === 48*3600000);
 assert.equal(writes, 0);
 assert.equal((await worker.fetch(request("/manage/deals/publish", { ...proposal, expectedSha: "stale" }), env)).status, 409);
 const saved = await (await worker.fetch(request("/manage/deals/publish", { ...proposal, expectedSha: preview.expectedSha }), env)).json();
 assert.equal(saved.published, true);
 assert.equal(writes, 1);
 assert.equal((await (await worker.fetch(new Request("https://example.com/api/deals"), env)).json())[0].name, "Test Game Package");
-assert.deepEqual(await (await worker.fetch(new Request("https://example.com/api/referral"), { ...env, REFERRAL_URL: "https://robertsspaceindustries.com/enlist?referral=DEINCODE" })).json(), { enabled: false, url: null });
+const providedReferral = "https://www.robertsspaceindustries.com/enlist?referral=STAR-6KT2-XJBC";
+assert.deepEqual(await (await worker.fetch(new Request("https://example.com/api/referral"), env)).json(), { enabled: true, url: providedReferral });
+assert.deepEqual(await (await worker.fetch(new Request("https://example.com/api/referral"), { ...env, REFERRAL_URL: "https://robertsspaceindustries.com/enlist?referral=DEINCODE" })).json(), { enabled: true, url: providedReferral });
 assert.equal((await (await worker.fetch(new Request("https://example.com/api/referral"), { ...env, REFERRAL_URL: "https://robertsspaceindustries.com/enlist?referral=ABCDE123" })).json()).enabled, true);
 
 const app = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
@@ -49,6 +55,7 @@ const context = { document: { addEventListener() {} }, Intl, Date, URL, encodeUR
 vm.createContext(context); vm.runInContext(app, context);
 const now = Date.now();
 assert.equal(context.liveDeals(deals, now).length, 1);
+assert.equal(context.isOfficialSource(providedReferral), true);
 assert.equal(context.liveDeals([{ ...deals[0], checkedAt: new Date(now-49*3600000).toISOString() }], now).length, 0);
 assert.equal(context.liveDeals([{ ...deals[0], validUntil: new Date(now-1).toISOString() }], now).length, 0);
 assert.equal(context.liveDeals([{ ...deals[0], sourceUrl: "javascript:alert(1)" }], now).length, 0);
