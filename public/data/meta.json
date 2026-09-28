@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-28T06:40:24.337Z",
+  "updatedAt": "2026-09-28T06:42:16.680Z",
   "source": "https://robertsspaceindustries.com/en/comm-link?sort=publish_new",
   "patchSource": "https://robertsspaceindustries.com/en/patch-notes",
   "mode": "live",
@@ -12,7 +12,7 @@
   "newsItems": null,
   "patchItems": 104,
   "patchNewItems": 0,
-  "patchNextPage": 43,
+  "patchNextPage": 45,
   "patchBackfillComplete": false,
   "patchDeferredSeedItems": 0,
   "patchDeferredPageItems": 0,
