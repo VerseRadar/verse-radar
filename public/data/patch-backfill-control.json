@@ -31,8 +31,8 @@
     ]
   },
   "sessionId": "de72824a-b670-4b2b-aa2c-58bd97871724",
-  "leaseId": null,
-  "leaseUntil": null,
+  "leaseId": "8a2b0506-afe4-407b-8e01-505f3c054321",
+  "leaseUntil": "2026-09-28T06:44:16.259Z",
   "lastError": null,
   "changedAt": "2026-09-28T06:33:07.464Z"
 }
