@@ -1,5 +1,12 @@
 # Changelog – Verse Radar
 
+## 0.12.3 – Bilder für Game Packages
+
+- Bild des Packages oder Schiffs auf der Angebotsseite ergänzt.
+- Verwaltung prüft offizielle direkte RSI-Bildadresse und zeigt ein Ladebild vor Veröffentlichung.
+- Gespeicherte Einträge ohne Bild bleiben erhalten und können nach erneuter Prüfung ergänzt werden.
+- Referral-Link und gespeicherte News, Patches, Events und Angebote bleiben unverändert.
+
 ## 0.12.2 – Game Packages und Referral-Preisgrenze
 
 - Angebotsbereich auf Game Packages mit konkretem RSI-Package-Link begrenzt.
