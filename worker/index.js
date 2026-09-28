@@ -22,7 +22,7 @@ const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
 const PATCH_BACKFILL_PATH = "public/data/patch-backfill-control.json";
 const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "0.9.10";
+const VERSION = "0.9.11";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -68,9 +68,31 @@ const HISTORICAL_VERSIONS = [
   "3.22.0", "3.22.0a", "3.22.1", "3.23.0", "3.23.1", "3.23.1a",
   "3.24.0", "3.24.1", "3.24.2", "3.24.2a", "3.24.3"
 ];
-// These short releases have verified, version-specific notes on RSI Spectrum.
-// Their wiki mirrors do not use the headings expected by the general parser.
+// These historical releases have verified, version-specific notes. Some are
+// short; others use headings the generic historical parser does not recognize.
 const HISTORICAL_SHORT_RELEASES = {
+  "Alpha 3.0.0": {
+    marker: /\bstar citizen alpha patch 3\.0\.0\b/i, minimum: 5,
+    sourceUrl: "https://robertsspaceindustries.com/en/comm-link/transmission/16349-Star-Citizen-Alpha-300",
+    changes: [
+      ["Orte", "Erkundbare Oberflächen", "Yela, Daymar, Cellin und Delamar erhalten erstmals erkundbare Oberflächen.", /\byela\b[\s\S]{0,100}\bdaymar\b[\s\S]{0,100}\bcellin\b[\s\S]{0,100}\bdelamar\b/i],
+      ["Orte", "Außenposten", "Außenposten und Schiffswracks verteilen sich auf den neuen Oberflächen.", /\bsurface outposts and derelict ships\b/i],
+      ["Schiffe & Fahrzeuge", "Ursa Explorer", "Der Ursa Explorer wird als erstes eigens dafür vorgesehenes Bodenfahrzeug eingeführt.", /\bfirst dedicated ground vehicle\s*\(?ursa\)?\s*explorer\b/i],
+      ["Missionen", "Neues Missionssystem", "Ein überarbeitetes Missionssystem bildet die Grundlage für neue Aufträge.", /\brevamped mission system with new missions\b/i],
+      ["Gameplay", "Sauerstoff und Ausdauer", "Sauerstoffvorrat, Ausdauer und Puls beeinflussen die Belastung des Charakters.", /\bbreathing, stamina\s*&\s*heart rate\b/i],
+      ["Orte", "Tag und Nacht", "Die Himmelskörper rotieren und erhalten dynamische Tag-Nacht-Zyklen.", /\bplanetary bodies now have rotational motion complete with dynamic day\/night cycles\b/i],
+      ["Technik", "Launcher und Patcher", "Ein neuer Launcher und ein neues Patchsystem werden eingeführt.", /\bnew launcher and patcher system\b/i]
+    ]
+  },
+  "Alpha 3.1.3": {
+    marker: /\balpha patch 3\.1\.3\b/i, minimum: 2,
+    sourceUrl: "https://robertsspaceindustries.com/spectrum/community/SC/forum/4/thread/star-citizen-alpha-3-1-3-live-746975-patch-notes",
+    changes: [
+      ["Technik", "KI-Piloten", "KI-Piloten wechseln nicht mehr gelegentlich in einen inaktiven Zustand.", /\bai pilots occasionally going into idle states\b/i],
+      ["Orte", "Revel-and-York-Hangar", "Der große persönliche Hangar lädt wieder für Schiffe der Größe 5 und größer.", /\blarger revel and york personal hangar for size 5\+ ships will now load again\b/i],
+      ["Technik", "Abstürze", "Die Patch Notes nennen Korrekturen für Client- und Serverabstürze.", /\bfixed 3 client crashes\b[\s\S]{0,80}\bfixed 9 potential server crash causes\b/i]
+    ]
+  },
   "Alpha 3.17.5": {
     marker: /\balpha patch 3\.17\.5\b/i, minimum: 1,
     sourceUrl: "https://robertsspaceindustries.com/spectrum/community/SC/forum/190048/thread/star-citizen-alpha-3-17-5-live-8338165-patch-notes/5683361",
@@ -1057,7 +1079,7 @@ async function fetchHistoricalPatch(patch) {
   if (!date) return { unusableReason: "Erscheinungsdatum im Wiki-Detail nicht erkennbar" };
   const wikiUrl = `https://starcitizen.tools/${patch.title.replace(/ /g, "_")}`;
   const sourceUrl = HISTORICAL_SHORT_RELEASES[patch.version]?.sourceUrl || historicalOfficialLink(html) || wikiUrl;
-  const sourceType = /\/spectrum\/community\/SC\/forum\/190048\/thread\//i.test(sourceUrl) || /\/comm-link\/Patch-Notes\/\d+-/i.test(sourceUrl) ? "Patch Notes" :
+  const sourceType = /\/spectrum\/community\/SC\/forum\/\d+\/thread\//i.test(sourceUrl) || /\/comm-link\/Patch-Notes\/\d+-/i.test(sourceUrl) || patch.version === "Alpha 3.0.0" ? "Patch Notes" :
     /\/comm-link\/transmission\/\d+-/i.test(sourceUrl) ? "RSI Release Info" : "Community Archive";
   const content = cleanPatchText(raw);
   return { version: patch.version, date, sourceUrl, sourceType, historical: true,

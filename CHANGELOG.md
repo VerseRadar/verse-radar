@@ -1,5 +1,11 @@
 # Changelog – Verse Radar
 
+## 0.9.11 – Die letzten zwei bekannten 3.x-Patches erschließen
+- Alpha 3.1.3: kurze Patch Notes gezielt erkennen; KI-Piloten, großer Revel-and-York-Hangar sowie Client- und Serverabstürze als konkrete Änderungen.
+- Alpha 3.0.0: ursprüngliche RSI-Patch Notes trotz abweichender Überschriften auswerten; erkundbare Oberflächen, Außenposten, Ursa Explorer, Missionssystem, Sauerstoff, Tag-Nacht-Zyklus und Launcher.
+- Import nur bei nachweisbarer Versionskennung und mehreren passenden Textstellen; beide Einträge mit ihrem offiziellen RSI-Quelllink.
+- Regressionstest für beide zuvor abgewiesenen Formate. Archiv mit 102 Einträgen, Fortschritt und pausierte Steuerung bleiben beim Update bestehen.
+
 ## 0.9.10 – Hotfix 3.11.1a korrekt zuordnen
 - Beim Bereinigen des Wiki-Texts wird die vor dem Patchabschnitt stehende Versionsüberschrift entfernt. 0.9.9 verlangte für 3.11.1a anschließend fälschlich genau diese Überschrift im verbleibenden Patchtext.
 - Die Version wird nun am Titel der Wiki-API-Antwort geprüft; die Zusammenfassung verlangt weiterhin mindestens zwei konkret belegte Korrekturen aus den Patch Notes.

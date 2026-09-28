@@ -47,13 +47,15 @@ globalThis.fetch = async (input, options = {}) => {
     if (!version) throw Error(`Unexpected title ${title}`);
     if (version === brokenVersion) return Response.json({ error: { code: 'missingtitle' } });
     const shortNotes = {
+      '3.0.0': 'Star Citizen Alpha Patch 3.0.0 is now available! Players will have access to planetary surfaces for the first time on 3 moons (Yela, Daymar, and Cellin) along with an asteroid (Delamar). These new surfaces are dotted with surface outposts and derelict ships. We have added 4 new ships, our first dedicated ground vehicle (Ursa) Explorer, the foundation of our revamped mission system with new missions, and a completely new launcher and patcher system. New features General content Breathing, Stamina & Heart Rate Oxygen Supply is consumed. Planetary bodies now have rotational motion complete with dynamic day/night cycles.',
+      '3.1.3': 'Alpha Patch 3.1.3 has been released and is now available! Patch should now show: LIVE-746975. Bug fixes Fix for AI pilots occasionally going into idle states. The larger Revel and York personal hangar for size 5+ ships will now load again. Technical Fixed 3 client crashes. Fixed 9 potential server crash causes. Fixed 2 fatal error crashes. Fixed a memory crash.',
       '3.17.5': 'Alpha Patch 3.17.5 LIVE Feature Updates. The Lunar New Year envelope (Year of the Rooster for 2953) returns for the Red Festival.',
       '3.17.4': 'Alpha Patch 3.17.4 LIVE New features. Added New Ship: Drake Corsair. Technical: Fixed 1 Server Crash. Known issues with unrelated ships remain.',
       '3.11.1a': 'Fixed an issue causing ships to fall through planet surfaces when powered off. Female Characters should now have correct sit animations for the under counter seat in the Nomad. Paints should now be able to be applied to the Sabre Comet. Illegal Cargo text will no longer show up in trading kiosks without illegal cargo. Fixed a Server Deadlock. Fixed a Backend Service Crash.'
     };
     if (Object.hasOwn(shortNotes, version)) {
-      const releaseDate = { '3.17.5': '2023-01-18', '3.17.4': '2022-11-17', '3.11.1a': '2020-11-19' }[version];
-      const header = 'Delete the USER folder if display issues occur after updating. Database Reset: No. Long Term Persistence: Enabled. Starting aUEC: 20000. ';
+      const releaseDate = { '3.0.0': '2017-12-23', '3.1.3': '2018-04-20', '3.17.5': '2023-01-18', '3.17.4': '2022-11-17', '3.11.1a': '2020-11-19' }[version];
+      const header = version === '3.0.0' || version === '3.1.3' ? '' : 'Delete the USER folder if display issues occur after updating. Database Reset: No. Long Term Persistence: Enabled. Starting aUEC: 20000. ';
       return Response.json({ parse: { title, text: { '*': `<div>Star Citizen build released on ${releaseDate}. ${version === '3.11.1a' ? 'Hot Fix 3.11.1a' : ''}</div><h2>Patch notes <span>edit</span></h2><p>${header.repeat(3)}${shortNotes[version]}</p>` } } });
     }
     const official = version === '3.22.1'
@@ -143,11 +145,39 @@ for (const version of ['3.17.5', '3.17.4', '3.11.1a']) {
   const item = fullShort.items.find(i => i.version === `Alpha ${version}`);
   assert.ok(item, version);
   assert.match(item.sourceUrl, /robertsspaceindustries\.com\/spectrum/);
-  assert.equal(item.summaryVersion, '0.9.10');
+  assert.equal(item.summaryVersion, '0.9.11');
   assert.ok(item.changes.length >= 1);
 }
 assert.ok(fullShort.items.find(i => i.version === 'Alpha 3.17.5').changes.some(c => c.title === 'Red Festival 2953'));
 assert.ok(fullShort.items.find(i => i.version === 'Alpha 3.17.4').changes.some(c => c.title === 'Drake Corsair'));
 assert.ok(fullShort.items.find(i => i.version === 'Alpha 3.11.1a').changes.some(c => c.title === 'Sabre-Comet-Lackierung'));
+saved.get(archivePath).data.push(...fullShort.items.filter(item => ['Alpha 3.17.5', 'Alpha 3.17.4', 'Alpha 3.11.1a'].includes(item.version)));
+
+// The final two missing archive entries have genuinely different formats: one
+// is shorter than 500 characters; the other has a long "New features" section.
+for (const version of ['3.0.0', '3.1.3']) {
+  saved.get(archivePath).data = saved.get(archivePath).data.filter(item => item.version !== `Alpha ${version}`);
+}
+calls = [];
+const finalPreview = await invoke('/preview/patches?diagnostic=1');
+assert.equal(finalPreview.newItems, 2);
+assert.equal(finalPreview.historicalUnusableItems, 0);
+assert.ok(finalPreview.historicalDiagnostics.every(item => item.eligible && item.sourceType === 'Patch Notes'));
+assert.ok(calls.length < 50);
+const finalItems = (await invoke('/preview/patches')).items;
+const major = finalItems.find(item => item.version === 'Alpha 3.0.0');
+const minor = finalItems.find(item => item.version === 'Alpha 3.1.3');
+assert.equal(major.date, '2017-12-23T00:00:00.000Z');
+assert.match(major.sourceUrl, /robertsspaceindustries\.com\/en\/comm-link\/transmission\/16349/);
+assert.ok(major.changes.length >= 5);
+assert.ok(major.changes.some(change => change.title === 'Erkundbare Oberflächen'));
+assert.ok(major.changes.some(change => change.title === 'Neues Missionssystem'));
+assert.match(major.summary, /Delamar/);
+assert.equal(minor.date, '2018-04-20T00:00:00.000Z');
+assert.match(minor.sourceUrl, /robertsspaceindustries\.com\/spectrum\/.*3-1-3/);
+assert.ok(minor.changes.some(change => change.title === 'Revel-and-York-Hangar'));
+assert.ok(minor.changes.some(change => change.title === 'Abstürze'));
+assert.equal(major.summaryVersion, '0.9.11');
+assert.equal(minor.summaryVersion, '0.9.11');
 
 console.log('Historische 3.x-Versionen, Quelllink-Prüfung, Suffixe und Worker-Limit: OK');

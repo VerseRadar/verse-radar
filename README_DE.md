@@ -1,4 +1,4 @@
-# Verse Radar 0.9.10
+# Verse Radar 0.9.11
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -39,6 +39,8 @@ Jeder Durchlauf nutzt die bestehende Begrenzung von acht historischen Versionen 
 **0.9.9:** Die Archivquellen zu Alpha 3.17.5, 3.17.4 und 3.11.1a werden anhand ihrer tatsächlichen kurzen Patch-Abschnitte ausgewertet. Für diese drei Versionen liegen offizielle RSI-Spectrum-Threads als Quelllink vor. Auf der pausierten `/backfill`-Seite nach dem Update einmal „Starten“ wählen. Wenn eine andere Version wegen eines Quellenfehlers nicht verarbeitet werden kann, hält die Automatik weiter an und nennt Version und Ursache.
 
 **0.9.10:** Bei 3.11.1a steht die Versionskennung im Wiki vor der eigentlichen Patch-Notiz und fällt bei der Textbereinigung weg. Der Worker prüft sie nun anhand des Wiki-API-Titels und übernimmt nur Korrekturen, deren Inhalte im bereinigten Patchabschnitt wirklich vorkommen. Der zuvor pausierte Lauf kann auf `/backfill` mit „Starten“ fortgesetzt werden; alte Patch-Einträge und die Fortschrittsdateien bleiben bestehen.
+
+**0.9.11:** Alpha 3.1.3 und 3.0.0 erhalten gezielte Quellenprüfung und konkrete deutsche Änderungspunkte. 3.1.3 ist kürzer als die bisherige Mindestlänge, 3.0.0 verwendet eine andere Gliederung. Nach dem Update `/backfill` öffnen und einmal **Starten** wählen. Die bereits gespeicherten 102 Patches und `nextPage: 35` bleiben erhalten; die weiteren Comm-Link-Seiten werden automatisch in begrenzten Durchläufen gescannt.
 Version 0.7.0 entfernt technische Archiv-Einträge und ersetzt wiederholte News-Platzhalter mit vorsichtigen deutschen Beschreibungen, die auf dem Titel beruhen. Wo eine bereits geprüfte Patch-Zusammenfassung zur exakt selben Comm-Link-ID vorliegt, nutzt die News-Karte deren erste zwei Sätze. Artikelinhalte werden ohne brauchbare Quellbeschreibung oder KI-Schlüssel nicht als vollständig zusammengefasst ausgegeben.
 Die Patch-Seite zeigt höchstens fünf aktuelle Einträge; die History zeigt alle gespeicherten Versionen. Der Worker ergänzt bei jedem geprüften manuellen Patch-Import zwei ältere Archivseiten und behält bestehende Versionen. Wie weit das Archiv zurückreichen kann, hängt von der verfügbaren Patch-Quelle ab. Die geprüfte Patch-Aufbereitung bleibt auf `summaryVersion=0.6.8`.
 Version 0.8.1 übernimmt neue Einträge in die Patch History nur, wenn ihr RSI-Quelllink tatsächlich auf Patch Notes zeigt. Ältere bereits gespeicherte Update-Ankündigungen bleiben erhalten, werden aber als solche bezeichnet und mit ihrem echten RSI-Link versehen. Eine allgemeine Titelübereinstimmung wie „Alpha 4.7.2“ genügt nicht mehr für eine Patch Note.
