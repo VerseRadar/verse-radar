@@ -2,7 +2,7 @@ const CONFIG = {
   referralUrl: "https://robertsspaceindustries.com/enlist?referral=DEINCODE",
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.10.1"
+  siteVersion: "0.10.2"
 };
 let usingStaticData = false;
 
@@ -51,7 +51,7 @@ function timeDE(v){if(!v)return ""; const d=new Date(v); return Number.isNaN(d.g
 function relative(v){const d=new Date(v), diff=Date.now()-d.getTime(); if(Number.isNaN(d.getTime()))return ""; const h=Math.round(diff/36e5); if(h<1)return "gerade eben"; if(h<24)return `vor ${h} Std.`; const days=Math.round(h/24); return days===1?"gestern":`vor ${days} Tagen`;}
 function sourceLink(n){return n.sourceUrl?`<a class="source" href="${esc(n.sourceUrl)}" target="_blank" rel="noopener noreferrer">${/https?:\/\/(?:www\.)?starcitizen\.tools\//i.test(n.sourceUrl)?"Community-Archiv":"Originalquelle"} ↗</a>`:"";}
 function renderNews(items,limit=3){
-  return items.slice(0,limit).map((n,i)=>`<article class="news-card" data-category="${esc(n.category||'NEWS')}"><div class="news-art art-${i%4}"><span class="art-signal">${esc((n.category||"NEWS").replace(" / "," · "))}</span></div><div class="news-body"><div><span class="tag">${esc(n.category||"NEWS")}</span><span class="date" title="${esc(n.date||"")}">${relative(n.date)||dateDE(n.date)}</span></div><h3>${esc(n.title)}</h3><p>${esc(n.summary)}</p><p class="ai-note">${n.ai === true ? "KI-gestützte Zusammenfassung" : n.summaryBasis === "Titel" ? "Kurzbeschreibung anhand des Titels" : n.summaryBasis === "Patch Notes" ? "Aus den Patch Notes" : "Kurzbeschreibung"} · ${sourceLink(n)}</p></div></article>`).join("");
+  return items.slice(0,limit).map((n,i)=>`<article class="news-card" data-category="${esc(n.category||'NEWS')}"><div class="news-art art-${i%4}"><span class="art-signal">${esc((n.category||"NEWS").replace(" / "," · "))}</span></div><div class="news-body"><div><span class="tag">${esc(n.category||"NEWS")}</span><span class="date" title="${esc(n.date||"")}">${relative(n.date)||dateDE(n.date)}</span></div><h3>${esc(n.title)}</h3><p>${esc(n.summary)}</p><p class="ai-note">${n.ai === true ? "KI-gestützte Zusammenfassung" : n.summaryBasis === "Titel" ? "Kurzbeschreibung anhand des Titels" : n.summaryBasis === "Patch Notes" ? "Aus den Patch Notes" : n.summaryBasis === "Quelltext" ? "Aus dem Artikeltext" : "Kurzbeschreibung"} · ${sourceLink(n)}</p></div></article>`).join("");
 }
 function radarContacts(news,events){
   const root=document.querySelector("#radar-contacts"); if(!root)return;

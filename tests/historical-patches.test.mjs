@@ -145,7 +145,7 @@ for (const version of ['3.17.5', '3.17.4', '3.11.1a']) {
   const item = fullShort.items.find(i => i.version === `Alpha ${version}`);
   assert.ok(item, version);
   assert.match(item.sourceUrl, /robertsspaceindustries\.com\/spectrum/);
-  assert.equal(item.summaryVersion, '0.10.1');
+  assert.equal(item.summaryVersion, '0.10.2');
   assert.ok(item.changes.length >= 1);
 }
 assert.ok(fullShort.items.find(i => i.version === 'Alpha 3.17.5').changes.some(c => c.title === 'Red Festival 2953'));
@@ -177,7 +177,7 @@ assert.equal(minor.date, '2018-04-20T00:00:00.000Z');
 assert.match(minor.sourceUrl, /robertsspaceindustries\.com\/spectrum\/.*3-1-3/);
 assert.ok(minor.changes.some(change => change.title === 'Revel-and-York-Hangar'));
 assert.ok(minor.changes.some(change => change.title === 'Abstürze'));
-assert.equal(major.summaryVersion, '0.10.1');
-assert.equal(minor.summaryVersion, '0.10.1');
+assert.equal(major.summaryVersion, '0.10.2');
+assert.equal(minor.summaryVersion, '0.10.2');
 
 console.log('Historische 3.x-Versionen, Quelllink-Prüfung, Suffixe und Worker-Limit: OK');

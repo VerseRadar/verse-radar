@@ -22,7 +22,7 @@ const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
 const PATCH_BACKFILL_PATH = "public/data/patch-backfill-control.json";
 const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "0.10.1";
+const VERSION = "0.10.2";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -125,7 +125,7 @@ const HISTORICAL_SHORT_RELEASES = {
 const VERSION_RE = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?$/;
 const PATCH_NOTES_URL = "https://robertsspaceindustries.com/en/patch-notes";
 const RELEVANT = /patch|alpha\s*\d|free\s*fly|foundation festival|fleet week|invictus|iae|event|roadmap|ship showdown|siege|monthly report|this week in star citizen|live experience|pirate week|subscriber|vehicle|ship|aegis|argo|anvil|kruger|sabre|aurora|gameplay|engineering|q\s*&\s*a|letter from the chairman/i;
-const NEWS_SUMMARY_VERSION = "0.10.1";
+const NEWS_SUMMARY_VERSION = "0.10.2";
 // The archived metadata for this article still names the August edition;
 // RSI redirects its old URL to the September 9 edition with the same ID.
 const NEWS_SOURCE_CORRECTIONS = {
@@ -455,6 +455,7 @@ function normalizeWikiCommLink(record) {
     title,
     url,
     verifiedSummary: correction && title === correction.title ? correction.summary : null,
+    content: typeof record?.translations?.en_EN === "string" ? record.translations.en_EN : "",
     date: date || new Date().toISOString(),
     description: "",
     sourceId: id
@@ -656,6 +657,44 @@ function patchNewsSummary(item, patches) {
   return patch.summary.split(/(?<=[.!?])\s+(?=[A-ZÄÖÜ])/u)[0].trim();
 }
 
+// Only mention subjects that actually occur in an archived article body.
+// An article title by itself never qualifies as an article-based summary.
+function newsContentSummary(item, content) {
+  const body = strip(content).slice(0, 14000);
+  if (body.length < 300) return "";
+  const topics = [
+    ["Orison Relief Support", /\borison relief support\b/i],
+    ["Alpha 4.10.1", /\balpha 4\.10\.1\b/i],
+    ["Pirate Week", /\bpirate week\b/i],
+    ["Ship Showdown", /\bship showdown\b/i],
+    ["der Roadmap", /\broadmap roundup\b/i],
+    ["der Sabre Raven EX", /\bsabre raven ex\b/i],
+    ["Nyx", /\bnyx\b/i],
+    ["Free Fly", /\bfree fly\b/i]
+  ].filter(([, pattern]) => pattern.test(body)).map(([name]) => name);
+  if (topics.length < 2) return "";
+  const list = topics.slice(0, 3).join(", ");
+  if (/^this week in star citizen\b/i.test(item.title)) return `Der Wochenüberblick erwähnt ${list}. Einzelheiten und Termine stehen in der Originalmeldung.`;
+  if (/^roadmap roundup\b/i.test(item.title)) return `Im Roadmap-Beitrag geht es unter anderem um ${list}. Weitere Details stehen in der Originalmeldung.`;
+  if (/^star citizen monthly report\b/i.test(item.title)) return `Der Monatsbericht behandelt unter anderem ${list}. Weitere Details stehen in der Originalmeldung.`;
+  return "";
+}
+
+async function fetchNewsContent(item) {
+  const id = Number(item.sourceId || item.url?.match(/\/(\d+)-/)?.[1]);
+  if (!id) return "";
+  if (typeof item.content === "string" && item.content.length >= 300) return item.content;
+  try {
+    const response = await fetch(`https://api.star-citizen.wiki/api/comm-links/${id}`, {
+      headers: { "user-agent": `Verse-Radar/${VERSION} (+independent fan site)`, "accept": "application/json" }
+    });
+    if (!response.ok) return "";
+    const data = (await response.json())?.data;
+    if (Number(data?.id) !== id) return "";
+    return typeof data?.translations?.en_EN === "string" ? data.translations.en_EN : "";
+  } catch { return ""; }
+}
+
 function extractDateFromSlug(url) {
   // Slugs normally do not contain dates, so return null here.  Actual article
   // dates are filled from the article page in the enrichment pass when needed.
@@ -669,6 +708,16 @@ async function buildNews(env) {
   if (!Array.isArray(existingData)) throw Error("Gespeicherte News aus GitHub nicht lesbar; News-Import sicherheitshalber abgebrochen.");
   const existing = existingData;
   const existingPatches = env.GITHUB_TOKEN && env.GITHUB_REPO ? await readGithubJSON(env, "public/data/patches.json", []) : [];
+  const contentSummaries = new Map();
+  const needingContent = items.filter(item => {
+    const old = existing.find(x => x.id === hash(item.url));
+    return !/^star citizen alpha\s*\d/i.test(item.title) && !item.verifiedSummary &&
+      (!old || old.summaryBasis === "Titel" || isNewsPlaceholder(old.summary));
+  }).slice(0, env.OPENAI_API_KEY ? 8 : 20);
+  await Promise.all(needingContent.map(async item => {
+    const summary = newsContentSummary(item, await fetchNewsContent(item));
+    if (summary) contentSummaries.set(item.url, summary);
+  }));
   const known = new Set(existing.map(x => x.id));
   const news = [];
   let aiCount = 0;
@@ -677,14 +726,15 @@ async function buildNews(env) {
   for (const item of items) {
     const id = hash(item.url);
     const old = existing.find(x => x.id === id);
-    if (old && !isNewsPlaceholder(old.summary)) { news.push(old); continue; }
+    const contentSummary = contentSummaries.get(item.url) || "";
+    if (old && !isNewsPlaceholder(old.summary) && !contentSummary && !(item.verifiedSummary && old.summaryBasis === "Titel")) { news.push(old); continue; }
     if (old) refreshedItems++;
     const patchSummary = patchNewsSummary(item, existingPatches);
     let ai = null;
-    if (env.OPENAI_API_KEY && !patchSummary) {
+    if (env.OPENAI_API_KEY && !patchSummary && !contentSummary && !item.verifiedSummary) {
       try { ai = await summarize(item, env.OPENAI_API_KEY); aiCount++; } catch (_) {}
     }
-    news.push({ id, title: ai?.title || item.title, category: ai?.category || classify(item.title), date: item.date, summary: patchSummary || ai?.summary || fallbackNewsSummary(item), sourceUrl: item.url, source: "RSI Comm-Link", ai: Boolean(ai), summaryBasis: patchSummary ? "Patch Notes" : ai ? "KI" : "Titel", summaryVersion: NEWS_SUMMARY_VERSION });
+    news.push({ id, title: ai?.title || item.title, category: ai?.category || classify(item.title), date: item.date, summary: patchSummary || contentSummary || ai?.summary || fallbackNewsSummary(item), sourceUrl: item.url, source: "RSI Comm-Link", ai: Boolean(ai), summaryBasis: patchSummary ? "Patch Notes" : contentSummary || item.verifiedSummary ? "Quelltext" : ai ? "KI" : "Titel", summaryVersion: NEWS_SUMMARY_VERSION });
   }
   // Preserve older useful articles, but remove stale demo links, technical
   // archive records and the repeated placeholder from earlier imports.

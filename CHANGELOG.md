@@ -1,5 +1,11 @@
 # Changelog – Verse Radar
 
+## 0.10.2 – Belegte Themen aus News-Artikeln
+- Der News-Import prüft bei neuen oder bisher nur anhand des Titels beschriebenen Meldungen den archivierten englischen Artikeltext. Bis zu 20 Detailseiten pro Aufruf bleiben im Worker-Anfragelimit.
+- Wochenüberblicke, Roadmap-Beiträge und Monatsberichte nennen nur Themen, die mehrfach eindeutig im Artikeltext belegbar sind. Unklare Texte behalten ihre vorsichtige Titel-Kurzbeschreibung.
+- Die News-Karten kennzeichnen textgestützte Meldungen als „Aus dem Artikeltext“; der RSI-Originallink bleibt sichtbar.
+- Bereits veröffentlichte Artikel mit Titel-Kurztext können bei `/run/news` verbessert werden. Das Patch-Archiv wird dabei nicht verändert.
+
 ## 0.10.1 – News-Vorschau nach echten Daten berichtigen
 - Die Patch-Kurzfassung endet nun am Ende des ersten vollständigen Satzes; die in der Vorschau abgeschnittene Abkürzung „bzw.“ entfällt.
 - Der Roadmap-Artikel mit ID 21314 erhält den geprüften RSI-Titel und Link vom 9. September sowie konkrete Änderungspunkte zu Orison Relief Support und Alpha 4.11.

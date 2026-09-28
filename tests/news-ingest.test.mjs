@@ -43,6 +43,11 @@ globalThis.fetch = async (target, options = {}) => {
     return new Response(html);
   }
   if (address.startsWith("https://api.star-citizen.wiki/api/comm-links?")) return Response.json({ data: archive });
+  if (address === "https://api.star-citizen.wiki/api/comm-links/21339") return Response.json({ data: {
+    id: 21339, translations: { en_EN: ('This week in Star Citizen: Orison Relief Support and Pirate Week are discussed in the community update. ' +
+      'The article also mentions the upcoming Alpha 4.10.1 release and points readers to the original announcements. ').repeat(4) }
+  } });
+  if (address.startsWith("https://api.star-citizen.wiki/api/comm-links/")) return new Response("Not found", { status: 404 });
   if (address.includes("/contents/public/data/news.json?ref=main")) return failNewsRead ? new Response("Unavailable", { status: 503 }) : Response.json({ sha: "news-sha", content: Buffer.from(JSON.stringify(oldNews)).toString("base64") });
   if (address.includes("/contents/public/data/patches.json?ref=main")) {
     const patches = [{ sourceUrl: "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21330-Star-Citizen-Alpha-4101", summaryVersion: "0.6.8", summary: "Alpha 4.10.1 bringt Orison Relief Support. Der Patch enthält weitere Änderungen an Aufträgen und Fahrzeugen. Noch ein dritter Satz." }];
@@ -56,7 +61,7 @@ globalThis.fetch = async (target, options = {}) => {
 
 const env = { GITHUB_TOKEN: "test-token", GITHUB_REPO: "example/verse-radar", GITHUB_BRANCH: "main" };
 const health = await worker.fetch(new Request("https://example.com/health"), env);
-assert.equal((await health.json()).version, "0.10.1");
+assert.equal((await health.json()).version, "0.10.2");
 const patchApi = await worker.fetch(new Request("https://example.com/api/patches"), env);
 assert.equal(patchApi.headers.get("x-verse-radar-patches-source"), "github");
 
@@ -84,6 +89,8 @@ assert.equal(body.items.find(x => x.title === 'Star Citizen Alpha 4.10.1').sourc
 assert.equal(body.items.some(x => x.sourceUrl === "https://robertsspaceindustries.com/en/comm-link"), false);
 assert.equal(body.items.some(x => x.summary === placeholder), false);
 assert.ok(body.items.find(x => x.id === hash(oldUrl)).summary.includes("Wochenüberblick"));
+assert.match(body.items.find(x => x.id === hash(oldUrl)).summary, /Pirate Week/);
+assert.equal(body.items.find(x => x.id === hash(oldUrl)).summaryBasis, "Quelltext");
 assert.match(body.items.find(x => x.id === hash(oldUrl)).title, /September 21, 2026/);
 assert.equal(body.items.find(x => x.title === "Star Citizen Alpha 4.10.1").summary, "Alpha 4.10.1 bringt Orison Relief Support.");
 assert.equal(body.items.find(x => x.title === "Star Citizen Alpha 4.10.1").summaryBasis, "Patch Notes");
