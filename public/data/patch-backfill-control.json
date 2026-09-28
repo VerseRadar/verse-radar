@@ -12,8 +12,8 @@
     "historicalUnusableVersions": []
   },
   "sessionId": "de72824a-b670-4b2b-aa2c-58bd97871724",
-  "leaseId": null,
-  "leaseUntil": null,
+  "leaseId": "dde878dd-ec87-481d-a20f-d7e727ff35c1",
+  "leaseUntil": "2026-09-28T07:02:14.002Z",
   "lastError": null,
   "changedAt": "2026-09-28T06:50:28.469Z"
 }
