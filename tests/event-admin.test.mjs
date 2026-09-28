@@ -26,12 +26,18 @@ const req = (path, payload, key = "private", origin = "https://example.com") => 
 const official = "https://robertsspaceindustries.com/en/comm-link/transmission/21300-Test";
 const start = "2030-06-01T12:00:00.000Z", end = "2030-06-03T12:00:00.000Z";
 
-assert.equal((await (await worker.fetch(new Request("https://example.com/health"), env)).json()).version, "0.11.1");
+assert.equal((await (await worker.fetch(new Request("https://example.com/health"), env)).json()).version, "0.11.2");
 assert.equal((await worker.fetch(new Request("https://example.com/manage/events/state"), env)).status, 401);
 const initial = await (await worker.fetch(req("/manage/events/state"), env)).json();
 assert.deepEqual(initial.events, []);
 assert.equal(initial.freeFly.active, false);
-assert.equal((await worker.fetch(new Request("https://example.com/manage/events"), env)).status, 200);
+const page = await worker.fetch(new Request("https://example.com/manage/events"), { ...env, ASSETS: undefined });
+assert.equal(page.status, 200);
+const pageHtml = await page.text();
+assert.match(pageHtml, /Free Fly & Events pflegen/);
+assert.equal(pageHtml, await readFile(new URL("../public/event-admin.html", import.meta.url), "utf8"));
+assert.match(page.headers.get("content-security-policy"), /connect-src 'self'/);
+assert.doesNotMatch(await readFile(new URL("../public/event-admin.html", import.meta.url), "utf8"), /href="\/styles\.css"/);
 const proposal = { kind: "freefly", action: "set", data: { title: "Test Free Fly", sourceUrl: official, start, end, summary: "Bestätigter Zeitraum." } };
 assert.equal((await worker.fetch(req("/manage/events/preview", proposal, "wrong"), env)).status, 401);
 assert.equal((await worker.fetch(req("/manage/events/preview", proposal, "private", "https://evil.example"), env)).status, 403);

@@ -1,5 +1,11 @@
 # Changelog – Verse Radar
 
+## 0.11.2 – Verwaltungsseite ohne Asset-Bindung
+
+- `/manage/events` wird direkt aus dem Worker ausgeliefert und benötigt keine `env.ASSETS`-Bindung oder separate CSS-Datei.
+- Schutz durch `RUN_SECRET`, Vorschau und GitHub-Schreibpfad bleiben wie in 0.11.1.
+- Test prüft ausdrücklich die Seite ohne Asset-Bindung; bestehende Daten bleiben erhalten.
+
 ## 0.11.1 – Bestätigte Zeiträume einfach pflegen
 
 - `/manage/events`: geschütztes Formular mit vorhandenem `RUN_SECRET`, Vorschau und getrennter Veröffentlichung.
