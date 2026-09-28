@@ -27,6 +27,8 @@ assert.equal((history.match(/<article class="article"/g) || []).length, 6);
 assert.ok(history.includes('id="Alpha%204.8"'));
 assert.ok(history.includes("<details>"));
 assert.ok(latest.includes("UPDATE-MELDUNG"));
+assert.equal(ctx.patchIsAnnouncement({ sourceType: 'Patch Notes', sourceUrl: 'https://robertsspaceindustries.com/en/comm-link/transmission/16349-Star-Citizen-Alpha-300' }), false);
+assert.equal(ctx.patchIsAnnouncement({ sourceType: 'RSI Release Info', sourceUrl: 'https://robertsspaceindustries.com/en/comm-link/transmission/21206-Star-Citizen-Alpha-483' }), true);
 assert.ok(history.includes('href="https://robertsspaceindustries.com/en/comm-link/transmission/21206-Star-Citizen-Alpha-483"'));
 assert.equal(history.includes('href="/patches.html#Alpha%204.8"'), false);
 assert.ok(ctx.renderNews(news, 1).includes("Kurzbeschreibung anhand des Titels"));

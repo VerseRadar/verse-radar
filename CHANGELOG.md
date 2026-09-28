@@ -1,5 +1,11 @@
 # Changelog – Verse Radar
 
+## 0.10.0 – News-Quellen und Patch-Kennzeichnung berichtigen
+- News aus der strukturierten Ersatzquelle übernehmen nur noch belegte RSI-Artikel-URLs, die zur Artikel-ID passen. Unbrauchbare Archiv-Platzhalter und erfundene Transmission-Links entfallen.
+- Wenn alte und neue URLs zur selben Comm-Link-ID gehören, erscheint nur ein News-Eintrag.
+- Alpha 3.0.0 bleibt in der Patch History als „Patch Notes“ gekennzeichnet, obwohl die offizielle RSI-Patchseite unter `/transmission/` liegt.
+- Die sichtbare Versionsanzeige auf der Startseite lautet 0.10.0; der automatische News-Import bleibt bis zur Prüfung der Vorschau deaktiviert.
+
 ## 0.9.11 – Die letzten zwei bekannten 3.x-Patches erschließen
 - Alpha 3.1.3: kurze Patch Notes gezielt erkennen; KI-Piloten, großer Revel-and-York-Hangar sowie Client- und Serverabstürze als konkrete Änderungen.
 - Alpha 3.0.0: ursprüngliche RSI-Patch Notes trotz abweichender Überschriften auswerten; erkundbare Oberflächen, Außenposten, Ursa Explorer, Missionssystem, Sauerstoff, Tag-Nacht-Zyklus und Launcher.

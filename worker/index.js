@@ -22,7 +22,7 @@ const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
 const PATCH_BACKFILL_PATH = "public/data/patch-backfill-control.json";
 const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "0.9.11";
+const VERSION = "0.10.0";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
 const LEGACY_RELEASE_LINKS = new Map([
@@ -125,7 +125,7 @@ const HISTORICAL_SHORT_RELEASES = {
 const VERSION_RE = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?$/;
 const PATCH_NOTES_URL = "https://robertsspaceindustries.com/en/patch-notes";
 const RELEVANT = /patch|alpha\s*\d|free\s*fly|foundation festival|fleet week|invictus|iae|event|roadmap|ship showdown|siege|monthly report|this week in star citizen|live experience|pirate week|subscriber|vehicle|ship|aegis|argo|anvil|kruger|sabre|aurora|gameplay|engineering|q\s*&\s*a|letter from the chairman/i;
-const NEWS_SUMMARY_VERSION = "0.7.0";
+const NEWS_SUMMARY_VERSION = "0.10.0";
 const OLD_NEWS_PLACEHOLDER = "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.";
 
 export default {
@@ -423,8 +423,11 @@ function normalizeWikiCommLink(record) {
   const id = Number(record?.id);
   const title = strip(record?.title || "");
   if (!Number.isInteger(id) || id <= 0 || !validTitle(title)) return null;
-  const slug = slugify(title);
-  const url = `https://robertsspaceindustries.com/en/comm-link/transmission/${id}-${slug}`;
+  // The archive sometimes returns a placeholder URL such as /comm-link/SCW/…
+  // and a title alone does not establish whether the article is a patch note
+  // or a transmission. Only use a supplied, matching RSI article link.
+  const url = cleanUrl(record?.rsi_url);
+  if (!url || !isArticleUrl(url) || /\/SCW\/|\-API(?:[/?#]|$)/i.test(url) || Number(new URL(url).pathname.match(/\/(\d+)-/)?.[1]) !== id) return null;
   let date = record?.published_at ? validDate(record.published_at) : null;
   if (!date && record?.created_at) date = validDate(record.created_at);
   if (!date && record?.created_at_human) {
@@ -438,16 +441,6 @@ function normalizeWikiCommLink(record) {
     description: "",
     sourceId: id
   };
-}
-
-function slugify(value) {
-  return String(value)
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/&/g, " and ")
-    .replace(/[^a-zA-Z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .toLowerCase();
 }
 
 async function enrichDates(items) {
@@ -600,11 +593,14 @@ function newsTitleKey(title) {
 function dedupeNewsItems(items) {
   const urls = new Set();
   const titles = new Set();
+  const articleIds = new Set();
   return items.filter(item => {
     const key = newsTitleKey(item.title);
     const url = item.url || item.sourceUrl;
-    if (urls.has(url) || (!/^this week in star citizen$/i.test(key) && titles.has(key))) return false;
+    const articleId = Number(url?.match(/\/(\d+)-/)?.[1]) || null;
+    if (urls.has(url) || (articleId && articleIds.has(articleId)) || (!/^this week in star citizen$/i.test(key) && titles.has(key))) return false;
     urls.add(url);
+    if (articleId) articleIds.add(articleId);
     titles.add(key);
     return true;
   });

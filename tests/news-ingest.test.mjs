@@ -17,7 +17,12 @@ const archive = [
   [21307, "Star Citizen Monthly Report: August 2026", "2026-09-02"],
   [21299, "Roadmap Roundup - August 26, 2026", "2026-08-26"],
   [21301, "Letter From The Chairman", "2026-08-27"]
-].map(([id, title, created_at]) => ({ id, title, created_at }));
+].map(([id, title, created_at]) => ({ id, title, created_at,
+  rsi_url: id === 21330
+    ? 'https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21330-Star-Citizen-Alpha-4101'
+    : url(id, title.toLowerCase().replace(/[^a-z0-9]+/g, '-')) }));
+archive.push({ id: 21340, title: 'Star Citizen Alpha 4.10.2', created_at: '2026-09-22', rsi_url: 'https://robertsspaceindustries.com/comm-link/SCW/21340-API' });
+archive.push({ id: 21341, title: 'Star Citizen Alpha 4.10.3', created_at: '2026-09-22', rsi_url: 'https://robertsspaceindustries.com/en/comm-link/transmission/20000-wrong-article' });
 archive.find(x => x.id === 21314).published_at = "2026-08-26T18:00:00.000Z";
 
 const oldUrl = url(21339, "this-week-in-star-citizen");
@@ -51,7 +56,7 @@ globalThis.fetch = async (target, options = {}) => {
 
 const env = { GITHUB_TOKEN: "test-token", GITHUB_REPO: "example/verse-radar", GITHUB_BRANCH: "main" };
 const health = await worker.fetch(new Request("https://example.com/health"), env);
-assert.equal((await health.json()).version, "0.9.11");
+assert.equal((await health.json()).version, "0.10.0");
 const patchApi = await worker.fetch(new Request("https://example.com/api/patches"), env);
 assert.equal(patchApi.headers.get("x-verse-radar-patches-source"), "github");
 
@@ -72,6 +77,8 @@ assert.equal(body.items.filter(x => x.title === "This Week in Star Citizen").len
 assert.equal(body.items.filter(x => x.title.startsWith("Roadmap Roundup")).length, 1);
 assert.equal(body.items.find(x => x.title.startsWith("Roadmap Roundup")).date, "2026-08-26T18:00:00.000Z");
 assert.equal(body.items.some(x => x.title.startsWith("R-PU-ORS-")), false);
+assert.equal(body.items.some(x => x.title === "Star Citizen Alpha 4.10.2" || x.title === "Star Citizen Alpha 4.10.3"), false);
+assert.equal(body.items.find(x => x.title === 'Star Citizen Alpha 4.10.1').sourceUrl, archive.find(x => x.id === 21330).rsi_url);
 assert.equal(body.items.some(x => x.sourceUrl === "https://robertsspaceindustries.com/en/comm-link"), false);
 assert.equal(body.items.some(x => x.summary === placeholder), false);
 assert.ok(body.items.find(x => x.id === hash(oldUrl)).summary.includes("Wochenüberblick"));
