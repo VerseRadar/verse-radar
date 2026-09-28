@@ -1,5 +1,14 @@
 # Changelog – Verse Radar
 
+## 0.12.2 – Game Packages und Referral-Preisgrenze
+
+- Angebotsbereich auf Game Packages mit konkretem RSI-Package-Link begrenzt.
+- Schiff, Spielzugang und sämtliche weiteren bestätigten Bestandteile werden einzeln angezeigt.
+- Ja/Nein-Anzeige für die 40-USD-Preisgrenze vor Steuern; zusätzlicher Hinweis auf RSIs weitere Referral-Bedingungen.
+- Hinweise zu ungesicherten Angaben und zur maßgeblichen Originalquelle ergänzt.
+- Ältere unvollständige Angebote bleiben gespeichert, werden bis zur erneuten Prüfung nicht angezeigt.
+- Bestehender Referral-Link und News-, Patch- und Eventdaten bleiben erhalten.
+
 ## 0.12.1 – Referral-Link und flexible Angebotsprüfung
 
 - Vom Betreiber bereitgestellten Referral-Link hinterlegt; offizielle www-Adresse und Bindestriche im Code werden akzeptiert.

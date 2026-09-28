@@ -19,3 +19,4 @@ main{max-width:var(--max);margin:auto;padding:0 24px}.hero{min-height:430px;disp
 @media(max-width:900px){.automation-panel{grid-template-columns:1fr}.pipeline{justify-content:flex-start}}
 
 .button[hidden]{display:none}
+.package-contents{color:var(--muted);padding-left:22px;line-height:1.7}.package-contents li{margin:3px 0}.referral-check{padding:10px 14px;border:1px solid var(--line);border-radius:6px;background:rgba(121,240,92,.05)}.referral-check strong{color:var(--green)}

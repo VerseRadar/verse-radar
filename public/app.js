@@ -1,7 +1,7 @@
 const CONFIG = {
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.12.1"
+  siteVersion: "0.12.2"
 };
 let usingStaticData = false;
 
@@ -51,11 +51,11 @@ function isOfficialSource(value){try{const u=new URL(value);return u.protocol===
 function validPrice(value){return (typeof value==="number"||typeof value==="string")&&/^\d+(?:\.\d{1,2})?$/.test(String(value))&&Number(value)>0&&Number(value)<100000;}
 function liveDeals(items,now=Date.now()){
   if(!Array.isArray(items))return [];
-  return items.filter(d=>d&&d.active===true&&d.name&&isOfficialSource(d.sourceUrl)&&validPrice(d.price)&&["USD","EUR"].includes(d.currency)&&Number.isFinite(Date.parse(d.checkedAt))&&Date.parse(d.checkedAt)<=now&&Date.parse(d.checkedAt)>now-48*3600000&&Number.isFinite(Date.parse(d.validUntil))&&Date.parse(d.validUntil)>now&&(!d.oldPrice||validPrice(d.oldPrice)&&Number(d.oldPrice)>Number(d.price)))
+  return items.filter(d=>d&&d.active===true&&d.type==="Game Package"&&d.name&&isOfficialSource(d.sourceUrl)&&/^\/(?:en\/)?pledge\/Packages\/[^/]+\/?$/i.test(new URL(d.sourceUrl).pathname)&&validPrice(d.price)&&validPrice(d.usdBeforeTax)&&["USD","EUR"].includes(d.currency)&&(d.currency!=="USD"||Number(d.usdBeforeTax)===Number(d.price))&&typeof d.contents?.ship==="string"&&d.contents.ship.trim()&&typeof d.contents?.gameAccess==="string"&&d.contents.gameAccess.trim()&&Array.isArray(d.contents?.extras)&&d.contents.extras.length&&d.contents.extras.every(x=>typeof x==="string"&&x.trim())&&Number.isFinite(Date.parse(d.checkedAt))&&Date.parse(d.checkedAt)<=now&&Date.parse(d.checkedAt)>now-48*3600000&&Number.isFinite(Date.parse(d.validUntil))&&Date.parse(d.validUntil)>now&&(!d.oldPrice||validPrice(d.oldPrice)&&Number(d.oldPrice)>Number(d.price)))
     .sort((a,b)=>Date.parse(a.validUntil)-Date.parse(b.validUntil));
 }
 function dealPrice(amount,currency){return new Intl.NumberFormat("de-DE",{style:"currency",currency}).format(Number(amount));}
-function renderDeals(items){return items.map(d=>`<article class="article"><span class="tag">${esc(d.type==="Game Package"?"GAME PACKAGE":"ANGEBOT")}</span><h2>${esc(d.name)}</h2><p>${d.oldPrice?`<s>${dealPrice(d.oldPrice,d.currency)}</s> `:""}<strong>${dealPrice(d.price,d.currency)}</strong></p>${d.note?`<p>${esc(d.note)}</p>`:""}<p class="ai-note">Zuletzt geprüft: ${dateDE(d.checkedAt)} · ${d.officialEndProvided?"Offizielles Ende laut Eintrag":"Anzeige spätestens bis"}: ${dateDE(d.validUntil)}. Preis und Bedingungen bitte bei RSI kontrollieren.</p><p>${sourceLink(d)}</p></article>`).join("")||'<article class="article"><p>Derzeit keine aktuell geprüften Angebote eingetragen.</p></article>';}
+function renderDeals(items){return items.map(d=>`<article class="article"><span class="tag">GAME PACKAGE</span><h2>${esc(d.name)}</h2><p>${d.oldPrice?`<s>${dealPrice(d.oldPrice,d.currency)}</s> `:""}<strong>${dealPrice(d.price,d.currency)}</strong> <small>vor Steuern laut Prüfung</small></p><h3>Im Package enthalten</h3><ul class="package-contents"><li>Schiff: ${esc(d.contents.ship)}</li><li>Spielzugang: ${esc(d.contents.gameAccess)}</li>${d.contents.extras.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><p class="referral-check">Referral-Preisgrenze (40 USD vor Steuern): <strong>${Number(d.usdBeforeTax)>=40?"Ja":"Nein"}</strong></p><p class="ai-note">Prüfbasis: ${dealPrice(d.usdBeforeTax,"USD")} vor Steuern. Das ist nur die Preisgrenze; ob ein Referral zählt, richtet sich nach RSIs aktuellen Bedingungen und dem Account.</p>${d.note?`<p>${esc(d.note)}</p>`:""}<p class="ai-note">Zuletzt geprüft: ${dateDE(d.checkedAt)} · ${d.officialEndProvided?"Offizielles Ende laut Eintrag":"Anzeige spätestens bis"}: ${dateDE(d.validUntil)}. Angaben ohne Gewähr; Preis, Lieferumfang und Bedingungen bitte auf der RSI-Shopseite prüfen.</p><p>${sourceLink(d)}</p></article>`).join("")||'<article class="article"><p>Derzeit keine aktuell geprüften Game Packages eingetragen.</p></article>';}
 function confirmedTime(value){return typeof value==="string"&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)&&Number.isFinite(Date.parse(value));}
 function activeEvents(items,now=Date.now()){
   if(!Array.isArray(items))return [];
