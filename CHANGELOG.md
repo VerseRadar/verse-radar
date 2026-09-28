@@ -1,10 +1,10 @@
 # Changelog – Verse Radar
 
-## 0.10.2 – Belegte Themen aus News-Artikeln
-- Der News-Import prüft bei neuen oder bisher nur anhand des Titels beschriebenen Meldungen den archivierten englischen Artikeltext. Bis zu 20 Detailseiten pro Aufruf bleiben im Worker-Anfragelimit.
-- Wochenüberblicke, Roadmap-Beiträge und Monatsberichte nennen nur Themen, die mehrfach eindeutig im Artikeltext belegbar sind. Unklare Texte behalten ihre vorsichtige Titel-Kurzbeschreibung.
-- Die News-Karten kennzeichnen textgestützte Meldungen als „Aus dem Artikeltext“; der RSI-Originallink bleibt sichtbar.
-- Bereits veröffentlichte Artikel mit Titel-Kurztext können bei `/run/news` verbessert werden. Das Patch-Archiv wird dabei nicht verändert.
+## 0.10.3 – Unsichere News-Themen zurücknehmen
+- Die Vorschau mit 0.10.2 zeigte wiederholte, teils unpassende Themen und fehlerhafte Formulierungen wie „um der Roadmap“. Die allgemeine Worttreffer-Regel wird entfernt.
+- Bereits veröffentlichte News-Kurztexte bleiben erhalten; der geprüfte Roadmap-Beitrag vom 9. September wird korrekt als „Aus dem Artikeltext“ gekennzeichnet.
+- Keine erneuten Detailabrufe für die entfernte Regel; die automatische News-Veröffentlichung bleibt deaktiviert.
+- Test sichert die Umkennzeichnung eines zuvor gespeicherten Roadmap-Titeltexts sowie die übrigen News- und Patchfunktionen.
 
 ## 0.10.1 – News-Vorschau nach echten Daten berichtigen
 - Die Patch-Kurzfassung endet nun am Ende des ersten vollständigen Satzes; die in der Vorschau abgeschnittene Abkürzung „bzw.“ entfällt.
