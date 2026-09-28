@@ -1,44 +1,25 @@
 {
-  "updatedAt": "2026-09-27T22:06:19.430Z",
+  "updatedAt": "2026-09-28T06:34:19.058Z",
   "source": "https://robertsspaceindustries.com/en/comm-link?sort=publish_new",
   "patchSource": "https://robertsspaceindustries.com/en/patch-notes",
   "mode": "live",
   "automation": "Cloudflare Worker + RSI Patch Notes; News-Import pausiert",
-  "version": "0.9.10",
+  "version": "0.9.11",
   "fetchedItems": null,
   "newItems": null,
   "refreshedItems": null,
   "aiItems": null,
   "newsItems": null,
-  "patchItems": 102,
-  "patchNewItems": 6,
-  "patchNextPage": 35,
+  "patchItems": 104,
+  "patchNewItems": 2,
+  "patchNextPage": 37,
   "patchBackfillComplete": false,
   "patchDeferredSeedItems": 0,
   "patchDeferredPageItems": 0,
   "patchHistoricalCandidates": 81,
   "patchHistoricalDeferredItems": 0,
-  "patchHistoricalUnusableItems": 2,
-  "patchHistoricalUnusableVersions": [
-    {
-      "version": "Alpha 3.1.3",
-      "reason": "Patchtext nicht ausreichend auswertbar",
-      "sourceContentLength": 363,
-      "matchedChanges": [
-        "Fehlerbehebungen"
-      ]
-    },
-    {
-      "version": "Alpha 3.0.0",
-      "reason": "Patchtext nicht ausreichend auswertbar",
-      "sourceContentLength": 35551,
-      "matchedChanges": [
-        "Schiffsanzeigen",
-        "Arena Commander",
-        "Fehlerbehebungen"
-      ]
-    }
-  ],
-  "patchHistoricalMissingItems": 2,
+  "patchHistoricalUnusableItems": 0,
+  "patchHistoricalUnusableVersions": [],
+  "patchHistoricalMissingItems": 0,
   "patchAiItems": 0
 }
