@@ -46,5 +46,27 @@
     "checkedAt": "2026-09-29T06:56:12.705Z",
     "officialEndProvided": false,
     "active": true
+  },
+  {
+    "name": "Salvager Starter Pack",
+    "type": "Game Package",
+    "sourceUrl": "https://robertsspaceindustries.com/en/pledge/Packages/Salvager-Starter-Pack",
+    "imageUrl": "https://robertsspaceindustries.com/i/b67105a629a5b91085fec0d4480a2cbbb4234924/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResijpLepjLGZkNcuKp2ubnRiZwFsW3wonzS)/source.webp",
+    "price": 55,
+    "oldPrice": 90,
+    "currency": "EUR",
+    "referralEligible": true,
+    "gameAccessConfirmed": true,
+    "contents": {
+      "ship": "Salvation",
+      "extras": [
+        "keine weiteren Bestandteile laut RSI"
+      ]
+    },
+    "note": "",
+    "validUntil": "2026-10-06T07:01:28.262Z",
+    "checkedAt": "2026-09-29T07:01:28.262Z",
+    "officialEndProvided": false,
+    "active": true
   }
 ]
