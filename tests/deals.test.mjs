@@ -94,6 +94,19 @@ const context = { document: { addEventListener() {} }, Intl, Date, URL, encodeUR
 vm.createContext(context); vm.runInContext(app, context);
 const now = Date.now();
 assert.equal(context.liveDeals(deals, now).length, 1);
+const orderedDeals = [
+  { ...deals[0], name: "Without Referral", price: 20, oldPrice: 30, referralEligible: false },
+  { ...deals[0], name: "Expensive Referral", price: 80, oldPrice: 100, referralEligible: true },
+  { ...deals[0], name: "Same Price Low Discount", price: 40, oldPrice: 50, referralEligible: true },
+  { ...deals[0], name: "Same Price High Discount", price: 40, oldPrice: 80, referralEligible: true },
+  { ...deals[0], name: "Cheapest Referral", price: 30, oldPrice: null, referralEligible: true },
+  { ...deals[0], name: "USD Referral", price: 10, oldPrice: 20, currency: "USD", referralEligible: true },
+  { ...deals[0], name: "Cheap Without Referral", price: 10, oldPrice: null, referralEligible: false }
+];
+assert.deepEqual(Array.from(context.liveDeals(orderedDeals,now),d=>d.name),[
+  "Cheapest Referral", "Same Price High Discount", "Same Price Low Discount", "Expensive Referral", "USD Referral", "Cheap Without Referral", "Without Referral"
+]);
+assert.equal(orderedDeals[0].name, "Without Referral");
 assert.equal(context.liveDeals([{ ...deals[0], gameAccessConfirmed: false }], now).length, 0);
 assert.equal(context.liveDeals([{ ...deals[0], imageUrl: "" }], now).length, 0);
 assert.equal(context.liveDeals([{ ...deals[0], type: "Sonstiges Angebot" }], now).length, 0);

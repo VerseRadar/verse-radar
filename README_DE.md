@@ -1,4 +1,4 @@
-# Verse Radar 0.12.7
+# Verse Radar 0.12.8
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -70,6 +70,8 @@ Jeder Durchlauf nutzt die bestehende Begrenzung von acht historischen Versionen 
 **0.12.6:** Mehrzeilige Hinweise zu Game Packages werden auf `/deals.html` mit den eingegebenen Zeilenumbrüchen und Leerzeilen dargestellt. Gespeicherte Angebote brauchen keine erneute Veröffentlichung. Das Update enthält weiterhin keine Dateien unter `public/data/`. Nach Deployment `/health` (0.12.6) und `/deals.html` prüfen.
 
 **0.12.7:** Ein neues Angebot beginnt mit leeren Feldern; auch „Erneut prüfen“ übernimmt keine alten Preise, Bestandteile oder Hinweise. Ein bekanntes Schiff schlägt nur das gespeicherte Bild vor. Ein bestehender Deal mit derselben Shop-URL wird erst bei ausdrücklich gewähltem „Erneut prüfen“ ersetzt; unterschiedliche URLs bleiben als mehrere Deals erhalten. Auf der Deals-Seite erscheint bei bestätigtem Vergleichspreis der berechnete Rabatt in Prozent. Das Update enthält keine Dateien unter `public/data/`. Nach Deployment `/health` (0.12.7), zwei Packages und die Bildsuche prüfen.
+
+**0.12.8:** Deals werden zuerst nach manuell geprüfter Referral-Eignung (Ja vor Nein), dann nach aufsteigendem Preis und bei Preisgleichheit nach höherem Rabatt sortiert. EUR und USD bleiben getrennt (EUR vor USD), da kein Wechselkurs verwendet wird. Diese Reihenfolge gilt auf der Deals-Seite und für die neuesten Deals auf der Startseite. Das Update enthält keine Dateien unter `public/data/`. Nach Deployment `/health` (0.12.8) und Reihenfolge auf `/deals.html` prüfen.
 Version 0.7.0 entfernt technische Archiv-Einträge und ersetzt wiederholte News-Platzhalter mit vorsichtigen deutschen Beschreibungen, die auf dem Titel beruhen. Wo eine bereits geprüfte Patch-Zusammenfassung zur exakt selben Comm-Link-ID vorliegt, nutzt die News-Karte deren erste zwei Sätze. Artikelinhalte werden ohne brauchbare Quellbeschreibung oder KI-Schlüssel nicht als vollständig zusammengefasst ausgegeben.
 Die Patch-Seite zeigt höchstens fünf aktuelle Einträge; die History zeigt alle gespeicherten Versionen. Der Worker ergänzt bei jedem geprüften manuellen Patch-Import zwei ältere Archivseiten und behält bestehende Versionen. Wie weit das Archiv zurückreichen kann, hängt von der verfügbaren Patch-Quelle ab. Die geprüfte Patch-Aufbereitung bleibt auf `summaryVersion=0.6.8`.
 Version 0.8.1 übernimmt neue Einträge in die Patch History nur, wenn ihr RSI-Quelllink tatsächlich auf Patch Notes zeigt. Ältere bereits gespeicherte Update-Ankündigungen bleiben erhalten, werden aber als solche bezeichnet und mit ihrem echten RSI-Link versehen. Eine allgemeine Titelübereinstimmung wie „Alpha 4.7.2“ genügt nicht mehr für eine Patch Note.

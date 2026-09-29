@@ -1,7 +1,7 @@
 const CONFIG = {
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.12.7"
+  siteVersion: "0.12.8"
 };
 let usingStaticData = false;
 
@@ -53,7 +53,15 @@ function isOfficialPackageImage(value){try{const u=new URL(value);return u.proto
 function liveDeals(items,now=Date.now()){
   if(!Array.isArray(items))return [];
   return items.filter(d=>d&&d.active===true&&d.type==="Game Package"&&d.gameAccessConfirmed===true&&d.name&&isOfficialSource(d.sourceUrl)&&/^\/(?:en\/)?pledge\/Packages\/[^/]+\/?$/i.test(new URL(d.sourceUrl).pathname)&&isOfficialPackageImage(d.imageUrl)&&validPrice(d.price)&&typeof d.referralEligible==="boolean"&&["USD","EUR"].includes(d.currency)&&typeof d.contents?.ship==="string"&&d.contents.ship.trim()&&Array.isArray(d.contents?.extras)&&d.contents.extras.length&&d.contents.extras.every(x=>typeof x==="string"&&x.trim())&&Number.isFinite(Date.parse(d.checkedAt))&&Date.parse(d.checkedAt)<=now&&Date.parse(d.checkedAt)>now-7*86400000&&Number.isFinite(Date.parse(d.validUntil))&&Date.parse(d.validUntil)>now&&(!d.oldPrice||validPrice(d.oldPrice)&&Number(d.oldPrice)>Number(d.price)))
-    .sort((a,b)=>Date.parse(a.validUntil)-Date.parse(b.validUntil));
+    .sort((a,b)=>{
+      if(a.referralEligible!==b.referralEligible)return a.referralEligible?-1:1;
+      // Preise verschiedener Währungen lassen sich ohne Umrechnung nicht vergleichen.
+      if(a.currency!==b.currency)return a.currency==="EUR"?-1:1;
+      if(Number(a.price)!==Number(b.price))return Number(a.price)-Number(b.price);
+      const discount=d=>d.oldPrice?(Number(d.oldPrice)-Number(d.price))/Number(d.oldPrice):0;
+      if(discount(a)!==discount(b))return discount(b)-discount(a);
+      return String(a.name).localeCompare(String(b.name),"de-DE");
+    });
 }
 function dealPrice(amount,currency){return new Intl.NumberFormat("de-DE",{style:"currency",currency}).format(Number(amount));}
 function dealDiscount(price,oldPrice){if(!validPrice(price)||!validPrice(oldPrice)||Number(oldPrice)<=Number(price))return "";const percent=(1-Number(price)/Number(oldPrice))*100;return percent<0.5?"<1 % Rabatt":`−${Math.round(percent)} % Rabatt`;}
