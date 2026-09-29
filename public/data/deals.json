@@ -68,5 +68,27 @@
     "checkedAt": "2026-09-29T07:01:28.262Z",
     "officialEndProvided": false,
     "active": true
+  },
+  {
+    "name": "Miner Starter Pack",
+    "type": "Game Package",
+    "sourceUrl": "https://robertsspaceindustries.com/en/pledge/Packages/Miner-Starter-Pack",
+    "imageUrl": "https://robertsspaceindustries.com/i/e1e7334c6431074b3b295fa47a486ce3895cf994/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjj8dgiqtN8h49B6RM8nTgNVucDRFxBWjG)/source.webp",
+    "price": 40,
+    "oldPrice": 55,
+    "currency": "EUR",
+    "referralEligible": false,
+    "gameAccessConfirmed": true,
+    "contents": {
+      "ship": "Golem",
+      "extras": [
+        "dasd"
+      ]
+    },
+    "note": "",
+    "validUntil": "2026-10-06T07:02:51.497Z",
+    "checkedAt": "2026-09-29T07:02:51.497Z",
+    "officialEndProvided": false,
+    "active": true
   }
 ]
