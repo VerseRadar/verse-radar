@@ -26,7 +26,7 @@ const req = (path, payload, key = "private", origin = "https://example.com") => 
 const official = "https://robertsspaceindustries.com/en/comm-link/transmission/21300-Test";
 const start = "2030-06-01T12:00:00.000Z", end = "2030-06-03T12:00:00.000Z";
 
-assert.equal((await (await worker.fetch(new Request("https://example.com/health"), env)).json()).version, "0.12.6");
+assert.equal((await (await worker.fetch(new Request("https://example.com/health"), env)).json()).version, "0.12.7");
 assert.equal((await worker.fetch(new Request("https://example.com/manage/events/state"), env)).status, 401);
 const initial = await (await worker.fetch(req("/manage/events/state"), env)).json();
 assert.deepEqual(initial.events, []);
