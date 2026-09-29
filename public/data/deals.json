@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "name": "Citizen Starter Pack",
+    "type": "Game Package",
+    "sourceUrl": "https://robertsspaceindustries.com/en/pledge/Packages/Citizen-Starter-Pack",
+    "imageUrl": "https://robertsspaceindustries.com/i/eb7d403b9304ca99b38e36f4bd3ba501b8319168/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResj6972NTEHJ13waHWWiwa59DCCcZxnZ4B8)/source.webp",
+    "price": 48.59,
+    "oldPrice": 62.12,
+    "currency": "EUR",
+    "referralEligible": true,
+    "gameAccessConfirmed": true,
+    "contents": {
+      "ship": "Aurora Mk II",
+      "extras": [
+        "6 Monate Versicherung",
+        "Self-Land Hangar",
+        "10.000 UEC"
+      ]
+    },
+    "note": "",
+    "validUntil": "2026-10-29T07:52:00.000Z",
+    "checkedAt": "2026-09-29T06:53:01.807Z",
+    "officialEndProvided": true,
+    "active": true
+  }
+]
