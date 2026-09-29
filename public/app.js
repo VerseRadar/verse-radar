@@ -1,7 +1,7 @@
 const CONFIG = {
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.12.8"
+  siteVersion: "0.13.0"
 };
 let usingStaticData = false;
 
@@ -65,8 +65,8 @@ function liveDeals(items,now=Date.now()){
 }
 function dealPrice(amount,currency){return new Intl.NumberFormat("de-DE",{style:"currency",currency}).format(Number(amount));}
 function dealDiscount(price,oldPrice){if(!validPrice(price)||!validPrice(oldPrice)||Number(oldPrice)<=Number(price))return "";const percent=(1-Number(price)/Number(oldPrice))*100;return percent<0.5?"<1 % Rabatt":`−${Math.round(percent)} % Rabatt`;}
-function renderDeals(items){return items.map(d=>`<article class="article"><span class="tag">GAME PACKAGE</span><h2>${esc(d.name)}</h2><figure class="package-image"><img src="${esc(d.imageUrl)}" alt="Bild zu ${esc(d.name)}" loading="lazy" referrerpolicy="no-referrer"><figcaption>Abbildung des Game Packages oder Schiffs von RSI</figcaption></figure><p>${d.oldPrice?`<s>${dealPrice(d.oldPrice,d.currency)}</s> `:""}<strong>${dealPrice(d.price,d.currency)}</strong>${d.oldPrice?` <span class="deal-discount">${dealDiscount(d.price,d.oldPrice)}</span>`:""}</p><p class="ai-note">${d.currency==="EUR"?"Preis inklusive deutscher MwSt. zum Zeitpunkt der Prüfung. In anderen Ländern kann der Preis abweichen.":"Preis laut RSI zum Zeitpunkt der Prüfung. Steuern können je nach Land abweichen."}</p><h3>Im Package enthalten</h3><ul class="package-contents"><li>Schiff: ${esc(d.contents.ship)}</li>${d.contents.extras.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><p class="referral-check">Qualifiziert sich für Referral: <strong>${d.referralEligible?"Ja":"Nein"}</strong></p><p class="ai-note">Manuell eingetragene Einschätzung. Ob ein Kauf als Referral zählt, entscheidet RSI nach den aktuellen Bedingungen.</p>${d.note?`<p class="deal-note">${esc(d.note)}</p>`:""}<p class="ai-note">Zuletzt geprüft: ${dateDE(d.checkedAt)} · ${d.officialEndProvided?"Offizielles Ende laut Eintrag":"Anzeige spätestens bis"}: ${dateDE(d.validUntil)}. Angaben ohne Gewähr; Preis, Lieferumfang und Bedingungen bitte auf der RSI-Shopseite prüfen.</p><p>${sourceLink(d)}</p></article>`).join("")||'<article class="article"><p>Derzeit keine aktuell geprüften Game Packages eingetragen.</p></article>';}
-function confirmedTime(value){return typeof value==="string"&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)&&Number.isFinite(Date.parse(value));}
+function renderDeals(items){return items.map(d=>`<article class="article"><span class="tag">GAME PACKAGE</span><h2>${esc(d.name)}</h2><figure class="package-image"><img src="${esc(d.imageUrl)}" alt="Bild zu ${esc(d.name)}" loading="lazy" referrerpolicy="no-referrer"><figcaption>Abbildung des Game Packages oder Schiffs von RSI</figcaption></figure><p>${d.oldPrice?`<s>${dealPrice(d.oldPrice,d.currency)}</s> `:""}<strong>${dealPrice(d.price,d.currency)}</strong>${d.oldPrice?` <span class="deal-discount">${dealDiscount(d.price,d.oldPrice)}</span>`:""}</p><p class="ai-note">${d.currency==="EUR"?"Preis inklusive deutscher MwSt. zum Zeitpunkt der Prüfung. In anderen Ländern kann der Preis abweichen.":"Preis laut RSI zum Zeitpunkt der Prüfung. Steuern können je nach Land abweichen."}</p><h3>Im Package enthalten</h3><ul class="package-contents"><li>Schiff: ${esc(d.contents.ship)}</li>${d.contents.extras.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><p class="referral-check${d.referralEligible?"":" referral-no"}">Qualifiziert sich für Referral: <strong>${d.referralEligible?"Ja":"Nein"}</strong></p><p class="ai-note">Manuell eingetragene Einschätzung. Ob ein Kauf als Referral zählt, entscheidet RSI nach den aktuellen Bedingungen.</p>${d.note?`<p class="deal-note">${esc(d.note)}</p>`:""}<p class="ai-note">Zuletzt geprüft: ${dateDE(d.checkedAt)} · ${d.officialEndProvided?"Offizielles Ende laut Eintrag":"Anzeige spätestens bis"}: ${dateDE(d.validUntil)}. Angaben ohne Gewähr; Preis, Lieferumfang und Bedingungen bitte auf der RSI-Shopseite prüfen.</p><p>${sourceLink(d)}</p></article>`).join("")||'<article class="article"><p>Derzeit keine aktuell geprüften Game Packages eingetragen.</p></article>';}
+function confirmedTime(value){return typeof value==="string"&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/.test(value)&&Number.isFinite(Date.parse(value));}
 function activeEvents(items,now=Date.now()){
   if(!Array.isArray(items))return [];
   return items.filter(e=>e&&e.name&&confirmedTime(e.start)&&confirmedTime(e.end)&&Date.parse(e.end)>Date.parse(e.start)&&Date.parse(e.end)>now&&isOfficialSource(e.sourceUrl))
@@ -86,13 +86,34 @@ function timeDE(v){if(!v)return ""; const d=new Date(v); return Number.isNaN(d.g
 function relative(v){const d=new Date(v), diff=Date.now()-d.getTime(); if(Number.isNaN(d.getTime()))return ""; const h=Math.round(diff/36e5); if(h<1)return "gerade eben"; if(h<24)return `vor ${h} Std.`; const days=Math.round(h/24); return days===1?"gestern":`vor ${days} Tagen`;}
 function sourceLink(n){return n.sourceUrl?`<a class="source" href="${esc(n.sourceUrl)}" target="_blank" rel="noopener noreferrer">${/https?:\/\/(?:www\.)?starcitizen\.tools\//i.test(n.sourceUrl)?"Community-Archiv":"Originalquelle"} ↗</a>`:"";}
 function renderNews(items,limit=3){
-  return items.slice(0,limit).map((n,i)=>`<article class="news-card" data-category="${esc(n.category||'NEWS')}"><div class="news-art art-${i%4}"><span class="art-signal">${esc((n.category||"NEWS").replace(" / "," · "))}</span></div><div class="news-body"><div><span class="tag">${esc(n.category||"NEWS")}</span><span class="date" title="${esc(n.date||"")}">${relative(n.date)||dateDE(n.date)}</span></div><h3>${esc(n.title)}</h3><p>${esc(n.summary)}</p><p class="ai-note">${n.ai === true ? "KI-gestützte Zusammenfassung" : n.summaryBasis === "Titel" ? "Kurzbeschreibung anhand des Titels" : n.summaryBasis === "Patch Notes" ? "Aus den Patch Notes" : n.summaryBasis === "Quelltext" ? "Aus dem Artikeltext" : "Kurzbeschreibung"} · ${sourceLink(n)}</p></div></article>`).join("");
+  return items.slice(0,limit).map((n,i)=>`<details class="news-card" data-category="${esc(n.category||'NEWS')}"><summary class="news-teaser"><span class="news-art art-${i%4}"><span class="art-signal">${esc((n.category||"NEWS").replace(" / "," · "))}</span></span><span class="news-body"><span class="news-heading"><span class="tag">${esc(n.category||"NEWS")}</span><span class="date" title="${esc(n.date||"")}">${relative(n.date)||dateDE(n.date)}</span></span><span class="news-title">${esc(n.title)}</span><span class="news-toggle news-open">Kurzüberblick anzeigen ↓</span><span class="news-toggle news-close">Schließen ↑</span></span></summary><div class="news-expanded"><p>${esc(n.summary||"Für diesen Artikel liegt noch keine deutsche Kurzbeschreibung vor.")}</p><p class="ai-note">${n.ai === true ? "KI-gestützte Zusammenfassung" : n.summaryBasis === "Titel" ? "Einordnung nur anhand des Titels; keine geprüften Artikeldetails" : n.summaryBasis === "Patch Notes" ? "Aus den Patch Notes" : n.summaryBasis === "Quelltext" ? "Aus dem Artikeltext" : "Kurze Einordnung"} · ${sourceLink(n)}</p></div></details>`).join("");
+}
+function alignRadar(root){
+  const panel=root.closest(".radar-panel"),sweep=panel?.querySelector(".sweep");
+  if(!panel||!sweep)return;
+  const contacts=[...root.querySelectorAll(".radar-contact")];
+  for(const contact of contacts)contact.style.animation="none";
+  sweep.style.animation="none";
+  void panel.offsetWidth;
+  const bounds=panel.getBoundingClientRect(),centerX=bounds.left+bounds.width/2,centerY=bounds.top+bounds.height/2;
+  for(const contact of contacts){
+    const rect=contact.getBoundingClientRect();
+    const angle=(Math.atan2(rect.top+rect.height/2-centerY,rect.left+rect.width/2-centerX)*180/Math.PI+360)%360;
+    contact.style.animationDelay=`${(angle/360*6).toFixed(3)}s`;
+    contact.style.removeProperty("animation");
+  }
+  sweep.style.removeProperty("animation");
 }
 function radarContacts(news,events){
   const root=document.querySelector("#radar-contacts"); if(!root)return;
   const contacts=[...news.slice(0,6).map((n,i)=>({kind:"N",label:n.category||"NEWS",x:[23,67,42,78,31,55][i],y:[28,22,68,56,82,40][i]})),...events.slice(0,4).map((e,i)=>({kind:"E",label:"EVENT",x:[18,73,56,86][i],y:[56,72,36,18][i]}))];
   root.innerHTML=contacts.map((c,i)=>`<button class="radar-contact rc${i}" style="left:${c.x}%;top:${c.y}%" title="${esc(c.label)}"><span>${c.kind}</span></button>`).join("");
-  const count=document.querySelector("#radar-count"); if(count)count.textContent=`${contacts.length} Kontakte`;
+  // Der Zeiger beginnt rechts und dreht sich in sechs Sekunden im Uhrzeigersinn.
+  alignRadar(root);
+  if(typeof window!=="undefined"){
+    let timer;
+    window.addEventListener("resize",()=>{clearTimeout(timer);timer=setTimeout(()=>alignRadar(root),150)});
+  }
 }
 function renderStats(news,patches,deals,events){
   const map={"stat-news":news.length,"stat-patches":patches.length,"stat-deals":liveDeals(deals).length,"stat-events":events.length};
@@ -109,8 +130,9 @@ function patchIsAnnouncement(p){return p.sourceType==="Release Info" || p.source
 function renderPatchHistory(items){
   return items.map((p,i)=>`<article class="article" id="${encodeURIComponent(p.version)}"><span class="tag">${patchIsAnnouncement(p)?"UPDATE-MELDUNG":"PATCH"}</span><span class="date">${dateDE(p.date)}</span><h2>${esc(p.version)}</h2><p>${esc(p.summary||"")}</p>${p.previous?`<p>Vorgängerversion: ${esc(p.previous)}</p>`:""}${i<5?`<p><a class="source" href="/patches.html#${encodeURIComponent(p.version)}">Zusammenfassung und Änderungen ↗</a> · ${sourceLink(p)}</p>`:`<details><summary>Zusammenfassung und Änderungen anzeigen</summary><h3>Wichtige Änderungen in ${esc(p.version)}</h3>${renderPatchChanges(p.changes)}<h3>Deutsche Zusammenfassung ${patchIsAnnouncement(p)?"der Update-Meldung":"der Patch Notes"}</h3><p>${esc(p.fullSummary||"")}</p><p class="ai-note">${p.ai === true ? "KI-gestützte" : "Regelbasierte"} Zusammenfassung · Kein offizieller RSI-Text · ${sourceLink(p)}</p></details>`}</article>`).join("");
 }
-function renderConfirmedEvents(items){
-  return items.map(e=>`<article class="article"><span class="tag">BESTÄTIGTER TERMIN</span><h3>${esc(e.name)}</h3><p>${dateDE(e.start)} – ${dateDE(e.end)}</p>${e.summary?`<p>${esc(e.summary)}</p>`:""}<p>${sourceLink(e)}</p></article>`).join("")||'<p class="page-intro">Derzeit keine bestätigten laufenden oder kommenden Termine eingetragen.</p>';
+function eventDateTime(value){return new Intl.DateTimeFormat("de-DE",{timeZone:"Europe/Berlin",dateStyle:"medium",timeStyle:"short"}).format(new Date(value))+" Uhr";}
+function renderConfirmedEvents(items,now=Date.now()){
+  return items.map(e=>`<article class="article"><span class="tag">${Date.parse(e.start)<=now?"JETZT AKTIV":"BESTÄTIGT · DEMNÄCHST"}</span><h3>${esc(e.name)}</h3><p>${eventDateTime(e.start)} – ${eventDateTime(e.end)}</p>${e.summary?`<p>${esc(e.summary)}</p>`:""}<p>${sourceLink(e)}</p></article>`).join("")||'<p class="page-intro">Derzeit keine bestätigten laufenden oder kommenden Termine eingetragen.</p>';
 }
 function renderEventNews(items){
   return items.slice(0,8).map(n=>`<article class="article"><span class="tag">${esc(n.category)} · MELDUNG VOM ${dateDE(n.date)}</span><h3>${esc(n.title)}</h3><p>${esc(n.summary||"")}</p><p>${sourceLink(n)}</p></article>`).join("")||'<p class="page-intro">Keine aktuellen Event-Meldungen vorhanden.</p>';
@@ -141,12 +163,12 @@ async function home(){
     document.querySelector("#top-news").innerHTML=renderNews(news,3);
     document.querySelector("#latest-patches").innerHTML=patches.slice(0,5).map(p=>`<a class="list-row" href="/patches.html#${encodeURIComponent(p.version)}"><span><b>${esc(p.version)}</b><small>${esc(p.summary||"").slice(0,55)}${(p.summary||"").length>55?"…":""}</small></span><span>${dateDE(p.date)}</span></a>`).join("");
     document.querySelector("#latest-deals").innerHTML=liveDeals(deals).slice(0,4).map(d=>`<a class="list-row deal-row" href="/deals.html"><span>${esc(d.name)}</span><strong>${dealPrice(d.price,d.currency)}</strong></a>`).join("") || '<p class="page-intro">Aktuell keine geprüften Angebote.</p>';
-    const liveEvents=activeEvents(events); document.querySelector("#events").innerHTML=liveEvents.slice(0,5).map(e=>`<a class="list-row" href="${esc(e.sourceUrl)}" target="_blank" rel="noopener noreferrer"><span><b>${esc(e.name)}</b><small>${esc(e.type||"Event")}</small></span><span>${dateDE(e.start)}</span></a>`).join("") || '<p class="page-intro">Keine bestätigten kommenden Events eingetragen.</p>';
+    const liveEvents=activeEvents(events); document.querySelector("#events").innerHTML=liveEvents.slice(0,5).map(e=>`<a class="list-row" href="${esc(e.sourceUrl)}" target="_blank" rel="noopener noreferrer"><span><b>${esc(e.name)}</b><small>${Date.parse(e.start)<=Date.now()?"JETZT AKTIV":"BESTÄTIGT · DEMNÄCHST"}</small></span><span>${Date.parse(e.start)<=Date.now()?"bis "+dateDE(e.end):"ab "+dateDE(e.start)}</span></a>`).join("") || '<p class="page-intro">Keine bestätigten laufenden oder kommenden Events eingetragen.</p>';
     const ff=document.querySelector("#free-fly");
     const fly=freeFlyState(freefly);
     if(fly.status==="active"){ff.classList.remove("hidden");document.querySelector("#freefly-title").textContent=fly.title;document.querySelector("#freefly-dates").textContent=fly.dateText;document.querySelector("#freefly-text").textContent=fly.summary;document.querySelector("#freefly-link").href="/free-fly.html";}
     radarContacts(news,liveEvents); renderStats(news,patches,deals,liveEvents);
-    if(status){if(usingStaticData){status.classList.remove("online");status.innerHTML=`<span></span> Gespeicherter Datenstand: ${dateDE(meta.updatedAt)} · ${timeDE(meta.updatedAt)} Uhr`;}else{status.classList.add("online");status.innerHTML=`<span></span> Datenstand: ${dateDE(meta.updatedAt)} · ${timeDE(meta.updatedAt)} Uhr <b>● ONLINE</b>`;}}
+    if(status){if(usingStaticData){status.classList.remove("online");status.innerHTML=`<span></span> Letzter gespeicherter News-/Patch-Import: ${dateDE(meta.updatedAt)} · ${timeDE(meta.updatedAt)} Uhr`;}else{status.classList.add("online");status.innerHTML=`<span></span> Letzter News-/Patch-Import: ${dateDE(meta.updatedAt)} · ${timeDE(meta.updatedAt)} Uhr <b>● DATENABFRAGE ONLINE</b>`;}}
     const badge=document.querySelector(".demo-badge"); if(badge)badge.textContent=`VERSION ${CONFIG.siteVersion} · LIVE PIPELINE`;
   }catch(e){console.error(e);if(status)status.innerHTML='<span></span> Lokaler Datenstand · Automatische Aktualisierung noch nicht verbunden';}
 }
