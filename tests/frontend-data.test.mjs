@@ -38,8 +38,8 @@ assert.match(renderedNews, /Einordnung nur anhand des Titels/);
 assert.match(renderedNews, /Kurzüberblick anzeigen/);
 assert.ok(!ctx.renderNews([{...news[0],title:'<img src=x onerror=alert(1)>',summary:'<script>alert(1)</script>'}],1).includes('<script>'));
 const contactNodes=[
-  {style:{removeProperty(name){delete this[name]}},getBoundingClientRect(){return {left:293.5,top:193.5,width:13,height:13}}},
-  {style:{removeProperty(name){delete this[name]}},getBoundingClientRect(){return {left:193.5,top:293.5,width:13,height:13}}}
+  {style:{setProperty(name,value){this[name]=value},removeProperty(name){delete this[name]}},getBoundingClientRect(){return {left:293.5,top:193.5,width:13,height:13}}},
+  {style:{setProperty(name,value){this[name]=value},removeProperty(name){delete this[name]}},getBoundingClientRect(){return {left:193.5,top:293.5,width:13,height:13}}}
 ];
 const sweep={style:{removeProperty(name){delete this[name]}}};
 const panel={offsetWidth:400,querySelector:()=>sweep,getBoundingClientRect:()=>({left:0,top:0,width:400,height:400})};
@@ -47,8 +47,9 @@ const nodes = { "#radar-contacts": { innerHTML: "",closest:()=>panel,querySelect
 ctx.document.querySelector = selector => nodes[selector] || null;
 ctx.radarContacts(news, Array.from({ length: 4 }, () => ({ name: "Event" })));
 assert.equal((nodes["#radar-contacts"].innerHTML.match(/class="radar-contact/g)||[]).length,10);
-assert.equal(contactNodes[0].style.animationDelay,"0.000s");
-assert.equal(contactNodes[1].style.animationDelay,"1.500s");
+assert.equal(contactNodes[0].style["--echo-delay"],"0.000s");
+assert.equal(contactNodes[1].style["--echo-delay"],"1.500s");
+assert.match(await read("../public/styles.css"),/\.radar-contact\{[^}]*animation-delay:var\(--echo-delay,0s\)/);
 assert.ok(!(await read('../public/index.html')).includes('id="radar-count"'));
 assert.equal(nodes["#radar-contacts"].innerHTML.includes("undefined%"), false);
 const now = Date.parse("2026-09-28T12:00:00Z");

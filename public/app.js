@@ -1,7 +1,7 @@
 const CONFIG = {
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.13.0"
+  siteVersion: "0.13.1"
 };
 let usingStaticData = false;
 
@@ -99,7 +99,7 @@ function alignRadar(root){
   for(const contact of contacts){
     const rect=contact.getBoundingClientRect();
     const angle=(Math.atan2(rect.top+rect.height/2-centerY,rect.left+rect.width/2-centerX)*180/Math.PI+360)%360;
-    contact.style.animationDelay=`${(angle/360*6).toFixed(3)}s`;
+    contact.style.setProperty("--echo-delay",`${(angle/360*6).toFixed(3)}s`);
     contact.style.removeProperty("animation");
   }
   sweep.style.removeProperty("animation");

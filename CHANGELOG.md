@@ -1,3 +1,8 @@
+# 0.13.1
+
+- Radar: Leuchtpunkte folgen dem Zeiger; Animationsverzögerungen bleiben beim Neustart erhalten.
+- Version auf 0.13.1 angehoben.
+
 # Changelog – Verse Radar
 
 ## 0.12.6 – Mehrzeilige Hinweise
