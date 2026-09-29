@@ -1,8 +1,9 @@
 {
-  "active": false,
-  "title": "Kein Free Fly aktiv",
-  "dateText": "",
-  "summary": "Derzeit ist kein bestätigter Free Fly eingetragen. Termine und Teilnahmebedingungen findest du auf der offiziellen RSI-Seite.",
+  "active": true,
+  "title": "FREE FLY AKTIV",
+  "start": "2026-09-28T07:31:00.000Z",
+  "end": "2026-10-01T07:31:00.000Z",
   "sourceUrl": "https://robertsspaceindustries.com/en/flyfree",
+  "summary": "asdasd",
   "pageUrl": "/free-fly.html"
 }
