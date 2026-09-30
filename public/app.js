@@ -1,7 +1,7 @@
 const CONFIG = {
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.13.2"
+  siteVersion: "0.13.3"
 };
 let usingStaticData = false;
 
@@ -48,6 +48,8 @@ function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt
 function dateDE(v){if(!v)return "—"; const d=new Date(v); return Number.isNaN(d.getTime())?esc(v):new Intl.DateTimeFormat("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"}).format(d);}
 function isFuture(v){const d=new Date(v);return !Number.isNaN(d.getTime())&&d.getTime()>Date.now();}
 function isOfficialSource(value){try{const u=new URL(value);return u.protocol==="https:"&&["robertsspaceindustries.com","www.robertsspaceindustries.com"].includes(u.hostname);}catch{return false;}}
+function isCommunitySource(value){try{const u=new URL(value);return u.protocol==="https:"&&!u.username&&!u.password&&!u.port&&/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(u.hostname);}catch{return false;}}
+function isCommunityEvent(e){return e?.type==="Community Event"&&typeof e.organizer==="string"&&e.organizer.trim()&&isCommunitySource(e.sourceUrl)&&(!e.imageUrl||/^\/event-image\/[a-f0-9]{64}\.(?:png|jpg|webp)$/.test(e.imageUrl));}
 function validPrice(value){return (typeof value==="number"||typeof value==="string")&&/^\d+(?:\.\d{1,2})?$/.test(String(value))&&Number(value)>0&&Number(value)<100000;}
 function isOfficialPackageImage(value){try{const u=new URL(value);return u.protocol==="https:"&&(u.hostname==="robertsspaceindustries.com"||u.hostname.endsWith(".robertsspaceindustries.com"))&&!u.username&&!u.password&&!u.port&&/\.(?:png|jpe?g|webp|avif)$/i.test(u.pathname);}catch{return false;}}
 function liveDeals(items,now=Date.now()){
@@ -69,7 +71,7 @@ function renderDeals(items){return items.map(d=>`<article class="article"><span 
 function confirmedTime(value){return typeof value==="string"&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/.test(value)&&Number.isFinite(Date.parse(value));}
 function activeEvents(items,now=Date.now()){
   if(!Array.isArray(items))return [];
-  return items.filter(e=>e&&e.name&&confirmedTime(e.start)&&confirmedTime(e.end)&&Date.parse(e.end)>Date.parse(e.start)&&Date.parse(e.end)>now&&isOfficialSource(e.sourceUrl))
+  return items.filter(e=>e&&e.name&&confirmedTime(e.start)&&confirmedTime(e.end)&&Date.parse(e.end)>Date.parse(e.start)&&Date.parse(e.end)>now&&(isCommunityEvent(e)||e.type!=="Community Event"&&isOfficialSource(e.sourceUrl)))
     .sort((a,b)=>Date.parse(a.start)-Date.parse(b.start));
 }
 function freeFlyState(data,now=Date.now()){
@@ -145,7 +147,7 @@ function renderPatchHistory(items){
 }
 function eventDateTime(value){return new Intl.DateTimeFormat("de-DE",{timeZone:"Europe/Berlin",dateStyle:"medium",timeStyle:"short"}).format(new Date(value))+" Uhr";}
 function renderConfirmedEvents(items,now=Date.now()){
-  return items.map(e=>`<article class="article"><span class="tag">${Date.parse(e.start)<=now?"JETZT AKTIV":"BESTÄTIGT · DEMNÄCHST"}</span><h3>${esc(e.name)}</h3><p>${eventDateTime(e.start)} – ${eventDateTime(e.end)}</p>${e.summary?`<p>${esc(e.summary)}</p>`:""}<p>${sourceLink(e)}</p></article>`).join("")||'<p class="page-intro">Derzeit keine bestätigten laufenden oder kommenden Termine eingetragen.</p>';
+  return items.map(e=>isCommunityEvent(e)?`<article class="article community-event"><span class="tag">COMMUNITY EVENT · ${Date.parse(e.start)<=now?"JETZT AKTIV":"DEMNÄCHST"}</span><h3>${esc(e.name)}</h3>${e.imageUrl?`<img class="event-image" src="${esc(e.imageUrl)}" alt="Bild zum Community Event ${esc(e.name)}" loading="lazy">`:""}<p>${eventDateTime(e.start)} – ${eventDateTime(e.end)} · Veranstalter: ${esc(e.organizer)}</p><p>${esc(e.summary||"")}</p>${e.prize?`<p><strong>Preise laut Veranstalter:</strong> ${esc(e.prize)}</p>`:""}<p class="ai-note">Community Event, keine offizielle RSI-Veranstaltung. Preise, Teilnahmebedingungen und Angaben beim Veranstalter prüfen.</p><p><a class="source" href="${esc(e.sourceUrl)}" target="_blank" rel="noopener noreferrer">Veranstalterseite und Bedingungen ↗</a></p></article>`:`<article class="article"><span class="tag">${Date.parse(e.start)<=now?"JETZT AKTIV":"BESTÄTIGT · DEMNÄCHST"}</span><h3>${esc(e.name)}</h3><p>${eventDateTime(e.start)} – ${eventDateTime(e.end)}</p>${e.summary?`<p>${esc(e.summary)}</p>`:""}<p>${sourceLink(e)}</p></article>`).join("")||'<p class="page-intro">Derzeit keine laufenden oder kommenden Termine eingetragen.</p>';
 }
 function renderEventNews(items){
   return items.slice(0,8).map(n=>`<article class="article"><span class="tag">${esc(n.category)} · MELDUNG VOM ${dateDE(n.date)}</span><h3>${esc(n.title)}</h3><p>${esc(n.summary||"")}</p><p>${sourceLink(n)}</p></article>`).join("")||'<p class="page-intro">Keine aktuellen Event-Meldungen vorhanden.</p>';
@@ -176,7 +178,7 @@ async function home(){
     document.querySelector("#top-news").innerHTML=renderNews(news,3);
     document.querySelector("#latest-patches").innerHTML=patches.slice(0,5).map(p=>`<a class="list-row" href="/patches.html#${encodeURIComponent(p.version)}"><span><b>${esc(p.version)}</b><small>${esc(p.summary||"").slice(0,55)}${(p.summary||"").length>55?"…":""}</small></span><span>${dateDE(p.date)}</span></a>`).join("");
     document.querySelector("#latest-deals").innerHTML=liveDeals(deals).slice(0,4).map(d=>`<a class="list-row deal-row" href="/deals.html"><span>${esc(d.name)}</span><strong>${dealPrice(d.price,d.currency)}</strong></a>`).join("") || '<p class="page-intro">Aktuell keine geprüften Angebote.</p>';
-    const liveEvents=activeEvents(events); document.querySelector("#events").innerHTML=liveEvents.slice(0,5).map(e=>`<a class="list-row" href="${esc(e.sourceUrl)}" target="_blank" rel="noopener noreferrer"><span><b>${esc(e.name)}</b><small>${Date.parse(e.start)<=Date.now()?"JETZT AKTIV":"BESTÄTIGT · DEMNÄCHST"}</small></span><span>${Date.parse(e.start)<=Date.now()?"bis "+dateDE(e.end):"ab "+dateDE(e.start)}</span></a>`).join("") || '<p class="page-intro">Keine bestätigten laufenden oder kommenden Events eingetragen.</p>';
+    const liveEvents=activeEvents(events); document.querySelector("#events").innerHTML=liveEvents.slice(0,5).map(e=>`<a class="list-row" href="/free-fly.html"><span><b>${esc(e.name)}</b><small>${isCommunityEvent(e)?"COMMUNITY · ":""}${Date.parse(e.start)<=Date.now()?"JETZT AKTIV":"DEMNÄCHST"}</small></span><span>${Date.parse(e.start)<=Date.now()?"bis "+dateDE(e.end):"ab "+dateDE(e.start)}</span></a>`).join("") || '<p class="page-intro">Keine laufenden oder kommenden Events eingetragen.</p>';
     const ff=document.querySelector("#free-fly");
     const fly=freeFlyState(freefly);
     if(fly.status==="active"){ff.classList.remove("hidden");document.querySelector("#freefly-title").textContent=fly.title;document.querySelector("#freefly-dates").textContent=fly.dateText;document.querySelector("#freefly-text").textContent=fly.summary;document.querySelector("#freefly-link").href="/free-fly.html";}

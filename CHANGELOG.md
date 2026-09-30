@@ -1,3 +1,12 @@
+# 0.13.3
+
+- Admin Login über `RUN_SECRET`; signierte Sitzung und geschütztes Verwaltungsmenü.
+- Events und Deals verwalten ohne erneute Secret-Eingabe auf jeder Seite.
+- Community Events mit Veranstalter, Teilnahme-Link, Preisinfo und optionalem eigenem Bild-Upload.
+- Community Events auf Start- und Event-Seite sichtbar und klar als nicht offiziell markiert.
+- Statische Admin-Vorlagen aus `public/` entfernt; Worker-first-Routen für geschützte Seiten.
+- Version auf 0.13.3 angehoben.
+
 # 0.13.2
 
 - Radarpunkte orientieren sich an der sichtbaren Nadel und leuchten erst nach dem Überstreichen.

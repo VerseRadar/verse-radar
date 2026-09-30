@@ -1,4 +1,4 @@
-# Verse Radar 0.13.2
+# Verse Radar 0.13.3
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -73,6 +73,8 @@ Jeder Durchlauf nutzt die bestehende Begrenzung von acht historischen Versionen 
 
 **0.12.8:** Deals werden zuerst nach manuell geprüfter Referral-Eignung (Ja vor Nein), dann nach aufsteigendem Preis und bei Preisgleichheit nach höherem Rabatt sortiert. EUR und USD bleiben getrennt (EUR vor USD), da kein Wechselkurs verwendet wird. Diese Reihenfolge gilt auf der Deals-Seite und für die neuesten Deals auf der Startseite. Das Update enthält keine Dateien unter `public/data/`. Nach Deployment `/health` (0.12.8) und Reihenfolge auf `/deals.html` prüfen.
 
+**0.13.3:** Öffentlicher Link „Admin Login“ führt nach `/admin`. Nach einmaliger Eingabe des vorhandenen `RUN_SECRET` gibt es eine acht Stunden gültige, signierte Sitzung mit HttpOnly-/Secure-/SameSite-Cookie. `/manage` bietet Links zu Events und Deals; beide Seiten und ihre API-Endpunkte prüfen die Sitzung serverseitig. Die alten Dateien `public/event-admin.html` und `public/deal-admin.html` werden nicht mehr als statische Seiten ausgeliefert; ihre Vorlagen liegen nun unter `worker/pages/`. Unter „Eigenes Community Event“ können Name, Veranstalter, HTTPS-Link mit Teilnahmebedingungen, Zeitraum, Beschreibung, optionale Preisinfo und ein eigenes PNG-/JPG-/WebP-Bild (maximal 512 KB) eingetragen werden. Das Bild wird per Worker im GitHub-Repository unter `public/event-images/` gespeichert und über `/event-image/…` ausgeliefert. Community Events erscheinen getrennt von offiziellen RSI-Terminen und nach Ende nicht mehr. **Update:** Dateien aus dem ZIP einspielen, `wrangler.toml` inklusive `run_worker_first` veröffentlichen; vorhandenes `RUN_SECRET` beibehalten. Alte statische Admin-Dateien im Repository nach Möglichkeit entfernen. `/health` (0.13.3), `/admin`, die geschützten Seiten und die öffentliche Event-Anzeige prüfen. `public/data/*` und gespeicherte Bilder aus GitHub nicht überschreiben. Ein Logout löscht das Browser-Cookie; eine bereits kopierte Sitzung wird erst nach Ablauf oder Wechsel von `RUN_SECRET` ungültig. Der bisherige `/backfill`-Dialog und ältere `/run?key=…`-Links verwenden das Secret weiterhin separat.
+
 **0.13.2:** Die Punkte im großen Radar reagieren jetzt auf die tatsächliche Stellung der Nadel. Sie leuchten erst auf, nachdem die Nadel sie erreicht hat, und verblassen kurz darauf. Überholte Radar-Stile und ungenutzte Punkt-Klassen wurden entfernt. Die übrigen Dateien bleiben erhalten, weil sie für Website, Worker, lokale Vorschau, Tests oder Dokumentation genutzt werden. Live-Daten unter `public/data/` sind weiterhin nicht im Update-ZIP. Nach Deployment `/health` (0.13.2) und mehrere Radarumdrehungen prüfen.
 
 **0.13.1:** Radarkontakte speichern ihre individuelle Verzögerung jetzt unabhängig vom Animations-Neustart. Jeder Punkt leuchtet auf, wenn der Zeiger seine Position erreicht. Das Update enthält keine Live-Daten unter `public/data/`. Nach dem Upload `/health` (0.13.1) und eine volle sechssekündige Radarumdrehung auf der Startseite prüfen.
@@ -99,7 +101,7 @@ Version 0.9.6 ergänzt Alpha 3.17.2a als eigenständigen Hotfix: Er erscheint im
 Der lokale Datenstand enthält 13 redaktionelle News und sechs ältere Patches als Rückfall bei API-Ausfall. Bei dieser Update-ZIP bleiben die vorhandenen GitHub-Patchdaten maßgeblich.
 
 ## Datenstruktur
-Die Website-Daten liegen ausschließlich unter `public/data/`.
+Die JSON-Daten liegen unter `public/data/`. Hochgeladene Community-Bilder liegen unter `public/event-images/` und werden vom Worker ausgeliefert.
 - `public/data/news.json`
 - `public/data/patches.json` (vorhandenen GitHub-Stand behalten; nicht in der Update-ZIP)
 - `public/data/patch-archive-state.json` (vom Worker gespeicherter Fortschritt; nicht in der ZIP enthalten)

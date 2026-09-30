@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Terminpflege – Verse Radar</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#041016;color:#e2eaea;font:15px/1.5 system-ui,Arial,sans-serif}a{color:#70ceda;text-decoration:none}.site-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 25px;border-bottom:1px solid #24404b}.site-header .brand{display:flex;flex-direction:column;color:#e2eaea;line-height:1}.brand strong{color:#79f05c}.brand small{font-size:8px;color:#7e969c;margin-top:5px}.site-header nav{display:flex;gap:14px;font-size:12px}.menu-toggle,.brand-radar{display:none}.page{padding:35px 20px;margin:0 auto}.eyebrow{color:#79f05c;font-size:10px;letter-spacing:.15em}.page-intro{color:#93aab0;max-width:700px}@media(max-width:720px){.site-header nav{display:none}}
+.event-editor{max-width:850px}.event-editor fieldset{border:1px solid #24404b;border-radius:8px;padding:20px;margin:22px 0}.event-editor label{display:block;margin:12px 0;font-size:13px}.event-editor input,.event-editor textarea,.event-editor select{display:block;box-sizing:border-box;width:100%;max-width:650px;margin-top:5px;background:#071219;border:1px solid #24404b;color:#e2eaea;border-radius:4px;padding:10px;font:inherit}.event-editor button{background:#184f29;color:#e2eaea;border:1px solid #5dcc62;border-radius:5px;padding:10px 15px;margin:8px 8px 0 0;cursor:pointer}.event-editor button:disabled{opacity:.45;cursor:default}.event-editor pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#071219;border:1px solid #24404b;padding:15px;border-radius:5px}.event-editor .entry{border-top:1px solid #24404b;margin-top:12px;padding-top:12px}
+</style>
+</head>
+<body>
+<header class="site-header"><a class="brand" href="/"><span class="brand-radar"><span></span></span><span><b>VERSE</b><strong>RADAR</strong><small>DEINE NEWS AUS DEM VERSE</small></span></a><button class="menu-toggle">☰</button><nav><a href="/news.html">News</a><a href="/patches.html">Patch Notes</a><a href="/patch-history.html">Patch History</a><a href="/free-fly.html">Free Fly &amp; Events</a></nav></header>
+<main class="page event-editor"><div class="eyebrow">VERSE RADAR · VERWALTUNG</div><h1>Free Fly & Events pflegen</h1><p class="page-intro">Offizielle RSI-Termine und Community Events werden getrennt gekennzeichnet. Erst Vorschau prüfen, dann veröffentlichen. Abgelaufene Termine verschwinden automatisch.</p>
+<p><a href="/manage">← Verwaltung</a></p><button id="load" type="button">Gespeicherten Stand laden</button>
+<fieldset><legend>Free Fly</legend>
+<label>Titel<input id="fly-title" placeholder="Offizieller Name des Free Fly"></label>
+<label>Offizieller RSI-Link<input id="fly-url" type="url" placeholder="https://robertsspaceindustries.com/…"></label>
+<label>Beginn (deine lokale Uhrzeit)<input id="fly-start" type="datetime-local"></label>
+<label>Ende (deine lokale Uhrzeit)<input id="fly-end" type="datetime-local"></label>
+<label>Kurzer Hinweis (optional)<textarea id="fly-summary" rows="3" maxlength="400"></textarea></label>
+<button id="fly-preview" type="button">Free Fly prüfen</button><button id="fly-disable" type="button">Free Fly deaktivieren – Vorschau</button>
+</fieldset>
+<fieldset><legend>Bestätigtes Event</legend>
+<label>Event-Meldung als Ausgangspunkt<select id="event-source"><option value="">Quelle selbst eingeben</option></select></label>
+<label>Name<input id="event-name" placeholder="Name des Events"></label>
+<label>Offizieller RSI-Link<input id="event-url" type="url" placeholder="https://robertsspaceindustries.com/…"></label>
+<label>Beginn (deine lokale Uhrzeit)<input id="event-start" type="datetime-local"></label>
+<label>Ende (deine lokale Uhrzeit)<input id="event-end" type="datetime-local"></label>
+<label>Kurzer Hinweis (optional)<textarea id="event-summary" rows="3" maxlength="400"></textarea></label>
+<button id="event-preview" type="button">Event prüfen</button><div id="saved-events"></div>
+</fieldset>
+<fieldset><legend>Eigenes Community Event</legend>
+<p class="page-intro">Für Ingame-Veranstaltungen von Spielern oder anderen Veranstaltern. Diese werden sichtbar als Community Event und nicht als offizieller RSI-Termin bezeichnet. Angaben zu Echtgeldpreisen nur mit Link zu den Bedingungen des Veranstalters veröffentlichen.</p>
+<label>Name<input id="community-name" maxlength="150" placeholder="Name des Ingame Events"></label>
+<label>Veranstalter<input id="community-organizer" maxlength="120" placeholder="Name der Community / Organisation"></label>
+<label>Seite des Veranstalters und Teilnahmebedingungen<input id="community-url" type="url" placeholder="https://…"></label>
+<label>Beginn (deine lokale Uhrzeit)<input id="community-start" type="datetime-local"></label>
+<label>Ende (deine lokale Uhrzeit)<input id="community-end" type="datetime-local"></label>
+<label>Beschreibung<textarea id="community-summary" rows="3" maxlength="400"></textarea></label>
+<label>Preise (optional, nachprüfen)<input id="community-prize" maxlength="180" placeholder="z. B. Geldpreise laut Veranstalter"></label>
+<label>Eigenes Bild (optional, PNG/JPG/WebP, maximal 512 KB)<input id="community-image" type="file" accept="image/png,image/jpeg,image/webp"></label><button id="upload-image" type="button">Bild hochladen</button><p id="upload-status" role="status"></p><img id="community-image-preview" alt="Vorschau des eigenen Event-Bildes" style="max-width:100%;max-height:260px" hidden>
+<button id="community-preview" type="button">Community Event prüfen</button>
+</fieldset>
+<h2>Vorschau</h2><pre id="result">Noch nichts geprüft.</pre><button id="publish" type="button" disabled>Geprüfte Änderung veröffentlichen</button>
+</main>
+<script>
+const byId=id=>document.getElementById(id), output=byId('result');let pending=null,communityImageUrl='';
+function iso(id){const value=byId(id).value;return value&&Number.isFinite(new Date(value).getTime())?new Date(value).toISOString():''}
+function local(value){if(!value)return '';const d=new Date(value);if(!Number.isFinite(d.getTime()))return '';const n=v=>String(v).padStart(2,'0');return `${d.getFullYear()}-${n(d.getMonth()+1)}-${n(d.getDate())}T${n(d.getHours())}:${n(d.getMinutes())}`}
+function invalidate(){pending=null;byId('publish').disabled=true}
+async function call(action,payload){const r=await fetch('/manage/events/'+action,{method:action==='state'?'GET':'POST',headers:{'content-type':'application/json'},body:payload?JSON.stringify(payload):undefined,cache:'no-store'});if(r.status===401){location.replace('/admin');throw Error('Sitzung abgelaufen. Bitte erneut anmelden.')}const body=await r.json();if(!r.ok||!body.ok)throw Error(body.error||`HTTP ${r.status}`);return body}
+function show(value){output.textContent=typeof value==='string'?value:JSON.stringify(value,null,2)}
+async function load(){try{invalidate();const data=await call('state');const f=data.freeFly||{};byId('fly-title').value=f.title||'';byId('fly-url').value=f.sourceUrl||'';byId('fly-start').value=local(f.start);byId('fly-end').value=local(f.end);byId('fly-summary').value=f.summary||'';const root=byId('saved-events');root.replaceChildren();for(const event of data.events){const row=document.createElement('div');row.className='entry';const name=document.createElement('span');name.textContent=`${event.type==='Community Event'?'Community · ':'RSI · '}${event.name} · ${new Date(event.start).toLocaleString('de-DE')} – ${new Date(event.end).toLocaleString('de-DE')}`;const button=document.createElement('button');button.type='button';button.textContent='Entfernen – Vorschau';button.addEventListener('click',()=>preview({kind:event.type==='Community Event'?'community':'event',action:'remove',data:{sourceUrl:event.sourceUrl,start:event.start}}));row.append(name,button);root.append(row)}show(`Gespeichert: ${data.events.length} Event(s). Free Fly: ${f.active?'eingetragen':'inaktiv'}.`)}catch(e){show(e.message)}}
+async function suggestions(){try{const r=await fetch('/api/news',{cache:'no-store'});const news=await r.json();for(const item of news.filter(n=>['EVENT','FREE FLY'].includes(n.category)&&n.sourceUrl?.startsWith('https://robertsspaceindustries.com/')).slice(0,15)){const option=document.createElement('option');option.value=item.sourceUrl;option.textContent=item.title;option.dataset.title=item.title;byId('event-source').append(option)}}catch{}}
+async function preview(payload){try{invalidate();const result=await call('preview',payload);pending={...payload,expectedSha:result.expectedSha};show({hinweis:'Bitte den Titel, Zeitraum und Original-Link prüfen. Erst danach veröffentlichen.',vorschau:result.proposal});byId('publish').disabled=false}catch(e){show(e.message)}}
+byId('load').addEventListener('click',load);
+byId('event-source').addEventListener('change',e=>{const option=e.target.selectedOptions[0];if(option?.dataset.title){byId('event-name').value=option.dataset.title;byId('event-url').value=option.value}invalidate()});
+byId('fly-preview').addEventListener('click',()=>preview({kind:'freefly',action:'set',data:{title:byId('fly-title').value,sourceUrl:byId('fly-url').value,start:iso('fly-start'),end:iso('fly-end'),summary:byId('fly-summary').value}}));
+byId('fly-disable').addEventListener('click',()=>preview({kind:'freefly',action:'disable'}));
+byId('event-preview').addEventListener('click',()=>preview({kind:'event',action:'set',data:{name:byId('event-name').value,sourceUrl:byId('event-url').value,start:iso('event-start'),end:iso('event-end'),summary:byId('event-summary').value}}));
+byId('community-image').addEventListener('change',()=>{communityImageUrl='';byId('upload-status').textContent='Bild ausgewählt. Bitte erst hochladen.';byId('community-image-preview').hidden=true;invalidate()});
+byId('upload-image').addEventListener('click',async()=>{const file=byId('community-image').files[0];if(!file){byId('upload-status').textContent='Bitte zuerst eine Bilddatei auswählen.';return}if(file.size>512*1024){byId('upload-status').textContent='Bild ist größer als 512 KB.';return}try{byId('upload-status').textContent='Bild wird hochgeladen …';const r=await fetch('/manage/events/image',{method:'POST',headers:{'content-type':file.type},body:file,cache:'no-store'});if(r.status===401){location.replace('/admin');return}const data=await r.json();if(!r.ok||!data.ok)throw Error(data.error||'Upload fehlgeschlagen');communityImageUrl=data.imageUrl;byId('community-image-preview').src=data.imageUrl;byId('community-image-preview').hidden=false;byId('upload-status').textContent='Bild hochgeladen. Motiv in der Vorschau prüfen.';invalidate()}catch(e){byId('upload-status').textContent=e.message}});
+byId('community-preview').addEventListener('click',()=>{if(byId('community-image').files[0]&&!communityImageUrl){show('Ausgewähltes Bild bitte vor der Prüfung hochladen.');return}preview({kind:'community',action:'set',data:{name:byId('community-name').value,organizer:byId('community-organizer').value,sourceUrl:byId('community-url').value,start:iso('community-start'),end:iso('community-end'),summary:byId('community-summary').value,prize:byId('community-prize').value,imageUrl:communityImageUrl}})});
+byId('publish').addEventListener('click',async()=>{if(!pending)return;try{const result=await call('publish',pending);invalidate();show(`Gespeichert: ${result.kind==='event'?'Event':result.kind==='community'?'Community Event':'Free Fly'}. Die öffentliche Seite übernimmt die Änderung aus den Website-Daten.`);await load()}catch(e){invalidate();show(e.message)}});
+for(const input of document.querySelectorAll('input,textarea,select'))input.addEventListener('input',invalidate);
+suggestions();
+</script>
+</body></html>

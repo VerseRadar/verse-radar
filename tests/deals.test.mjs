@@ -28,16 +28,20 @@ globalThis.fetch = async (target, options = {}) => {
   return Response.json({ sha, content: Buffer.from(JSON.stringify(deals)).toString("base64") });
 };
 const env = { RUN_SECRET: "private", GITHUB_TOKEN: "github-key", GITHUB_REPO: "example/repo", GITHUB_BRANCH: "main" };
-const request = (path, body, key = "private") => new Request(`https://example.com${path}`, { method: body ? "POST" : "GET", headers: { "x-run-secret": key, origin: "https://example.com" }, body: body ? JSON.stringify(body) : undefined });
+const login = await worker.fetch(new Request("https://example.com/manage/login", {method:"POST",headers:{origin:"https://example.com","content-type":"application/json"},body:JSON.stringify({secret:"private"})}), env);
+assert.equal(login.status,200);
+const cookie=login.headers.get("set-cookie").split(";")[0];
+const request = (path, body, key = "private") => new Request(`https://example.com${path}`, { method: body ? "POST" : "GET", headers: { cookie:key==="private"?cookie:"vr_admin=wrong", origin: "https://example.com" }, body: body ? JSON.stringify(body) : undefined });
 const shop = "https://robertsspaceindustries.com/pledge/Packages/Test-Game-Package";
 const future = "2030-10-01T12:00:00.000Z";
 const picture = "https://media.robertsspaceindustries.com/package/aurora.jpg?size=large";
 const proposal = { action: "set", data: { name: "Test Game Package", type: "Game Package", sourceUrl: shop, imageUrl: picture, saveImageToCatalog: true, price: "58,24", oldPrice: "77,65", currency: "EUR", referralEligible: "yes", ship: "Aurora", gameAccessConfirmed: true, extras: "3 Monate Versicherung\nSkin Blau", validUntil: future, note: "Manuell geprüft." } };
 
 assert.equal((await worker.fetch(new Request("https://example.com/manage/deals/state"), env)).status, 401);
-const page = await worker.fetch(new Request("https://example.com/manage/deals"), env);
+assert.equal((await worker.fetch(new Request("https://example.com/manage/deals"),env)).status,302);
+const page = await worker.fetch(request("/manage/deals"), env);
 assert.equal(page.status, 200);
-assert.equal(await page.text(), await readFile(new URL("../public/deal-admin.html", import.meta.url), "utf8"));
+assert.equal(await page.text(), await readFile(new URL("../worker/pages/deal-admin.html", import.meta.url), "utf8"));
 assert.match(page.headers.get("content-security-policy"), /img-src https:\/\/robertsspaceindustries\.com https:\/\/\*\.robertsspaceindustries\.com/);
 assert.equal((await (await worker.fetch(request("/manage/deals/state"), env)).json()).deals.length, 0);
 assert.equal((await (await worker.fetch(request("/manage/deals/state"), env)).json()).shipImages.length, 0);
