@@ -1,7 +1,7 @@
 const CONFIG = {
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.13.1"
+  siteVersion: "0.13.2"
 };
 let usingStaticData = false;
 
@@ -88,26 +88,39 @@ function sourceLink(n){return n.sourceUrl?`<a class="source" href="${esc(n.sourc
 function renderNews(items,limit=3){
   return items.slice(0,limit).map((n,i)=>`<details class="news-card" data-category="${esc(n.category||'NEWS')}"><summary class="news-teaser"><span class="news-art art-${i%4}"><span class="art-signal">${esc((n.category||"NEWS").replace(" / "," · "))}</span></span><span class="news-body"><span class="news-heading"><span class="tag">${esc(n.category||"NEWS")}</span><span class="date" title="${esc(n.date||"")}">${relative(n.date)||dateDE(n.date)}</span></span><span class="news-title">${esc(n.title)}</span><span class="news-toggle news-open">Kurzüberblick anzeigen ↓</span><span class="news-toggle news-close">Schließen ↑</span></span></summary><div class="news-expanded"><p>${esc(n.summary||"Für diesen Artikel liegt noch keine deutsche Kurzbeschreibung vor.")}</p><p class="ai-note">${n.ai === true ? "KI-gestützte Zusammenfassung" : n.summaryBasis === "Titel" ? "Einordnung nur anhand des Titels; keine geprüften Artikeldetails" : n.summaryBasis === "Patch Notes" ? "Aus den Patch Notes" : n.summaryBasis === "Quelltext" ? "Aus dem Artikeltext" : "Kurze Einordnung"} · ${sourceLink(n)}</p></div></details>`).join("");
 }
+let radarFrameId=null;
 function alignRadar(root){
   const panel=root.closest(".radar-panel"),sweep=panel?.querySelector(".sweep");
   if(!panel||!sweep)return;
-  const contacts=[...root.querySelectorAll(".radar-contact")];
-  for(const contact of contacts)contact.style.animation="none";
-  sweep.style.animation="none";
-  void panel.offsetWidth;
+  if(radarFrameId!==null)cancelAnimationFrame(radarFrameId);
   const bounds=panel.getBoundingClientRect(),centerX=bounds.left+bounds.width/2,centerY=bounds.top+bounds.height/2;
-  for(const contact of contacts){
+  const contacts=[...root.querySelectorAll(".radar-contact")].map(contact=>{
     const rect=contact.getBoundingClientRect();
     const angle=(Math.atan2(rect.top+rect.height/2-centerY,rect.left+rect.width/2-centerX)*180/Math.PI+360)%360;
-    contact.style.setProperty("--echo-delay",`${(angle/360*6).toFixed(3)}s`);
-    contact.style.removeProperty("animation");
+    return {contact,angle};
+  });
+  function scan(){
+    // Die sichtbare Nadel selbst bestimmt den Zeitpunkt. Damit läuft kein zweiter Takt vor.
+    const transform=getComputedStyle(sweep).transform;
+    const matrix=/^matrix\(([^)]+)\)$/.exec(transform);
+    if(matrix){
+      const [a,b]=matrix[1].split(",").map(Number);
+      const beam=(Math.atan2(b,a)*180/Math.PI+360)%360;
+      for(const {contact,angle} of contacts){
+        const justPassed=(beam-angle+360)%360<14;
+        if(contact.classList.contains("is-scanned")!==justPassed)contact.classList.toggle("is-scanned",justPassed);
+      }
+    }else{
+      for(const {contact} of contacts)contact.classList.remove("is-scanned");
+    }
+    radarFrameId=requestAnimationFrame(scan);
   }
-  sweep.style.removeProperty("animation");
+  radarFrameId=requestAnimationFrame(scan);
 }
 function radarContacts(news,events){
   const root=document.querySelector("#radar-contacts"); if(!root)return;
   const contacts=[...news.slice(0,6).map((n,i)=>({kind:"N",label:n.category||"NEWS",x:[23,67,42,78,31,55][i],y:[28,22,68,56,82,40][i]})),...events.slice(0,4).map((e,i)=>({kind:"E",label:"EVENT",x:[18,73,56,86][i],y:[56,72,36,18][i]}))];
-  root.innerHTML=contacts.map((c,i)=>`<button class="radar-contact rc${i}" style="left:${c.x}%;top:${c.y}%" title="${esc(c.label)}"><span>${c.kind}</span></button>`).join("");
+  root.innerHTML=contacts.map((c,i)=>`<button class="radar-contact" style="left:${c.x}%;top:${c.y}%" title="${esc(c.label)}"><span>${c.kind}</span></button>`).join("");
   // Der Zeiger beginnt rechts und dreht sich in sechs Sekunden im Uhrzeigersinn.
   alignRadar(root);
   if(typeof window!=="undefined"){

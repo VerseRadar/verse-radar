@@ -1,3 +1,9 @@
+# 0.13.2
+
+- Radarpunkte orientieren sich an der sichtbaren Nadel und leuchten erst nach dem Überstreichen.
+- Nicht mehr genutzte Radar-Stile und Punkt-Klassen entfernt; Dateibestand geprüft.
+- Version auf 0.13.2 angehoben.
+
 # 0.13.1
 
 - Radar: Leuchtpunkte folgen dem Zeiger; Animationsverzögerungen bleiben beim Neustart erhalten.

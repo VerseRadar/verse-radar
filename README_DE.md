@@ -1,4 +1,4 @@
-# Verse Radar 0.13.1
+# Verse Radar 0.13.2
 
 Unabhängige deutschsprachige Star-Citizen-Fanseite – ohne Werbung.
 
@@ -72,6 +72,8 @@ Jeder Durchlauf nutzt die bestehende Begrenzung von acht historischen Versionen 
 **0.12.7:** Ein neues Angebot beginnt mit leeren Feldern; auch „Erneut prüfen“ übernimmt keine alten Preise, Bestandteile oder Hinweise. Ein bekanntes Schiff schlägt nur das gespeicherte Bild vor. Ein bestehender Deal mit derselben Shop-URL wird erst bei ausdrücklich gewähltem „Erneut prüfen“ ersetzt; unterschiedliche URLs bleiben als mehrere Deals erhalten. Auf der Deals-Seite erscheint bei bestätigtem Vergleichspreis der berechnete Rabatt in Prozent. Das Update enthält keine Dateien unter `public/data/`. Nach Deployment `/health` (0.12.7), zwei Packages und die Bildsuche prüfen.
 
 **0.12.8:** Deals werden zuerst nach manuell geprüfter Referral-Eignung (Ja vor Nein), dann nach aufsteigendem Preis und bei Preisgleichheit nach höherem Rabatt sortiert. EUR und USD bleiben getrennt (EUR vor USD), da kein Wechselkurs verwendet wird. Diese Reihenfolge gilt auf der Deals-Seite und für die neuesten Deals auf der Startseite. Das Update enthält keine Dateien unter `public/data/`. Nach Deployment `/health` (0.12.8) und Reihenfolge auf `/deals.html` prüfen.
+
+**0.13.2:** Die Punkte im großen Radar reagieren jetzt auf die tatsächliche Stellung der Nadel. Sie leuchten erst auf, nachdem die Nadel sie erreicht hat, und verblassen kurz darauf. Überholte Radar-Stile und ungenutzte Punkt-Klassen wurden entfernt. Die übrigen Dateien bleiben erhalten, weil sie für Website, Worker, lokale Vorschau, Tests oder Dokumentation genutzt werden. Live-Daten unter `public/data/` sind weiterhin nicht im Update-ZIP. Nach Deployment `/health` (0.13.2) und mehrere Radarumdrehungen prüfen.
 
 **0.13.1:** Radarkontakte speichern ihre individuelle Verzögerung jetzt unabhängig vom Animations-Neustart. Jeder Punkt leuchtet auf, wenn der Zeiger seine Position erreicht. Das Update enthält keine Live-Daten unter `public/data/`. Nach dem Upload `/health` (0.13.1) und eine volle sechssekündige Radarumdrehung auf der Startseite prüfen.
 

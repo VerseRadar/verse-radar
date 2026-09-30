@@ -37,19 +37,33 @@ assert.match(renderedNews, /<summary class="news-teaser"/);
 assert.match(renderedNews, /Einordnung nur anhand des Titels/);
 assert.match(renderedNews, /Kurzüberblick anzeigen/);
 assert.ok(!ctx.renderNews([{...news[0],title:'<img src=x onerror=alert(1)>',summary:'<script>alert(1)</script>'}],1).includes('<script>'));
-const contactNodes=[
-  {style:{setProperty(name,value){this[name]=value},removeProperty(name){delete this[name]}},getBoundingClientRect(){return {left:293.5,top:193.5,width:13,height:13}}},
-  {style:{setProperty(name,value){this[name]=value},removeProperty(name){delete this[name]}},getBoundingClientRect(){return {left:193.5,top:293.5,width:13,height:13}}}
-];
-const sweep={style:{removeProperty(name){delete this[name]}}};
+function fakeContact(left,top){
+  const classes=new Set();
+  return {classList:{contains:name=>classes.has(name),toggle(name,on){on?classes.add(name):classes.delete(name)},remove:name=>classes.delete(name)},getBoundingClientRect(){return {left,top,width:13,height:13}}};
+}
+const contactNodes=[fakeContact(293.5,193.5),fakeContact(193.5,293.5)];
+const sweep={};
 const panel={offsetWidth:400,querySelector:()=>sweep,getBoundingClientRect:()=>({left:0,top:0,width:400,height:400})};
 const nodes = { "#radar-contacts": { innerHTML: "",closest:()=>panel,querySelectorAll:()=>contactNodes } };
+let beamAngle=0,nextFrameId=0;
+const pendingFrames=new Map();
+ctx.requestAnimationFrame=callback=>{pendingFrames.set(++nextFrameId,callback);return nextFrameId};
+ctx.cancelAnimationFrame=id=>pendingFrames.delete(id);
+ctx.getComputedStyle=()=>({transform:`matrix(${Math.cos(beamAngle*Math.PI/180)}, ${Math.sin(beamAngle*Math.PI/180)}, 0, 0, 0, 0)`});
+function frame(angle){beamAngle=angle;const callbacks=[...pendingFrames.values()];pendingFrames.clear();callbacks.forEach(callback=>callback())}
 ctx.document.querySelector = selector => nodes[selector] || null;
 ctx.radarContacts(news, Array.from({ length: 4 }, () => ({ name: "Event" })));
 assert.equal((nodes["#radar-contacts"].innerHTML.match(/class="radar-contact/g)||[]).length,10);
-assert.equal(contactNodes[0].style["--echo-delay"],"0.000s");
-assert.equal(contactNodes[1].style["--echo-delay"],"1.500s");
-assert.match(await read("../public/styles.css"),/\.radar-contact\{[^}]*animation-delay:var\(--echo-delay,0s\)/);
+frame(0);
+assert.equal(contactNodes[0].classList.contains("is-scanned"),true);
+assert.equal(contactNodes[1].classList.contains("is-scanned"),false);
+frame(85);
+assert.equal(contactNodes[1].classList.contains("is-scanned"),false);
+frame(90);
+assert.equal(contactNodes[1].classList.contains("is-scanned"),true);
+frame(112);
+assert.equal(contactNodes[1].classList.contains("is-scanned"),false);
+assert.match(await read("../public/styles.css"),/\.radar-contact\.is-scanned\{/);
 assert.ok(!(await read('../public/index.html')).includes('id="radar-count"'));
 assert.equal(nodes["#radar-contacts"].innerHTML.includes("undefined%"), false);
 const now = Date.parse("2026-09-28T12:00:00Z");
