@@ -57,7 +57,7 @@ globalThis.fetch = async (target, options = {}) => {
 
 const env = { GITHUB_TOKEN: "test-token", GITHUB_REPO: "example/verse-radar", GITHUB_BRANCH: "main" };
 const health = await worker.fetch(new Request("https://example.com/health"), env);
-assert.equal((await health.json()).version, "0.13.3");
+assert.equal((await health.json()).version, "0.13.4");
 const patchApi = await worker.fetch(new Request("https://example.com/api/patches"), env);
 assert.equal(patchApi.headers.get("x-verse-radar-patches-source"), "github");
 

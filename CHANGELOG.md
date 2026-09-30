@@ -1,3 +1,12 @@
+# 0.13.4
+
+- Admin Login und geschützte Verwaltung aus 0.13.3 beibehalten.
+- Community-Event-Eingabe und öffentliche Anzeige entfernt.
+- Offizielle Ingame-Aktionen: Aufgaben, persönliche Belohnungen und optionales Gemeinschaftsziel mit RSI-Quelle.
+- Eigene Rubrik auf Start- und Free-Fly-Seite; unbekanntes Ende ausdrücklich markiert.
+- Optionaler Bild-Upload und separates GitHub-Archiv `public/data/activities.json`.
+- Version auf 0.13.4 angehoben.
+
 # 0.13.3
 
 - Admin Login über `RUN_SECRET`; signierte Sitzung und geschütztes Verwaltungsmenü.

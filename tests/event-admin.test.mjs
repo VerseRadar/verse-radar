@@ -11,7 +11,7 @@ const sha = { "public/data/freefly.json": "sha-free-1", "public/data/events.json
 const imageFiles=new Map();
 let writes = 0;
 globalThis.fetch = async (target, options = {}) => {
-  const imagePath=String(target).match(/\/contents\/(public\/event-images\/[a-f0-9]{64}\.(?:png|jpg|webp))/)?.[1];
+  const imagePath=String(target).match(/\/contents\/(public\/activity-images\/[a-f0-9]{64}\.(?:png|jpg|webp))/)?.[1];
   if (imagePath) {
     if(options.method==="PUT"){
       const bytes=Buffer.from(JSON.parse(options.body).content,"base64");
@@ -22,14 +22,15 @@ globalThis.fetch = async (target, options = {}) => {
     const bytes=imageFiles.get(imagePath);
     return Response.json({sha:"image-sha",size:bytes.length,content:bytes.toString("base64")});
   }
-  const path = String(target).match(/\/contents\/(public\/data\/(?:events|freefly)\.json)/)?.[1];
+  const path = String(target).match(/\/contents\/(public\/data\/(?:events|freefly|activities)\.json)/)?.[1];
   if (!path) throw Error(`Unexpected URL ${target}`);
   if (options.method === "PUT") {
-    assert.equal(JSON.parse(options.body).sha, sha[path]);
+    assert.equal(JSON.parse(options.body).sha||null, sha[path]||null);
     data[path] = JSON.parse(Buffer.from(JSON.parse(options.body).content, "base64").toString("utf8"));
     sha[path] = `sha-${++writes}`;
     return Response.json({ content: { sha: sha[path] } });
   }
+  if(!(path in data))return Response.json({message:"Not Found"},{status:404});
   return Response.json({ sha: sha[path], content: Buffer.from(JSON.stringify(data[path])).toString("base64") });
 };
 const env = { RUN_SECRET: "private", GITHUB_TOKEN: "github-key", GITHUB_REPO: "example/verse-radar", GITHUB_BRANCH: "main",
@@ -46,7 +47,7 @@ const req = (path, payload, key = "private", origin = "https://example.com") => 
 const official = "https://robertsspaceindustries.com/en/comm-link/transmission/21300-Test";
 const start = "2030-06-01T12:00:00.000Z", end = "2030-06-03T12:00:00.000Z";
 
-assert.equal((await (await worker.fetch(new Request("https://example.com/health"), env)).json()).version, "0.13.3");
+assert.equal((await (await worker.fetch(new Request("https://example.com/health"), env)).json()).version, "0.13.4");
 assert.equal((await worker.fetch(new Request("https://example.com/manage/events/state"), env)).status, 401);
 const initial = await (await worker.fetch(req("/manage/events/state"), env)).json();
 assert.deepEqual(initial.events, []);
@@ -57,14 +58,14 @@ assert.equal((await worker.fetch(new Request("https://example.com/manage/session
 const page = await worker.fetch(req("/manage/events"), { ...env, ASSETS: undefined });
 assert.equal(page.status, 200);
 const pageHtml = await page.text();
-assert.match(pageHtml, /Free Fly & Events pflegen/);
+assert.match(pageHtml, /Free Fly, Events & Ingame-Aktionen pflegen/);
 assert.doesNotMatch(pageHtml,/id="secret"/);
-assert.match(pageHtml,/Eigenes Community Event/);
+assert.match(pageHtml,/Offizielle Ingame-Aktion/);
 assert.equal(pageHtml, await readFile(new URL("../worker/pages/event-admin.html", import.meta.url), "utf8"));
 assert.match(page.headers.get("content-security-policy"), /connect-src 'self'/);
 assert.doesNotMatch(await readFile(new URL("../worker/pages/event-admin.html", import.meta.url), "utf8"), /href="\/styles\.css"/);
 assert.equal((await worker.fetch(new Request("https://example.com/event-admin.html"),env)).status,302);
-assert.equal((await worker.fetch(new Request("https://example.com/manage/events/image",{method:"POST",headers:{origin:"https://example.com"},body:"fake"}),env)).status,401);
+assert.equal((await worker.fetch(new Request("https://example.com/manage/activities/image",{method:"POST",headers:{origin:"https://example.com"},body:"fake"}),env)).status,401);
 const proposal = { kind: "freefly", action: "set", data: { title: "Test Free Fly", sourceUrl: official, start, end, summary: "Bestätigter Zeitraum." } };
 assert.equal((await worker.fetch(req("/manage/events/preview", proposal, "wrong"), env)).status, 401);
 assert.equal((await worker.fetch(req("/manage/events/preview", proposal, "private", "https://evil.example"), env)).status, 403);
@@ -95,23 +96,31 @@ assert.equal(removePreview.proposal.length, 0);
 assert.equal((await (await worker.fetch(req("/manage/events/publish", { ...removal, expectedSha: removePreview.expectedSha }), env)).json()).published, true);
 assert.equal((await (await worker.fetch(new Request("https://example.com/api/events"), env)).json()).length, 0);
 const png=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9ZcwYc8AAAAASUVORK5CYII=","base64");
-const uploadRequest=(body,auth=cookie)=>new Request("https://example.com/manage/events/image",{method:"POST",headers:{origin:"https://example.com",cookie:auth,"content-type":"image/png"},body});
+const uploadRequest=(body,auth=cookie)=>new Request("https://example.com/manage/activities/image",{method:"POST",headers:{origin:"https://example.com",cookie:auth,"content-type":"image/png"},body});
 assert.equal((await worker.fetch(uploadRequest("<svg onload=alert(1)>"),env)).status,413);
 const upload=await (await worker.fetch(uploadRequest(png),env)).json();
-assert.match(upload.imageUrl,/^\/event-image\/[a-f0-9]{64}\.png$/);
+assert.match(upload.imageUrl,/^\/activity-image\/[a-f0-9]{64}\.png$/);
 assert.equal(imageFiles.size,1);
 const image=await worker.fetch(new Request("https://example.com"+upload.imageUrl),env);
 assert.equal(image.headers.get("content-type"),"image/png");
 assert.deepEqual(Buffer.from(await image.arrayBuffer()),png);
-const community={kind:"community",action:"set",data:{name:"Spieler-Turnier",organizer:"Community Team",start,end,sourceUrl:"https://community.example.org/turnier",summary:"Ingame-Turnier mit Anmeldung.",prize:"Geldpreise laut Veranstalter",imageUrl:upload.imageUrl}};
-assert.equal((await (await worker.fetch(req("/manage/events/preview",{...community,data:{...community.data,imageUrl:"https://evil.example/a.png"}}),env)).json()).ok,false);
-const communityPreview=await (await worker.fetch(req("/manage/events/preview",community),env)).json();
-assert.equal(communityPreview.ok,true,JSON.stringify(communityPreview));
-assert.equal(communityPreview.proposal[0].type,"Community Event");
-assert.equal((await (await worker.fetch(req("/manage/events/publish",{...community,expectedSha:communityPreview.expectedSha}),env)).json()).published,true);
-assert.equal((await (await worker.fetch(new Request("https://example.com/api/events"),env)).json())[0].imageUrl,upload.imageUrl);
+const activity={kind:"activity",action:"set",data:{name:"Orison Relief Support",sourceUrl:"https://robertsspaceindustries.com/spectrum/community/SC/forum/3/thread/orison-relief-support-faq",tasks:"Material laut RSI abgeben",rewards:"Dauerhafte Account-Belohnung laut RSI",summary:"Aufträge mit persönlichem Fortschritt",imageUrl:upload.imageUrl}};
+assert.equal((await (await worker.fetch(req("/manage/events/preview",{...activity,data:{...activity.data,sourceUrl:"https://community.example.org/turnier"}}),env)).json()).ok,false);
+assert.equal((await (await worker.fetch(req("/manage/events/preview",{...activity,data:{...activity.data,imageUrl:"https://evil.example/a.png"}}),env)).json()).ok,false);
+assert.equal((await (await worker.fetch(req("/manage/events/preview",{...activity,data:{...activity.data,groupGoal:"Gemeinsam abgeben"}}),env)).json()).ok,false);
+const activityPreview=await (await worker.fetch(req("/manage/events/preview",activity),env)).json();
+assert.equal(activityPreview.ok,true,JSON.stringify(activityPreview));
+assert.equal(activityPreview.proposal[0].type,"Ingame Activity");
+assert.equal(activityPreview.proposal[0].end,null);
+assert.deepEqual(activityPreview.proposal[0].tasks,["Material laut RSI abgeben"]);
+assert.equal((await (await worker.fetch(req("/manage/events/publish",{...activity,expectedSha:activityPreview.expectedSha}),env)).json()).published,true);
+assert.equal((await (await worker.fetch(new Request("https://example.com/api/activities"),env)).json())[0].imageUrl,upload.imageUrl);
+const removeActivity={kind:"activity",action:"remove",data:{sourceUrl:activity.data.sourceUrl}};
+const removalPreview=await (await worker.fetch(req("/manage/events/preview",removeActivity),env)).json();
+assert.equal((await (await worker.fetch(req("/manage/events/publish",{...removeActivity,expectedSha:removalPreview.expectedSha}),env)).json()).published,true);
+assert.deepEqual(await (await worker.fetch(new Request("https://example.com/api/activities"),env)).json(),[]);
 const dashboard=await worker.fetch(req("/manage"),env);
 assert.match(await dashboard.text(),/Game Packages pflegen/);
 const logout=await worker.fetch(new Request("https://example.com/manage/logout",{method:"POST",headers:{origin:"https://example.com",cookie}}),env);
 assert.match(logout.headers.get("set-cookie"),/Max-Age=0/);
-console.log("Terminpflege: Admin-Sitzung, Bild-Upload, Community Event und GitHub-Veröffentlichung: OK");
+console.log("Terminpflege: Admin-Sitzung, Bild-Upload, offizielle Ingame-Aktion und GitHub-Veröffentlichung: OK");

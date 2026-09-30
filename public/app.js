@@ -1,12 +1,12 @@
 const CONFIG = {
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.13.3"
+  siteVersion: "0.13.4"
 };
 let usingStaticData = false;
 
 async function loadJSON(name){
-  const url = name === "news.json" ? CONFIG.newsEndpoint : name === "patches.json" ? "/api/patches" : name === "freefly.json" ? "/api/freefly" : name === "events.json" ? "/api/events" : name === "deals.json" ? "/api/deals" : name === "referral.json" ? "/api/referral" : CONFIG.dataBase+name;
+  const url = name === "news.json" ? CONFIG.newsEndpoint : name === "patches.json" ? "/api/patches" : name === "freefly.json" ? "/api/freefly" : name === "events.json" ? "/api/events" : name === "activities.json" ? "/api/activities" : name === "deals.json" ? "/api/deals" : name === "referral.json" ? "/api/referral" : CONFIG.dataBase+name;
   let r;
   try { r=await fetch(url,{cache:"no-store"}); }
   catch (e) {
@@ -48,8 +48,6 @@ function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt
 function dateDE(v){if(!v)return "—"; const d=new Date(v); return Number.isNaN(d.getTime())?esc(v):new Intl.DateTimeFormat("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"}).format(d);}
 function isFuture(v){const d=new Date(v);return !Number.isNaN(d.getTime())&&d.getTime()>Date.now();}
 function isOfficialSource(value){try{const u=new URL(value);return u.protocol==="https:"&&["robertsspaceindustries.com","www.robertsspaceindustries.com"].includes(u.hostname);}catch{return false;}}
-function isCommunitySource(value){try{const u=new URL(value);return u.protocol==="https:"&&!u.username&&!u.password&&!u.port&&/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(u.hostname);}catch{return false;}}
-function isCommunityEvent(e){return e?.type==="Community Event"&&typeof e.organizer==="string"&&e.organizer.trim()&&isCommunitySource(e.sourceUrl)&&(!e.imageUrl||/^\/event-image\/[a-f0-9]{64}\.(?:png|jpg|webp)$/.test(e.imageUrl));}
 function validPrice(value){return (typeof value==="number"||typeof value==="string")&&/^\d+(?:\.\d{1,2})?$/.test(String(value))&&Number(value)>0&&Number(value)<100000;}
 function isOfficialPackageImage(value){try{const u=new URL(value);return u.protocol==="https:"&&(u.hostname==="robertsspaceindustries.com"||u.hostname.endsWith(".robertsspaceindustries.com"))&&!u.username&&!u.password&&!u.port&&/\.(?:png|jpe?g|webp|avif)$/i.test(u.pathname);}catch{return false;}}
 function liveDeals(items,now=Date.now()){
@@ -71,7 +69,7 @@ function renderDeals(items){return items.map(d=>`<article class="article"><span 
 function confirmedTime(value){return typeof value==="string"&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/.test(value)&&Number.isFinite(Date.parse(value));}
 function activeEvents(items,now=Date.now()){
   if(!Array.isArray(items))return [];
-  return items.filter(e=>e&&e.name&&confirmedTime(e.start)&&confirmedTime(e.end)&&Date.parse(e.end)>Date.parse(e.start)&&Date.parse(e.end)>now&&(isCommunityEvent(e)||e.type!=="Community Event"&&isOfficialSource(e.sourceUrl)))
+  return items.filter(e=>e&&e.name&&e.type!=="Community Event"&&confirmedTime(e.start)&&confirmedTime(e.end)&&Date.parse(e.end)>Date.parse(e.start)&&Date.parse(e.end)>now&&isOfficialSource(e.sourceUrl))
     .sort((a,b)=>Date.parse(a.start)-Date.parse(b.start));
 }
 function freeFlyState(data,now=Date.now()){
@@ -147,7 +145,13 @@ function renderPatchHistory(items){
 }
 function eventDateTime(value){return new Intl.DateTimeFormat("de-DE",{timeZone:"Europe/Berlin",dateStyle:"medium",timeStyle:"short"}).format(new Date(value))+" Uhr";}
 function renderConfirmedEvents(items,now=Date.now()){
-  return items.map(e=>isCommunityEvent(e)?`<article class="article community-event"><span class="tag">COMMUNITY EVENT · ${Date.parse(e.start)<=now?"JETZT AKTIV":"DEMNÄCHST"}</span><h3>${esc(e.name)}</h3>${e.imageUrl?`<img class="event-image" src="${esc(e.imageUrl)}" alt="Bild zum Community Event ${esc(e.name)}" loading="lazy">`:""}<p>${eventDateTime(e.start)} – ${eventDateTime(e.end)} · Veranstalter: ${esc(e.organizer)}</p><p>${esc(e.summary||"")}</p>${e.prize?`<p><strong>Preise laut Veranstalter:</strong> ${esc(e.prize)}</p>`:""}<p class="ai-note">Community Event, keine offizielle RSI-Veranstaltung. Preise, Teilnahmebedingungen und Angaben beim Veranstalter prüfen.</p><p><a class="source" href="${esc(e.sourceUrl)}" target="_blank" rel="noopener noreferrer">Veranstalterseite und Bedingungen ↗</a></p></article>`:`<article class="article"><span class="tag">${Date.parse(e.start)<=now?"JETZT AKTIV":"BESTÄTIGT · DEMNÄCHST"}</span><h3>${esc(e.name)}</h3><p>${eventDateTime(e.start)} – ${eventDateTime(e.end)}</p>${e.summary?`<p>${esc(e.summary)}</p>`:""}<p>${sourceLink(e)}</p></article>`).join("")||'<p class="page-intro">Derzeit keine laufenden oder kommenden Termine eingetragen.</p>';
+  return items.map(e=>`<article class="article"><span class="tag">${Date.parse(e.start)<=now?"JETZT AKTIV":"BESTÄTIGT · DEMNÄCHST"}</span><h3>${esc(e.name)}</h3><p>${eventDateTime(e.start)} – ${eventDateTime(e.end)}</p>${e.summary?`<p>${esc(e.summary)}</p>`:""}<p>${sourceLink(e)}</p></article>`).join("")||'<p class="page-intro">Derzeit keine laufenden oder kommenden Termine eingetragen.</p>';
+}
+function activeActivities(items,now=Date.now()){
+  return Array.isArray(items)?items.filter(a=>a?.type==="Ingame Activity"&&a.active===true&&a.name&&isOfficialSource(a.sourceUrl)&&Array.isArray(a.tasks)&&a.tasks.length&&Array.isArray(a.rewards)&&a.rewards.length&&(!a.end||confirmedTime(a.end)&&Date.parse(a.end)>now)&&(!a.start||confirmedTime(a.start))).sort((a,b)=>(Date.parse(b.start)||0)-(Date.parse(a.start)||0)):[];
+}
+function renderActivities(items,limit=items.length){
+  return items.slice(0,limit).map(a=>`<article class="article"><span class="tag">OFFIZIELLE INGAME-AKTION</span><h3>${esc(a.name)}</h3>${/^\/activity-image\/[a-f0-9]{64}\.(?:png|jpg|webp)$/.test(a.imageUrl||"")?`<img class="event-image" src="${esc(a.imageUrl)}" alt="Bild zu ${esc(a.name)}" loading="lazy">`:""}<p>${a.start?`Beginn: ${eventDateTime(a.start)} · `:""}${a.end?`Ende: ${eventDateTime(a.end)}`:"Ende nicht bestätigt – aktuellen Stand bei RSI prüfen"}</p>${a.summary?`<p>${esc(a.summary)}</p>`:""}<h4>Aufgaben</h4><ul>${a.tasks.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><h4>Persönliche Belohnungen</h4><ul>${a.rewards.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>${a.groupGoal&&a.groupReward?`<p><strong>Gemeinschaftsziel:</strong> ${esc(a.groupGoal)}<br><strong>Belohnung:</strong> ${esc(a.groupReward)}</p>`:""}<p>${sourceLink(a)}</p></article>`).join("")||'<p class="page-intro">Derzeit keine offizielle Ingame-Aktion eingetragen.</p>';
 }
 function renderEventNews(items){
   return items.slice(0,8).map(n=>`<article class="article"><span class="tag">${esc(n.category)} · MELDUNG VOM ${dateDE(n.date)}</span><h3>${esc(n.title)}</h3><p>${esc(n.summary||"")}</p><p>${sourceLink(n)}</p></article>`).join("")||'<p class="page-intro">Keine aktuellen Event-Meldungen vorhanden.</p>';
@@ -155,10 +159,11 @@ function renderEventNews(items){
 async function freeFlyPage(){
   const status=document.querySelector("#freefly-page");if(!status)return;
   try{
-    const [data,events,news]=await Promise.all(["freefly.json","events.json","news.json"].map(loadJSON));
+    const [data,events,news,activities]=await Promise.all(["freefly.json","events.json","news.json","activities.json"].map(loadJSON));
     const fly=freeFlyState(data);
     status.innerHTML=`<article class="article"><span class="tag">${fly.status==="active"?"JETZT AKTIV":fly.status==="upcoming"?"BESTÄTIGT · DEMNÄCHST":"DERZEIT INAKTIV"}</span><h2>${esc(fly.title)}</h2>${fly.dateText?`<p>${esc(fly.dateText)}</p>`:""}<p>${esc(fly.summary)}</p><p>${sourceLink(fly)}</p></article>`;
     document.querySelector("#confirmed-events").innerHTML=renderConfirmedEvents(activeEvents(events));
+    document.querySelector("#activities").innerHTML=renderActivities(activeActivities(activities));
     document.querySelector("#event-news").innerHTML=renderEventNews(eventNews(news));
   }catch(e){console.error(e);status.innerHTML='<p class="page-intro">Free-Fly- und Event-Daten konnten nicht geladen werden.</p>';}
 }
@@ -173,12 +178,13 @@ async function referralPage(){if(!document.querySelector("#ref-main"))return;try
 async function home(){
   const status=document.querySelector("#data-status");
   try{
-    const [news,patches,deals,events,freefly,meta,referral]=await Promise.all([...["news.json","patches.json","deals.json","events.json","freefly.json","meta.json"].map(loadJSON),loadJSON("referral.json").catch(()=>({enabled:false}))]);
+    const [news,patches,deals,events,freefly,meta,activities,referral]=await Promise.all([...["news.json","patches.json","deals.json","events.json","freefly.json","meta.json","activities.json"].map(loadJSON),loadJSON("referral.json").catch(()=>({enabled:false}))]);
     setReferral(referral);
     document.querySelector("#top-news").innerHTML=renderNews(news,3);
     document.querySelector("#latest-patches").innerHTML=patches.slice(0,5).map(p=>`<a class="list-row" href="/patches.html#${encodeURIComponent(p.version)}"><span><b>${esc(p.version)}</b><small>${esc(p.summary||"").slice(0,55)}${(p.summary||"").length>55?"…":""}</small></span><span>${dateDE(p.date)}</span></a>`).join("");
     document.querySelector("#latest-deals").innerHTML=liveDeals(deals).slice(0,4).map(d=>`<a class="list-row deal-row" href="/deals.html"><span>${esc(d.name)}</span><strong>${dealPrice(d.price,d.currency)}</strong></a>`).join("") || '<p class="page-intro">Aktuell keine geprüften Angebote.</p>';
-    const liveEvents=activeEvents(events); document.querySelector("#events").innerHTML=liveEvents.slice(0,5).map(e=>`<a class="list-row" href="/free-fly.html"><span><b>${esc(e.name)}</b><small>${isCommunityEvent(e)?"COMMUNITY · ":""}${Date.parse(e.start)<=Date.now()?"JETZT AKTIV":"DEMNÄCHST"}</small></span><span>${Date.parse(e.start)<=Date.now()?"bis "+dateDE(e.end):"ab "+dateDE(e.start)}</span></a>`).join("") || '<p class="page-intro">Keine laufenden oder kommenden Events eingetragen.</p>';
+    const liveEvents=activeEvents(events); document.querySelector("#events").innerHTML=liveEvents.slice(0,5).map(e=>`<a class="list-row" href="/free-fly.html"><span><b>${esc(e.name)}</b><small>${Date.parse(e.start)<=Date.now()?"JETZT AKTIV":"DEMNÄCHST"}</small></span><span>${Date.parse(e.start)<=Date.now()?"bis "+dateDE(e.end):"ab "+dateDE(e.start)}</span></a>`).join("") || '<p class="page-intro">Keine laufenden oder kommenden Events eingetragen.</p>';
+    document.querySelector("#home-activities").innerHTML=renderActivities(activeActivities(activities),2);
     const ff=document.querySelector("#free-fly");
     const fly=freeFlyState(freefly);
     if(fly.status==="active"){ff.classList.remove("hidden");document.querySelector("#freefly-title").textContent=fly.title;document.querySelector("#freefly-dates").textContent=fly.dateText;document.querySelector("#freefly-text").textContent=fly.summary;document.querySelector("#freefly-link").href="/free-fly.html";}

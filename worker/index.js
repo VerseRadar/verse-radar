@@ -22,7 +22,7 @@ const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
 const PATCH_BACKFILL_PATH = "public/data/patch-backfill-control.json";
 const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "0.13.3";
+const VERSION = "0.13.4";
 const DEFAULT_REFERRAL_URL = "https://www.robertsspaceindustries.com/enlist?referral=STAR-6KT2-XJBC";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
@@ -186,13 +186,13 @@ export default {
         return json({ ok: true, version: VERSION, ...await editEventData(env, input, u.pathname.endsWith("/publish")) });
       } catch (e) { return json({ ok: false, error: e.message }, e.status === 409 ? 409 : 400); }
     }
-    if (u.pathname === "/manage/events/image" && request.method === "POST") {
+    if (u.pathname === "/manage/activities/image" && request.method === "POST") {
       if (!await adminAuthorized(request, env, u)) return json({ ok: false, error: "Unauthorized" }, 401);
       if (!sameOrigin(request, u)) return json({ ok: false, error: "Andere Herkunft nicht erlaubt" }, 403);
-      try { return json({ ok: true, ...(await uploadEventImage(request, env)) }); }
+      try { return json({ ok: true, ...(await uploadActivityImage(request, env)) }); }
       catch (e) { return json({ ok: false, error: e.message }, e.status || 400); }
     }
-    if (u.pathname.startsWith("/event-image/") && request.method === "GET") return serveEventImage(env, u.pathname);
+    if (u.pathname.startsWith("/activity-image/") && request.method === "GET") return serveActivityImage(env, u.pathname);
     if (u.pathname === "/backfill/status" || u.pathname === "/backfill/start" || u.pathname === "/backfill/stop") {
       if (!env.RUN_SECRET) return json({ ok: false, error: "Für die Importsteuerung RUN_SECRET als Worker-Secret einrichten." }, 503);
       if (request.headers.get("x-run-secret") !== env.RUN_SECRET) return json({ ok: false, error: "Unauthorized" }, 401);
@@ -314,19 +314,20 @@ export default {
         return json({ ok: false, error: e.message }, 500);
       }
     }
-    if (u.pathname === "/api/freefly" || u.pathname === "/api/events") {
-      const path = u.pathname === "/api/freefly" ? FREE_FLY_DATA_PATH : EVENT_DATA_PATH;
-      const asset = u.pathname === "/api/freefly" ? "/data/freefly.json" : "/data/events.json";
+    if (u.pathname === "/api/freefly" || u.pathname === "/api/events" || u.pathname === "/api/activities") {
+      const path = u.pathname === "/api/freefly" ? FREE_FLY_DATA_PATH : u.pathname === "/api/activities" ? ACTIVITY_DATA_PATH : EVENT_DATA_PATH;
+      const asset = u.pathname === "/api/freefly" ? "/data/freefly.json" : u.pathname === "/api/activities" ? "/data/activities.json" : "/data/events.json";
       try {
         const data = await readGithubJSON(env, path, null);
-        if (u.pathname === "/api/events" ? Array.isArray(data) : data && typeof data === "object" && !Array.isArray(data)) {
+        if (u.pathname === "/api/activities" && data == null) return json([]);
+        if (u.pathname !== "/api/freefly" ? Array.isArray(data) : data && typeof data === "object" && !Array.isArray(data)) {
           return new Response(JSON.stringify(data), { headers: { "content-type": "application/json;charset=utf-8", "cache-control": "no-store", "x-verse-radar-event-source": "github" } });
         }
         if (env.ASSETS) {
           const fallback = await env.ASSETS.fetch(new Request(new URL(asset, u.origin), request));
           return new Response(await fallback.text(), { status: fallback.status, headers: { "content-type": "application/json;charset=utf-8", "cache-control": "no-store", "x-verse-radar-event-source": "static-fallback" } });
         }
-        return json(u.pathname === "/api/events" ? [] : { active: false });
+        return json(u.pathname !== "/api/freefly" ? [] : { active: false });
       } catch (e) { return json({ ok: false, error: e.message }, 500); }
     }
     if (u.pathname === "/api/deals") {
@@ -411,7 +412,7 @@ function adminLogout(request,url) {
 }
 
 // Self-contained editor: the Worker can run without a static asset binding.
-const EVENT_ADMIN_HTML = "<!doctype html>\n<html lang=\"de\">\n<head>\n<meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<meta name=\"robots\" content=\"noindex,nofollow\"><title>Terminpflege – Verse Radar</title>\n<style>\n*{box-sizing:border-box}body{margin:0;background:#041016;color:#e2eaea;font:15px/1.5 system-ui,Arial,sans-serif}a{color:#70ceda;text-decoration:none}.site-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 25px;border-bottom:1px solid #24404b}.site-header .brand{display:flex;flex-direction:column;color:#e2eaea;line-height:1}.brand strong{color:#79f05c}.brand small{font-size:8px;color:#7e969c;margin-top:5px}.site-header nav{display:flex;gap:14px;font-size:12px}.menu-toggle,.brand-radar{display:none}.page{padding:35px 20px;margin:0 auto}.eyebrow{color:#79f05c;font-size:10px;letter-spacing:.15em}.page-intro{color:#93aab0;max-width:700px}@media(max-width:720px){.site-header nav{display:none}}\n.event-editor{max-width:850px}.event-editor fieldset{border:1px solid #24404b;border-radius:8px;padding:20px;margin:22px 0}.event-editor label{display:block;margin:12px 0;font-size:13px}.event-editor input,.event-editor textarea,.event-editor select{display:block;box-sizing:border-box;width:100%;max-width:650px;margin-top:5px;background:#071219;border:1px solid #24404b;color:#e2eaea;border-radius:4px;padding:10px;font:inherit}.event-editor button{background:#184f29;color:#e2eaea;border:1px solid #5dcc62;border-radius:5px;padding:10px 15px;margin:8px 8px 0 0;cursor:pointer}.event-editor button:disabled{opacity:.45;cursor:default}.event-editor pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#071219;border:1px solid #24404b;padding:15px;border-radius:5px}.event-editor .entry{border-top:1px solid #24404b;margin-top:12px;padding-top:12px}\n</style>\n</head>\n<body>\n<header class=\"site-header\"><a class=\"brand\" href=\"/\"><span class=\"brand-radar\"><span></span></span><span><b>VERSE</b><strong>RADAR</strong><small>DEINE NEWS AUS DEM VERSE</small></span></a><button class=\"menu-toggle\">☰</button><nav><a href=\"/news.html\">News</a><a href=\"/patches.html\">Patch Notes</a><a href=\"/patch-history.html\">Patch History</a><a href=\"/free-fly.html\">Free Fly &amp; Events</a></nav></header>\n<main class=\"page event-editor\"><div class=\"eyebrow\">VERSE RADAR · VERWALTUNG</div><h1>Free Fly & Events pflegen</h1><p class=\"page-intro\">Offizielle RSI-Termine und Community Events werden getrennt gekennzeichnet. Erst Vorschau prüfen, dann veröffentlichen. Abgelaufene Termine verschwinden automatisch.</p>\n<p><a href=\"/manage\">← Verwaltung</a></p><button id=\"load\" type=\"button\">Gespeicherten Stand laden</button>\n<fieldset><legend>Free Fly</legend>\n<label>Titel<input id=\"fly-title\" placeholder=\"Offizieller Name des Free Fly\"></label>\n<label>Offizieller RSI-Link<input id=\"fly-url\" type=\"url\" placeholder=\"https://robertsspaceindustries.com/…\"></label>\n<label>Beginn (deine lokale Uhrzeit)<input id=\"fly-start\" type=\"datetime-local\"></label>\n<label>Ende (deine lokale Uhrzeit)<input id=\"fly-end\" type=\"datetime-local\"></label>\n<label>Kurzer Hinweis (optional)<textarea id=\"fly-summary\" rows=\"3\" maxlength=\"400\"></textarea></label>\n<button id=\"fly-preview\" type=\"button\">Free Fly prüfen</button><button id=\"fly-disable\" type=\"button\">Free Fly deaktivieren – Vorschau</button>\n</fieldset>\n<fieldset><legend>Bestätigtes Event</legend>\n<label>Event-Meldung als Ausgangspunkt<select id=\"event-source\"><option value=\"\">Quelle selbst eingeben</option></select></label>\n<label>Name<input id=\"event-name\" placeholder=\"Name des Events\"></label>\n<label>Offizieller RSI-Link<input id=\"event-url\" type=\"url\" placeholder=\"https://robertsspaceindustries.com/…\"></label>\n<label>Beginn (deine lokale Uhrzeit)<input id=\"event-start\" type=\"datetime-local\"></label>\n<label>Ende (deine lokale Uhrzeit)<input id=\"event-end\" type=\"datetime-local\"></label>\n<label>Kurzer Hinweis (optional)<textarea id=\"event-summary\" rows=\"3\" maxlength=\"400\"></textarea></label>\n<button id=\"event-preview\" type=\"button\">Event prüfen</button><div id=\"saved-events\"></div>\n</fieldset>\n<fieldset><legend>Eigenes Community Event</legend>\n<p class=\"page-intro\">Für Ingame-Veranstaltungen von Spielern oder anderen Veranstaltern. Diese werden sichtbar als Community Event und nicht als offizieller RSI-Termin bezeichnet. Angaben zu Echtgeldpreisen nur mit Link zu den Bedingungen des Veranstalters veröffentlichen.</p>\n<label>Name<input id=\"community-name\" maxlength=\"150\" placeholder=\"Name des Ingame Events\"></label>\n<label>Veranstalter<input id=\"community-organizer\" maxlength=\"120\" placeholder=\"Name der Community / Organisation\"></label>\n<label>Seite des Veranstalters und Teilnahmebedingungen<input id=\"community-url\" type=\"url\" placeholder=\"https://…\"></label>\n<label>Beginn (deine lokale Uhrzeit)<input id=\"community-start\" type=\"datetime-local\"></label>\n<label>Ende (deine lokale Uhrzeit)<input id=\"community-end\" type=\"datetime-local\"></label>\n<label>Beschreibung<textarea id=\"community-summary\" rows=\"3\" maxlength=\"400\"></textarea></label>\n<label>Preise (optional, nachprüfen)<input id=\"community-prize\" maxlength=\"180\" placeholder=\"z. B. Geldpreise laut Veranstalter\"></label>\n<label>Eigenes Bild (optional, PNG/JPG/WebP, maximal 512 KB)<input id=\"community-image\" type=\"file\" accept=\"image/png,image/jpeg,image/webp\"></label><button id=\"upload-image\" type=\"button\">Bild hochladen</button><p id=\"upload-status\" role=\"status\"></p><img id=\"community-image-preview\" alt=\"Vorschau des eigenen Event-Bildes\" style=\"max-width:100%;max-height:260px\" hidden>\n<button id=\"community-preview\" type=\"button\">Community Event prüfen</button>\n</fieldset>\n<h2>Vorschau</h2><pre id=\"result\">Noch nichts geprüft.</pre><button id=\"publish\" type=\"button\" disabled>Geprüfte Änderung veröffentlichen</button>\n</main>\n<script>\nconst byId=id=>document.getElementById(id), output=byId('result');let pending=null,communityImageUrl='';\nfunction iso(id){const value=byId(id).value;return value&&Number.isFinite(new Date(value).getTime())?new Date(value).toISOString():''}\nfunction local(value){if(!value)return '';const d=new Date(value);if(!Number.isFinite(d.getTime()))return '';const n=v=>String(v).padStart(2,'0');return `${d.getFullYear()}-${n(d.getMonth()+1)}-${n(d.getDate())}T${n(d.getHours())}:${n(d.getMinutes())}`}\nfunction invalidate(){pending=null;byId('publish').disabled=true}\nasync function call(action,payload){const r=await fetch('/manage/events/'+action,{method:action==='state'?'GET':'POST',headers:{'content-type':'application/json'},body:payload?JSON.stringify(payload):undefined,cache:'no-store'});if(r.status===401){location.replace('/admin');throw Error('Sitzung abgelaufen. Bitte erneut anmelden.')}const body=await r.json();if(!r.ok||!body.ok)throw Error(body.error||`HTTP ${r.status}`);return body}\nfunction show(value){output.textContent=typeof value==='string'?value:JSON.stringify(value,null,2)}\nasync function load(){try{invalidate();const data=await call('state');const f=data.freeFly||{};byId('fly-title').value=f.title||'';byId('fly-url').value=f.sourceUrl||'';byId('fly-start').value=local(f.start);byId('fly-end').value=local(f.end);byId('fly-summary').value=f.summary||'';const root=byId('saved-events');root.replaceChildren();for(const event of data.events){const row=document.createElement('div');row.className='entry';const name=document.createElement('span');name.textContent=`${event.type==='Community Event'?'Community · ':'RSI · '}${event.name} · ${new Date(event.start).toLocaleString('de-DE')} – ${new Date(event.end).toLocaleString('de-DE')}`;const button=document.createElement('button');button.type='button';button.textContent='Entfernen – Vorschau';button.addEventListener('click',()=>preview({kind:event.type==='Community Event'?'community':'event',action:'remove',data:{sourceUrl:event.sourceUrl,start:event.start}}));row.append(name,button);root.append(row)}show(`Gespeichert: ${data.events.length} Event(s). Free Fly: ${f.active?'eingetragen':'inaktiv'}.`)}catch(e){show(e.message)}}\nasync function suggestions(){try{const r=await fetch('/api/news',{cache:'no-store'});const news=await r.json();for(const item of news.filter(n=>['EVENT','FREE FLY'].includes(n.category)&&n.sourceUrl?.startsWith('https://robertsspaceindustries.com/')).slice(0,15)){const option=document.createElement('option');option.value=item.sourceUrl;option.textContent=item.title;option.dataset.title=item.title;byId('event-source').append(option)}}catch{}}\nasync function preview(payload){try{invalidate();const result=await call('preview',payload);pending={...payload,expectedSha:result.expectedSha};show({hinweis:'Bitte den Titel, Zeitraum und Original-Link prüfen. Erst danach veröffentlichen.',vorschau:result.proposal});byId('publish').disabled=false}catch(e){show(e.message)}}\nbyId('load').addEventListener('click',load);\nbyId('event-source').addEventListener('change',e=>{const option=e.target.selectedOptions[0];if(option?.dataset.title){byId('event-name').value=option.dataset.title;byId('event-url').value=option.value}invalidate()});\nbyId('fly-preview').addEventListener('click',()=>preview({kind:'freefly',action:'set',data:{title:byId('fly-title').value,sourceUrl:byId('fly-url').value,start:iso('fly-start'),end:iso('fly-end'),summary:byId('fly-summary').value}}));\nbyId('fly-disable').addEventListener('click',()=>preview({kind:'freefly',action:'disable'}));\nbyId('event-preview').addEventListener('click',()=>preview({kind:'event',action:'set',data:{name:byId('event-name').value,sourceUrl:byId('event-url').value,start:iso('event-start'),end:iso('event-end'),summary:byId('event-summary').value}}));\nbyId('community-image').addEventListener('change',()=>{communityImageUrl='';byId('upload-status').textContent='Bild ausgewählt. Bitte erst hochladen.';byId('community-image-preview').hidden=true;invalidate()});\nbyId('upload-image').addEventListener('click',async()=>{const file=byId('community-image').files[0];if(!file){byId('upload-status').textContent='Bitte zuerst eine Bilddatei auswählen.';return}if(file.size>512*1024){byId('upload-status').textContent='Bild ist größer als 512 KB.';return}try{byId('upload-status').textContent='Bild wird hochgeladen …';const r=await fetch('/manage/events/image',{method:'POST',headers:{'content-type':file.type},body:file,cache:'no-store'});if(r.status===401){location.replace('/admin');return}const data=await r.json();if(!r.ok||!data.ok)throw Error(data.error||'Upload fehlgeschlagen');communityImageUrl=data.imageUrl;byId('community-image-preview').src=data.imageUrl;byId('community-image-preview').hidden=false;byId('upload-status').textContent='Bild hochgeladen. Motiv in der Vorschau prüfen.';invalidate()}catch(e){byId('upload-status').textContent=e.message}});\nbyId('community-preview').addEventListener('click',()=>{if(byId('community-image').files[0]&&!communityImageUrl){show('Ausgewähltes Bild bitte vor der Prüfung hochladen.');return}preview({kind:'community',action:'set',data:{name:byId('community-name').value,organizer:byId('community-organizer').value,sourceUrl:byId('community-url').value,start:iso('community-start'),end:iso('community-end'),summary:byId('community-summary').value,prize:byId('community-prize').value,imageUrl:communityImageUrl}})});\nbyId('publish').addEventListener('click',async()=>{if(!pending)return;try{const result=await call('publish',pending);invalidate();show(`Gespeichert: ${result.kind==='event'?'Event':result.kind==='community'?'Community Event':'Free Fly'}. Die öffentliche Seite übernimmt die Änderung aus den Website-Daten.`);await load()}catch(e){invalidate();show(e.message)}});\nfor(const input of document.querySelectorAll('input,textarea,select'))input.addEventListener('input',invalidate);\nsuggestions();\n</script>\n</body></html>\n";
+const EVENT_ADMIN_HTML = "<!doctype html>\n<html lang=\"de\">\n<head>\n<meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<meta name=\"robots\" content=\"noindex,nofollow\"><title>Terminpflege – Verse Radar</title>\n<style>\n*{box-sizing:border-box}body{margin:0;background:#041016;color:#e2eaea;font:15px/1.5 system-ui,Arial,sans-serif}a{color:#70ceda;text-decoration:none}.site-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 25px;border-bottom:1px solid #24404b}.site-header .brand{display:flex;flex-direction:column;color:#e2eaea;line-height:1}.brand strong{color:#79f05c}.brand small{font-size:8px;color:#7e969c;margin-top:5px}.site-header nav{display:flex;gap:14px;font-size:12px}.menu-toggle,.brand-radar{display:none}.page{padding:35px 20px;margin:0 auto}.eyebrow{color:#79f05c;font-size:10px;letter-spacing:.15em}.page-intro{color:#93aab0;max-width:700px}@media(max-width:720px){.site-header nav{display:none}}\n.event-editor{max-width:850px}.event-editor fieldset{border:1px solid #24404b;border-radius:8px;padding:20px;margin:22px 0}.event-editor label{display:block;margin:12px 0;font-size:13px}.event-editor input,.event-editor textarea,.event-editor select{display:block;box-sizing:border-box;width:100%;max-width:650px;margin-top:5px;background:#071219;border:1px solid #24404b;color:#e2eaea;border-radius:4px;padding:10px;font:inherit}.event-editor button{background:#184f29;color:#e2eaea;border:1px solid #5dcc62;border-radius:5px;padding:10px 15px;margin:8px 8px 0 0;cursor:pointer}.event-editor button:disabled{opacity:.45;cursor:default}.event-editor pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#071219;border:1px solid #24404b;padding:15px;border-radius:5px}.event-editor .entry{border-top:1px solid #24404b;margin-top:12px;padding-top:12px}\n</style>\n</head>\n<body>\n<header class=\"site-header\"><a class=\"brand\" href=\"/\"><span class=\"brand-radar\"><span></span></span><span><b>VERSE</b><strong>RADAR</strong><small>DEINE NEWS AUS DEM VERSE</small></span></a><button class=\"menu-toggle\">☰</button><nav><a href=\"/news.html\">News</a><a href=\"/patches.html\">Patch Notes</a><a href=\"/patch-history.html\">Patch History</a><a href=\"/free-fly.html\">Free Fly &amp; Events</a></nav></header>\n<main class=\"page event-editor\"><div class=\"eyebrow\">VERSE RADAR · VERWALTUNG</div><h1>Free Fly, Events & Ingame-Aktionen pflegen</h1><p class=\"page-intro\">Nur offizielle RSI-Quellen verwenden. Erst Vorschau prüfen, dann veröffentlichen. Abgelaufene Termine verschwinden automatisch; Aktionen ohne bestätigtes Ende bitte selbst entfernen.</p>\n<p><a href=\"/manage\">← Verwaltung</a></p><button id=\"load\" type=\"button\">Gespeicherten Stand laden</button>\n<fieldset><legend>Free Fly</legend>\n<label>Titel<input id=\"fly-title\" placeholder=\"Offizieller Name des Free Fly\"></label>\n<label>Offizieller RSI-Link<input id=\"fly-url\" type=\"url\" placeholder=\"https://robertsspaceindustries.com/…\"></label>\n<label>Beginn (deine lokale Uhrzeit)<input id=\"fly-start\" type=\"datetime-local\"></label>\n<label>Ende (deine lokale Uhrzeit)<input id=\"fly-end\" type=\"datetime-local\"></label>\n<label>Kurzer Hinweis (optional)<textarea id=\"fly-summary\" rows=\"3\" maxlength=\"400\"></textarea></label>\n<button id=\"fly-preview\" type=\"button\">Free Fly prüfen</button><button id=\"fly-disable\" type=\"button\">Free Fly deaktivieren – Vorschau</button>\n</fieldset>\n<fieldset><legend>Bestätigtes Event</legend>\n<label>Event-Meldung als Ausgangspunkt<select id=\"event-source\"><option value=\"\">Quelle selbst eingeben</option></select></label>\n<label>Name<input id=\"event-name\" placeholder=\"Name des Events\"></label>\n<label>Offizieller RSI-Link<input id=\"event-url\" type=\"url\" placeholder=\"https://robertsspaceindustries.com/…\"></label>\n<label>Beginn (deine lokale Uhrzeit)<input id=\"event-start\" type=\"datetime-local\"></label>\n<label>Ende (deine lokale Uhrzeit)<input id=\"event-end\" type=\"datetime-local\"></label>\n<label>Kurzer Hinweis (optional)<textarea id=\"event-summary\" rows=\"3\" maxlength=\"400\"></textarea></label>\n<button id=\"event-preview\" type=\"button\">Event prüfen</button><div id=\"saved-events\"></div>\n</fieldset>\n<fieldset><legend>Offizielle Ingame-Aktion</legend>\n<p class=\"page-intro\">Zum Beispiel Orison Relief Support: Aufgaben im Spiel und Belohnungen für den eigenen Account. Gemeinschaftsziel nur ausfüllen, wenn die offizielle Quelle es bestätigt.</p>\n<label>Name<input id=\"activity-name\" maxlength=\"150\" placeholder=\"Name der Ingame-Aktion\"></label>\n<label>Offizielle RSI-Quelle<input id=\"activity-url\" type=\"url\" placeholder=\"https://robertsspaceindustries.com/spectrum/…\"></label>\n<label>Aufgaben (eine pro Zeile)<textarea id=\"activity-tasks\" rows=\"4\" placeholder=\"Aufgabe und erforderliche Menge laut Quelle\"></textarea></label>\n<label>Persönliche Belohnungen (eine pro Zeile)<textarea id=\"activity-rewards\" rows=\"4\" placeholder=\"Belohnung und Voraussetzung laut Quelle\"></textarea></label>\n<label>Gemeinschaftsziel (optional)<input id=\"activity-group-goal\" maxlength=\"240\" placeholder=\"Nur wenn offiziell bestätigt\"></label>\n<label>Gemeinschaftsbelohnung (optional)<input id=\"activity-group-reward\" maxlength=\"240\"></label>\n<label>Beginn, falls bestätigt (deine lokale Uhrzeit)<input id=\"activity-start\" type=\"datetime-local\"></label>\n<label>Ende, falls bestätigt (deine lokale Uhrzeit)<input id=\"activity-end\" type=\"datetime-local\"></label>\n<label>Kurzer Hinweis (optional)<textarea id=\"activity-summary\" rows=\"3\" maxlength=\"400\"></textarea></label>\n<label>Eigenes Bild (optional, PNG/JPG/WebP, maximal 512 KB)<input id=\"activity-image\" type=\"file\" accept=\"image/png,image/jpeg,image/webp\"></label><button id=\"upload-image\" type=\"button\">Bild hochladen</button><p id=\"upload-status\" role=\"status\"></p><img id=\"activity-image-preview\" alt=\"Vorschau des Bildes zur Ingame-Aktion\" style=\"max-width:100%;max-height:260px\" hidden>\n<button id=\"activity-preview\" type=\"button\">Ingame-Aktion prüfen</button><div id=\"saved-activities\"></div>\n</fieldset>\n<h2>Vorschau</h2><pre id=\"result\">Noch nichts geprüft.</pre><button id=\"publish\" type=\"button\" disabled>Geprüfte Änderung veröffentlichen</button>\n</main>\n<script>\nconst byId=id=>document.getElementById(id), output=byId('result');let pending=null,activityImageUrl='';\nfunction iso(id){const value=byId(id).value;return value&&Number.isFinite(new Date(value).getTime())?new Date(value).toISOString():''}\nfunction local(value){if(!value)return '';const d=new Date(value);if(!Number.isFinite(d.getTime()))return '';const n=v=>String(v).padStart(2,'0');return `${d.getFullYear()}-${n(d.getMonth()+1)}-${n(d.getDate())}T${n(d.getHours())}:${n(d.getMinutes())}`}\nfunction invalidate(){pending=null;byId('publish').disabled=true}\nasync function call(action,payload){const r=await fetch('/manage/events/'+action,{method:action==='state'?'GET':'POST',headers:{'content-type':'application/json'},body:payload?JSON.stringify(payload):undefined,cache:'no-store'});if(r.status===401){location.replace('/admin');throw Error('Sitzung abgelaufen. Bitte erneut anmelden.')}const body=await r.json();if(!r.ok||!body.ok)throw Error(body.error||`HTTP ${r.status}`);return body}\nfunction show(value){output.textContent=typeof value==='string'?value:JSON.stringify(value,null,2)}\nasync function load(){try{invalidate();const data=await call('state');const f=data.freeFly||{};byId('fly-title').value=f.title||'';byId('fly-url').value=f.sourceUrl||'';byId('fly-start').value=local(f.start);byId('fly-end').value=local(f.end);byId('fly-summary').value=f.summary||'';const root=byId('saved-events');root.replaceChildren();for(const event of data.events){const row=document.createElement('div');row.className='entry';const name=document.createElement('span');name.textContent=`RSI · ${event.name} · ${new Date(event.start).toLocaleString('de-DE')} – ${new Date(event.end).toLocaleString('de-DE')}`;const button=document.createElement('button');button.type='button';button.textContent='Entfernen – Vorschau';button.addEventListener('click',()=>preview({kind:'event',action:'remove',data:{sourceUrl:event.sourceUrl,start:event.start}}));row.append(name,button);root.append(row)}const acts=byId('saved-activities');acts.replaceChildren();for(const activity of data.activities){const row=document.createElement('div');row.className='entry';const label=document.createElement('span');label.textContent=`${activity.name} · ${activity.end?'bis '+new Date(activity.end).toLocaleString('de-DE'):'Ende nicht bestätigt'}`;const remove=document.createElement('button');remove.type='button';remove.textContent='Entfernen – Vorschau';remove.addEventListener('click',()=>preview({kind:'activity',action:'remove',data:{sourceUrl:activity.sourceUrl}}));row.append(label,remove);acts.append(row)}show(`Gespeichert: ${data.events.length} Event(s), ${data.activities.length} Ingame-Aktion(en). Free Fly: ${f.active?'eingetragen':'inaktiv'}.`)}catch(e){show(e.message)}}\nasync function suggestions(){try{const r=await fetch('/api/news',{cache:'no-store'});const news=await r.json();for(const item of news.filter(n=>['EVENT','FREE FLY'].includes(n.category)&&n.sourceUrl?.startsWith('https://robertsspaceindustries.com/')).slice(0,15)){const option=document.createElement('option');option.value=item.sourceUrl;option.textContent=item.title;option.dataset.title=item.title;byId('event-source').append(option)}}catch{}}\nasync function preview(payload){try{invalidate();const result=await call('preview',payload);pending={...payload,expectedSha:result.expectedSha};show({hinweis:'Bitte den Titel, Zeitraum und Original-Link prüfen. Erst danach veröffentlichen.',vorschau:result.proposal});byId('publish').disabled=false}catch(e){show(e.message)}}\nbyId('load').addEventListener('click',load);\nbyId('event-source').addEventListener('change',e=>{const option=e.target.selectedOptions[0];if(option?.dataset.title){byId('event-name').value=option.dataset.title;byId('event-url').value=option.value}invalidate()});\nbyId('fly-preview').addEventListener('click',()=>preview({kind:'freefly',action:'set',data:{title:byId('fly-title').value,sourceUrl:byId('fly-url').value,start:iso('fly-start'),end:iso('fly-end'),summary:byId('fly-summary').value}}));\nbyId('fly-disable').addEventListener('click',()=>preview({kind:'freefly',action:'disable'}));\nbyId('event-preview').addEventListener('click',()=>preview({kind:'event',action:'set',data:{name:byId('event-name').value,sourceUrl:byId('event-url').value,start:iso('event-start'),end:iso('event-end'),summary:byId('event-summary').value}}));\nbyId('activity-image').addEventListener('change',()=>{activityImageUrl='';byId('upload-status').textContent='Bild ausgewählt. Bitte erst hochladen.';byId('activity-image-preview').hidden=true;invalidate()});\nbyId('upload-image').addEventListener('click',async()=>{const file=byId('activity-image').files[0];if(!file){byId('upload-status').textContent='Bitte zuerst eine Bilddatei auswählen.';return}if(file.size>512*1024){byId('upload-status').textContent='Bild ist größer als 512 KB.';return}try{byId('upload-status').textContent='Bild wird hochgeladen …';const r=await fetch('/manage/activities/image',{method:'POST',headers:{'content-type':file.type},body:file,cache:'no-store'});if(r.status===401){location.replace('/admin');return}const data=await r.json();if(!r.ok||!data.ok)throw Error(data.error||'Upload fehlgeschlagen');activityImageUrl=data.imageUrl;byId('activity-image-preview').src=data.imageUrl;byId('activity-image-preview').hidden=false;byId('upload-status').textContent='Bild hochgeladen. Motiv in der Vorschau prüfen.';invalidate()}catch(e){byId('upload-status').textContent=e.message}});\nbyId('activity-preview').addEventListener('click',()=>{if(byId('activity-image').files[0]&&!activityImageUrl){show('Ausgewähltes Bild bitte vor der Prüfung hochladen.');return}preview({kind:'activity',action:'set',data:{name:byId('activity-name').value,sourceUrl:byId('activity-url').value,tasks:byId('activity-tasks').value,rewards:byId('activity-rewards').value,groupGoal:byId('activity-group-goal').value,groupReward:byId('activity-group-reward').value,start:iso('activity-start'),end:iso('activity-end'),summary:byId('activity-summary').value,imageUrl:activityImageUrl}})});\nbyId('publish').addEventListener('click',async()=>{if(!pending)return;try{const result=await call('publish',pending);invalidate();show(`Gespeichert: ${result.kind==='event'?'Event':result.kind==='activity'?'Ingame-Aktion':'Free Fly'}. Die öffentliche Seite übernimmt die Änderung aus den Website-Daten.`);await load()}catch(e){invalidate();show(e.message)}});\nfor(const input of document.querySelectorAll('input,textarea,select'))input.addEventListener('input',invalidate);\nsuggestions();\n</script>\n</body></html>\n";
 function eventAdminPage() {
   return new Response(EVENT_ADMIN_HTML, { headers: {
     "content-type": "text/html;charset=utf-8", "cache-control": "no-store", "referrer-policy": "no-referrer",
@@ -430,8 +431,9 @@ function dealAdminPage() {
 
 const FREE_FLY_DATA_PATH = "public/data/freefly.json";
 const EVENT_DATA_PATH = "public/data/events.json";
-const EVENT_IMAGE_DIR = "public/event-images/";
-const MAX_EVENT_IMAGE_BYTES = 512 * 1024;
+const ACTIVITY_DATA_PATH = "public/data/activities.json";
+const ACTIVITY_IMAGE_DIR = "public/activity-images/";
+const MAX_ACTIVITY_IMAGE_BYTES = 512 * 1024;
 const DEAL_DATA_PATH = "public/data/deals.json";
 const SHIP_IMAGES_PATH = "public/data/ship-images.json";
 
@@ -568,32 +570,33 @@ function checkedEventFields(data) {
   return { start, end, sourceUrl, summary };
 }
 
-function communityLink(raw) {
-  let url;
-  try { url=new URL(raw); } catch { throw Error("Link zur Veranstalterseite fehlt oder ist ungültig."); }
-  if (url.protocol!=="https:" || url.username || url.password || url.port || !/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(url.hostname)) throw Error("Nur öffentliche HTTPS-Links zur Veranstalterseite erlaubt.");
-  url.hash="";
-  return url.toString();
-}
-function communityImage(raw) {
+function activityImage(raw) {
   if (!raw) return "";
-  if (typeof raw!=="string" || !/^\/event-image\/[a-f0-9]{64}\.(?:png|jpg|webp)$/.test(raw)) throw Error("Bitte ein Bild über den Event-Upload auswählen.");
+  if (typeof raw!=="string" || !/^\/activity-image\/[a-f0-9]{64}\.(?:png|jpg|webp)$/.test(raw)) throw Error("Bitte ein Bild über den Upload für Ingame-Aktionen auswählen.");
   return raw;
 }
-function checkedCommunityFields(data) {
-  const name=String(data?.name||"").trim(),organizer=String(data?.organizer||"").trim();
-  if (name.length<5 || name.length>150 || organizer.length<2 || organizer.length>120) throw Error("Event-Name (5–150 Zeichen) und Veranstalter (2–120 Zeichen) eintragen.");
-  const start=editorDate(data.start),end=editorDate(data.end);
-  if (Date.parse(end)<=Date.parse(start) || Date.parse(end)<=Date.now()) throw Error("Beginn und zukünftiges Ende prüfen.");
-  const summary=String(data.summary||"").trim(),prize=String(data.prize||"").trim();
-  if (!summary || summary.length>400 || prize.length>180) throw Error("Beschreibung (maximal 400 Zeichen) und Preisinfo (maximal 180 Zeichen) prüfen.");
-  return {name,type:"Community Event",organizer,start,end,sourceUrl:communityLink(data.sourceUrl),summary,prize,imageUrl:communityImage(data.imageUrl)};
+function activityLines(value,label) {
+  const lines=String(value||"").split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  if (!lines.length || lines.length>12 || lines.some(x=>x.length>240)) throw Error(label+": 1–12 Zeilen mit höchstens 240 Zeichen je Zeile eintragen.");
+  return lines;
 }
-async function assertEventImageExists(env,url) {
+function checkedActivityFields(data) {
+  const name=String(data?.name||"").trim();
+  if (name.length<5 || name.length>150) throw Error("Name der Ingame-Aktion (5–150 Zeichen) eintragen.");
+  const sourceUrl=officialEventLink(data.sourceUrl);
+  const start=data.start?editorDate(data.start):null, end=data.end?editorDate(data.end):null;
+  if (end && (!start || Date.parse(end)<=Date.parse(start) || Date.parse(end)<=Date.now())) throw Error("Für ein Enddatum einen früheren Beginn und ein zukünftiges Ende eintragen.");
+  const summary=String(data.summary||"").trim();
+  if (summary.length>400) throw Error("Beschreibung zu lang (maximal 400 Zeichen).");
+  const groupGoal=String(data.groupGoal||"").trim(),groupReward=String(data.groupReward||"").trim();
+  if (groupGoal.length>240 || groupReward.length>240 || Boolean(groupGoal)!==Boolean(groupReward)) throw Error("Gemeinschaftsziel und zugehörige Belohnung gemeinsam eintragen (je maximal 240 Zeichen).");
+  return {name,type:"Ingame Activity",sourceUrl,start,end,summary,tasks:activityLines(data.tasks,"Aufgaben"),rewards:activityLines(data.rewards,"Persönliche Belohnungen"),groupGoal,groupReward,imageUrl:activityImage(data.imageUrl),active:true,checkedAt:new Date().toISOString()};
+}
+async function assertActivityImageExists(env,url) {
   if (!url) return;
   const [owner,repo]=String(env.GITHUB_REPO||"").split("/");
-  if (!env.GITHUB_TOKEN || !owner || !repo) throw Error("GitHub-Konfiguration für Event-Bilder fehlt.");
-  const path=EVENT_IMAGE_DIR+url.slice("/event-image/".length);
+  if (!env.GITHUB_TOKEN || !owner || !repo) throw Error("GitHub-Konfiguration für Bilder fehlt.");
+  const path=ACTIVITY_IMAGE_DIR+url.slice("/activity-image/".length);
   const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${encodeURIComponent(env.GITHUB_BRANCH||"main")}`,{headers:gh(env.GITHUB_TOKEN)});
   if (!r.ok) throw Error("Hochgeladenes Bild nicht gefunden. Bitte erneut hochladen.");
 }
@@ -604,38 +607,38 @@ function imageFormat(bytes) {
   if (bytes.length>=16 && new TextDecoder().decode(bytes.slice(0,4))==="RIFF" && new TextDecoder().decode(bytes.slice(8,12))==="WEBP") return {ext:"webp",mime:"image/webp"};
   return null;
 }
-async function uploadEventImage(request,env) {
-  if (Number(request.headers.get("content-length"))>MAX_EVENT_IMAGE_BYTES) {const e=Error("Bild zu groß (maximal 512 KB).");e.status=413;throw e;}
+async function uploadActivityImage(request,env) {
+  if (Number(request.headers.get("content-length"))>MAX_ACTIVITY_IMAGE_BYTES) {const e=Error("Bild zu groß (maximal 512 KB).");e.status=413;throw e;}
   const reader=request.body?.getReader();
   if (!reader) throw Error("Bilddatei fehlt.");
   const parts=[];let total=0;
   while (true) {
     const {done,value}=await reader.read();if(done)break;
     total+=value.length;
-    if(total>MAX_EVENT_IMAGE_BYTES){await reader.cancel();const e=Error("Bild zu groß (maximal 512 KB).");e.status=413;throw e;}
+    if(total>MAX_ACTIVITY_IMAGE_BYTES){await reader.cancel();const e=Error("Bild zu groß (maximal 512 KB).");e.status=413;throw e;}
     parts.push(value);
   }
   const bytes=new Uint8Array(total);let offset=0;
   for(const part of parts){bytes.set(part,offset);offset+=part.length;}
   const format=imageFormat(bytes);
-  if (!bytes.length || bytes.length>MAX_EVENT_IMAGE_BYTES || !format) {const e=Error("Nur vollständige PNG-, JPG- oder WebP-Bilder bis 512 KB hochladen.");e.status=413;throw e;}
+  if (!bytes.length || bytes.length>MAX_ACTIVITY_IMAGE_BYTES || !format) {const e=Error("Nur vollständige PNG-, JPG- oder WebP-Bilder bis 512 KB hochladen.");e.status=413;throw e;}
   const digest=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",bytes)),x=>x.toString(16).padStart(2,"0")).join("");
-  const filename=`${digest}.${format.ext}`,path=EVENT_IMAGE_DIR+filename;
+  const filename=`${digest}.${format.ext}`,path=ACTIVITY_IMAGE_DIR+filename;
   const [owner,repo]=String(env.GITHUB_REPO||"").split("/");
   if (!env.GITHUB_TOKEN || !owner || !repo) throw Error("GitHub-Konfiguration fehlt.");
   const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${encodeURIComponent(env.GITHUB_BRANCH||"main")}`,{headers:gh(env.GITHUB_TOKEN)});
-  if (r.status===404) await putGithub(env,path,bytes,`Verse Radar ${VERSION}: community event image`,null);
+  if (r.status===404) await putGithub(env,path,bytes,`Verse Radar ${VERSION}: ingame activity image`,null);
   else if (!r.ok) throw Error(`Bildspeicher nicht erreichbar (HTTP ${r.status}).`);
-  return {imageUrl:`/event-image/${filename}`,size:bytes.length};
+  return {imageUrl:`/activity-image/${filename}`,size:bytes.length};
 }
-async function serveEventImage(env,pathname) {
-  const match=/^\/event-image\/([a-f0-9]{64}\.(?:png|jpg|webp))$/.exec(pathname);
+async function serveActivityImage(env,pathname) {
+  const match=/^\/activity-image\/([a-f0-9]{64}\.(?:png|jpg|webp))$/.exec(pathname);
   if (!match || !env.GITHUB_TOKEN || !env.GITHUB_REPO) return new Response("Bild nicht gefunden",{status:404});
   const [owner,repo]=env.GITHUB_REPO.split("/");
-  const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${EVENT_IMAGE_DIR}${match[1]}?ref=${encodeURIComponent(env.GITHUB_BRANCH||"main")}`,{headers:gh(env.GITHUB_TOKEN)});
+  const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${ACTIVITY_IMAGE_DIR}${match[1]}?ref=${encodeURIComponent(env.GITHUB_BRANCH||"main")}`,{headers:gh(env.GITHUB_TOKEN)});
   if (!r.ok) return new Response("Bild nicht gefunden",{status:r.status===404?404:502});
   const data=await r.json();
-  if (data.size>MAX_EVENT_IMAGE_BYTES || !data.content) return new Response("Bild nicht verfügbar",{status:502});
+  if (data.size>MAX_ACTIVITY_IMAGE_BYTES || !data.content) return new Response("Bild nicht verfügbar",{status:502});
   const bytes=Uint8Array.from(atob(data.content.replace(/\s/g,"")),c=>c.charCodeAt(0));
   const format=imageFormat(bytes);
   if (!format || format.ext!==match[1].split(".").at(-1)) return new Response("Ungültiges Bild",{status:502});
@@ -645,21 +648,21 @@ async function serveEventImage(env,pathname) {
 }
 
 async function eventEditorState(env) {
-  const [freeFly, events] = await Promise.all([
-    getGithubJSONStrict(env, FREE_FLY_DATA_PATH), getGithubJSONStrict(env, EVENT_DATA_PATH)
+  const [freeFly, events, activities] = await Promise.all([
+    getGithubJSONStrict(env, FREE_FLY_DATA_PATH), getGithubJSONStrict(env, EVENT_DATA_PATH), getGithubJSONStrict(env, ACTIVITY_DATA_PATH, {allowMissing:true})
   ]);
-  if (!freeFly.data || typeof freeFly.data !== "object" || Array.isArray(freeFly.data) || !Array.isArray(events.data)) throw Error("Gespeicherte Termin-Dateien ungültig; nichts verändert.");
-  return { freeFly: freeFly.data, events: events.data };
+  if (!freeFly.data || typeof freeFly.data !== "object" || Array.isArray(freeFly.data) || !Array.isArray(events.data) || activities.data!==null && !Array.isArray(activities.data)) throw Error("Gespeicherte Termin-Dateien ungültig; nichts verändert.");
+  return { freeFly: freeFly.data, events: events.data.filter(e=>e.type!=="Community Event"), activities: activities.data||[] };
 }
 
 async function editEventData(env, input, publish) {
   const kind = input?.kind, action = input?.action;
-  if (!["freefly", "event", "community"].includes(kind)) throw Error("Unbekannte Terminart.");
+  if (!["freefly", "event", "activity"].includes(kind)) throw Error("Unbekannte Terminart.");
   if (kind === "freefly" ? !["set", "disable"].includes(action) : !["set", "remove"].includes(action)) throw Error("Unbekannte Aktion.");
-  const path = kind === "freefly" ? FREE_FLY_DATA_PATH : EVENT_DATA_PATH;
-  const current = await getGithubJSONStrict(env, path);
-  if (kind !== "freefly" ? !Array.isArray(current.data) : !current.data || typeof current.data !== "object" || Array.isArray(current.data)) throw Error("Gespeicherte Termindaten ungültig; nichts verändert.");
-  if (publish && (!input.expectedSha || input.expectedSha !== current.sha)) {
+  const path = kind === "freefly" ? FREE_FLY_DATA_PATH : kind === "activity" ? ACTIVITY_DATA_PATH : EVENT_DATA_PATH;
+  const current = await getGithubJSONStrict(env, path, {allowMissing:kind==="activity"});
+  if (kind !== "freefly" ? current.data!==null && !Array.isArray(current.data) : !current.data || typeof current.data !== "object" || Array.isArray(current.data)) throw Error("Gespeicherte Termindaten ungültig; nichts verändert.");
+  if (publish && (input.expectedSha ?? null) !== (current.sha ?? null)) {
     const error = new Error("Daten wurden seit der Vorschau geändert. Bitte erneut prüfen."); error.status = 409; throw error;
   }
   let next;
@@ -671,20 +674,20 @@ async function editEventData(env, input, publish) {
       next = { active: true, title, ...checkedEventFields(input.data), pageUrl: "/free-fly.html" };
     }
   } else {
-    const items = current.data;
+    const items = current.data||[];
     if (action === "remove") {
-      const sourceUrl = kind==="community"?communityLink(input.data?.sourceUrl):officialEventLink(input.data?.sourceUrl), start = editorDate(input.data?.start);
-      if (!items.some(x => x.sourceUrl === sourceUrl && x.start === start)) throw Error("Termin nicht gefunden.");
-      next = items.filter(x => x.sourceUrl !== sourceUrl || x.start !== start);
+      const sourceUrl = officialEventLink(input.data?.sourceUrl), start = kind==="activity"?null:editorDate(input.data?.start);
+      if (!items.some(x => x.sourceUrl === sourceUrl && (kind==="activity" || x.start === start))) throw Error("Eintrag nicht gefunden.");
+      next = items.filter(x => x.sourceUrl !== sourceUrl || kind!=="activity" && x.start !== start);
     } else {
       let event;
-      if (kind === "community") { event=checkedCommunityFields(input.data);await assertEventImageExists(env,event.imageUrl); }
+      if (kind === "activity") { event=checkedActivityFields(input.data);await assertActivityImageExists(env,event.imageUrl); }
       else {
         const name = String(input.data?.name || "").trim();
         if (name.length < 5 || name.length > 150) throw Error("Event-Name muss zwischen 5 und 150 Zeichen haben.");
         event = { name, type: "Event", ...checkedEventFields(input.data) };
       }
-      next = items.filter(x => x.sourceUrl !== event.sourceUrl || x.start !== event.start).concat(event).sort((a, b) => Date.parse(a.start) - Date.parse(b.start));
+      next = items.filter(x => x.sourceUrl !== event.sourceUrl || kind!=="activity" && x.start !== event.start).concat(event).sort((a, b) => (Date.parse(a.start)||0) - (Date.parse(b.start)||0));
     }
   }
   if (publish) await putGithub(env, path, JSON.stringify(next, null, 2) + "\n", `Verse Radar ${VERSION}: ${kind} ${action}`, current.sha);
