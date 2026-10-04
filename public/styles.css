@@ -36,3 +36,6 @@ main{max-width:var(--max);margin:auto;padding:0 24px}.hero{min-height:430px;disp
 
 /* Verse Radar 0.13.7: sichtbarer Hinweis auf allen öffentlichen Seiten */
 .fan-notice{max-width:var(--max);margin:0 auto;padding:11px 24px;color:#c8d7da;background:#091820;border:1px solid #17313b;font-size:14px;line-height:1.5}
+
+/* Verse Radar 0.13.8: nur aktive Referral-Sonderaktion */
+.referral-special{margin:24px 0;border-color:#36643d}.referral-special[hidden]{display:none}.referral-special-image{margin:18px 0}.referral-special-image img{display:block;width:100%;max-height:360px;object-fit:contain;background:#071219;border-radius:6px}.referral-special-image figcaption{color:var(--muted);font-size:12px}

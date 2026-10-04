@@ -1,12 +1,12 @@
 const CONFIG = {
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.13.7"
+  siteVersion: "0.13.8"
 };
 let usingStaticData = false;
 
 async function loadJSON(name){
-  const url = name === "news.json" ? CONFIG.newsEndpoint : name === "patches.json" ? "/api/patches" : name === "freefly.json" ? "/api/freefly" : name === "events.json" ? "/api/events" : name === "activities.json" ? "/api/activities" : name === "deals.json" ? "/api/deals" : name === "referral.json" ? "/api/referral" : CONFIG.dataBase+name;
+  const url = name === "news.json" ? CONFIG.newsEndpoint : name === "patches.json" ? "/api/patches" : name === "freefly.json" ? "/api/freefly" : name === "events.json" ? "/api/events" : name === "activities.json" ? "/api/activities" : name === "deals.json" ? "/api/deals" : name === "referral.json" ? "/api/referral" : name === "referral-special.json" ? "/api/referral-special" : CONFIG.dataBase+name;
   let r;
   try { r=await fetch(url,{cache:"no-store"}); }
   catch (e) {
@@ -180,7 +180,19 @@ function setReferral(referral){
   const dealInfo=document.querySelector("#ref-deals-status");if(dealInfo)dealInfo.textContent=url?"Bei einer Registrierung über diesen Link kann Verse Radar Vorteile erhalten. Für Boni und Bedingungen ist RSI maßgeblich.":"Der Referral-Link ist derzeit nicht verfügbar. Details findest du auf der Referral-Seite.";
 }
 async function dealsPage(){const target=document.querySelector("#deals");if(!target)return;loadJSON("referral.json").then(setReferral).catch(()=>setReferral(null));try{target.innerHTML=renderDeals(liveDeals(await loadJSON("deals.json")))}catch(e){console.error(e);target.innerHTML='<p class="page-intro">Angebote konnten nicht geladen werden.</p>';}}
-async function referralPage(){if(!document.querySelector("#ref-main"))return;try{setReferral(await loadJSON("referral.json"))}catch{setReferral(null)}}
+function renderReferralSpecial(data,now=Date.now()){
+  if(!data || data.active!==true || typeof data.title!=="string" || !data.title.trim() || !isOfficialSource(data.sourceUrl) || data.imageUrl && !isOfficialPackageImage(data.imageUrl) || !confirmedTime(data.start) || !confirmedTime(data.end) || Date.parse(data.start)>now || Date.parse(data.end)<=now || !Array.isArray(data.rewards) || !data.rewards.length || data.rewards.some(x=>typeof x!=="string"||!x.trim()))return "";
+  const range=new Intl.DateTimeFormat("de-DE",{timeZone:"Europe/Berlin",dateStyle:"medium",timeStyle:"short"});
+  return `<h2>Zusätzlich während der Referral-Sonderaktion</h2><p><strong>${esc(data.title)}</strong> · ${range.format(new Date(data.start))} bis ${range.format(new Date(data.end))} Uhr</p>${data.imageUrl?`<figure class="referral-special-image"><img src="${esc(data.imageUrl)}" alt="Bild zur Referral-Sonderaktion ${esc(data.title)}" loading="lazy" referrerpolicy="no-referrer"><figcaption>Bild von RSI</figcaption></figure>`:""}<h3>Was ist zusätzlich dabei?</h3><ul>${data.rewards.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>${data.note?`<p>${esc(data.note)}</p>`:""}<p>Für den Sonderbonus muss der Account mit dem Referral-Code verknüpft sein und während der Aktion die Voraussetzungen als neuer Backer erfüllen. Laut RSI zählen mindestens 40 USD im Pledge Store während des Aktionszeitraums; wer die Schwelle schon vorher erreicht hat, ist für den Sonderbonus nicht berechtigt. Ein Game Package ist für die Teilnahme als aktiver Spieler erforderlich. Store Credit und geschenkte Pledges zählen nicht. Die genauen Bedingungen stehen in der offiziellen Aktionsmeldung.</p><p><a class="source" href="${esc(data.sourceUrl)}" target="_blank" rel="noopener noreferrer">Offizielle Sonderaktion bei RSI ↗</a></p>`;
+}
+async function referralPage(){
+  if(!document.querySelector("#ref-main"))return;
+  try{setReferral(await loadJSON("referral.json"))}catch{setReferral(null)}
+  const section=document.querySelector("#referral-special");
+  if(!section)return;
+  try{const html=renderReferralSpecial(await loadJSON("referral-special.json"));section.hidden=!html;if(html)section.innerHTML=html}
+  catch{section.hidden=true}
+}
 async function home(){
   const status=document.querySelector("#data-status");
   try{

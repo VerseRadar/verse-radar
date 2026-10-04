@@ -24,7 +24,7 @@ const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
 const PATCH_BACKFILL_PATH = "public/data/patch-backfill-control.json";
 const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "0.13.7";
+const VERSION = "0.13.8";
 const DEFAULT_REFERRAL_URL = "https://www.robertsspaceindustries.com/enlist?referral=STAR-6KT2-XJBC";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
@@ -162,10 +162,23 @@ export default {
         return json({ ok: true, months, metric: "page_views" });
       } catch { return json({ ok: false, error: "Aufrufzahlen gerade nicht verfügbar" }, 503); }
     }
-    if (u.pathname === "/manage" || u.pathname === "/manage/events" || u.pathname === "/manage/deals") {
+    if (u.pathname === "/manage" || u.pathname === "/manage/events" || u.pathname === "/manage/deals" || u.pathname === "/manage/referral") {
       if (!await adminAuthorized(request, env, u)) return new Response(null, { status: 302, headers: { location: "/admin", "cache-control": "no-store" } });
       if (request.method !== "GET") return json({ ok: false, error: "GET erforderlich" }, 405);
-      return u.pathname === "/manage" ? adminDashboardPage() : u.pathname === "/manage/events" ? eventAdminPage() : dealAdminPage();
+      return u.pathname === "/manage" ? adminDashboardPage() : u.pathname === "/manage/events" ? eventAdminPage() : u.pathname === "/manage/deals" ? dealAdminPage() : referralAdminPage();
+    }
+    if (["/manage/referral/state", "/manage/referral/preview", "/manage/referral/publish"].includes(u.pathname)) {
+      if (!env.RUN_SECRET) return json({ ok: false, error: "Zugangsschlüssel nicht eingerichtet." }, 503);
+      if (!await adminAuthorized(request, env, u)) return json({ ok: false, error: "Unauthorized" }, 401);
+      const state = u.pathname.endsWith("/state");
+      if (request.method !== (state ? "GET" : "POST")) return json({ ok: false, error: state ? "GET erforderlich" : "POST erforderlich" }, 405);
+      if (!state && !sameOrigin(request, u)) return json({ ok: false, error: "Andere Herkunft nicht erlaubt" }, 403);
+      try {
+        if (state) return json({ ok: true, version: VERSION, ...await referralSpecialState(env) });
+        const raw = await request.text();
+        if (raw.length > 6000) return json({ ok: false, error: "Eingabe zu groß" }, 413);
+        return json({ ok: true, version: VERSION, ...await editReferralSpecial(env, JSON.parse(raw), u.pathname.endsWith("/publish")) });
+      } catch (e) { return json({ ok: false, error: e.message }, e.status === 409 ? 409 : 400); }
     }
     if (["/manage/deals/state", "/manage/deals/preview", "/manage/deals/publish"].includes(u.pathname)) {
       if (!env.RUN_SECRET) return json({ ok: false, error: "RUN_SECRET fehlt." }, 503);
@@ -365,6 +378,10 @@ export default {
       const url = validReferralUrl(env.REFERRAL_URL) || validReferralUrl(DEFAULT_REFERRAL_URL);
       return json({ enabled: Boolean(url), url });
     }
+    if (u.pathname === "/api/referral-special") {
+      const data = await readGithubJSON(env, REFERRAL_SPECIAL_PATH, null);
+      return json(publicReferralSpecial(data));
+    }
     // Public website: let Cloudflare Static Assets serve /public.
     if (env.ASSETS) return env.ASSETS.fetch(request);
     return new Response(`Verse Radar ${VERSION}`, { headers: { "content-type": "text/plain;charset=utf-8" } });
@@ -412,7 +429,7 @@ function adminLoginPage() {
   return new Response(`<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Admin Login – Verse Radar</title><style>body{font:16px/1.5 system-ui;background:#041016;color:#e2eaea;max-width:520px;margin:9vh auto;padding:24px}a{color:#79f05c}input,button{display:block;font:inherit;padding:12px;margin:12px 0;width:100%;box-sizing:border-box}input{background:#071219;color:white;border:1px solid #24404b}button{background:#184f29;color:white;border:1px solid #5dcc62;cursor:pointer}</style><a href="/">← Verse Radar</a><h1>Admin Login</h1><p>Melde dich mit deinem Zugangsschlüssel an.</p><form id="login"><label>Zugangsschlüssel<input id="secret" type="password" autocomplete="current-password" required></label><button>Anmelden</button></form><p id="message" role="status"></p><script>fetch('/manage/session',{cache:'no-store'}).then(r=>r.json()).then(x=>{if(x.ok)location.replace('/manage')});document.querySelector('#login').addEventListener('submit',async e=>{e.preventDefault();const field=document.querySelector('#secret'),secret=field.value;field.value='';try{const r=await fetch('/manage/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({secret}),cache:'no-store'});if(!r.ok)throw Error('Anmeldung fehlgeschlagen. Zugangsschlüssel prüfen.');location.replace('/manage')}catch(x){document.querySelector('#message').textContent=x.message}})</script></html>`, { headers: adminHeaders });
 }
 function adminDashboardPage() {
-  return new Response(`<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Verwaltung – Verse Radar</title><style>body{font:16px/1.5 system-ui;background:#041016;color:#e2eaea;max-width:700px;margin:9vh auto;padding:24px}a{color:#79f05c;display:block;padding:14px;border:1px solid #24404b;margin:12px 0;text-decoration:none}button{background:#184f29;color:white;border:1px solid #5dcc62;padding:10px 16px;cursor:pointer}section{border:1px solid #24404b;padding:16px;margin:25px 0}li{margin:7px 0}</style><h1>Verse Radar · Verwaltung</h1><a href="/manage/events">Free Fly & Events pflegen →</a><a href="/manage/deals">Game Packages pflegen →</a><section><h2>Seitenaufrufe pro Monat</h2><p>Nur öffentliche Seiten seit Aktivierung dieses Zählers. Mehrere Aufrufe derselben Person zählen mehrfach; dies ist keine Anzahl verschiedener Personen.</p><div id="monthly-views" role="status">Lade Aufrufzahlen …</div></section><button id="logout">Abmelden</button><script>fetch('/manage/stats',{cache:'no-store'}).then(async r=>{if(r.status===401){location.replace('/admin');return}const data=await r.json();if(!r.ok||!data.ok)throw Error(data.error||'Zähler gerade nicht verfügbar');const root=document.querySelector('#monthly-views');root.replaceChildren();const list=document.createElement('ul');for(const item of data.months){const row=document.createElement('li');const date=new Date(item.month+'-15T12:00:00Z');row.textContent=new Intl.DateTimeFormat('de-DE',{month:'long',year:'numeric',timeZone:'Europe/Berlin'}).format(date)+': '+new Intl.NumberFormat('de-DE').format(item.views);list.append(row)}root.append(list)}).catch(e=>{document.querySelector('#monthly-views').textContent=e.message});document.querySelector('#logout').onclick=async()=>{await fetch('/manage/logout',{method:'POST',cache:'no-store'});location.replace('/admin')}</script></html>`, { headers: adminHeaders });
+  return new Response(`<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Verwaltung – Verse Radar</title><style>body{font:16px/1.5 system-ui;background:#041016;color:#e2eaea;max-width:700px;margin:9vh auto;padding:24px}a{color:#79f05c;display:block;padding:14px;border:1px solid #24404b;margin:12px 0;text-decoration:none}button{background:#184f29;color:white;border:1px solid #5dcc62;padding:10px 16px;cursor:pointer}section{border:1px solid #24404b;padding:16px;margin:25px 0}li{margin:7px 0}</style><h1>Verse Radar · Verwaltung</h1><a href="/manage/events">Free Fly & Events pflegen →</a><a href="/manage/deals">Game Packages pflegen →</a><a href="/manage/referral">Referral-Sonderaktion pflegen →</a><section><h2>Seitenaufrufe pro Monat</h2><p>Nur öffentliche Seiten seit Aktivierung dieses Zählers. Mehrere Aufrufe derselben Person zählen mehrfach; dies ist keine Anzahl verschiedener Personen.</p><div id="monthly-views" role="status">Lade Aufrufzahlen …</div></section><button id="logout">Abmelden</button><script>fetch('/manage/stats',{cache:'no-store'}).then(async r=>{if(r.status===401){location.replace('/admin');return}const data=await r.json();if(!r.ok||!data.ok)throw Error(data.error||'Zähler gerade nicht verfügbar');const root=document.querySelector('#monthly-views');root.replaceChildren();const list=document.createElement('ul');for(const item of data.months){const row=document.createElement('li');const date=new Date(item.month+'-15T12:00:00Z');row.textContent=new Intl.DateTimeFormat('de-DE',{month:'long',year:'numeric',timeZone:'Europe/Berlin'}).format(date)+': '+new Intl.NumberFormat('de-DE').format(item.views);list.append(row)}root.append(list)}).catch(e=>{document.querySelector('#monthly-views').textContent=e.message});document.querySelector('#logout').onclick=async()=>{await fetch('/manage/logout',{method:'POST',cache:'no-store'});location.replace('/admin')}</script></html>`, { headers: adminHeaders });
 }
 async function adminKey(env) {
   return crypto.subtle.importKey("raw", new TextEncoder().encode(env.RUN_SECRET), { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
@@ -469,6 +486,59 @@ function dealAdminPage() {
     "content-type": "text/html;charset=utf-8", "cache-control": "no-store", "referrer-policy": "no-referrer",
     "x-frame-options": "DENY", "content-security-policy": "default-src 'none'; connect-src 'self'; img-src https://robertsspaceindustries.com https://*.robertsspaceindustries.com; script-src 'unsafe-inline'; style-src 'unsafe-inline'"
   } });
+}
+
+const REFERRAL_ADMIN_HTML = "<!doctype html>\n<html lang=\"de\">\n<head>\n<meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<meta name=\"robots\" content=\"noindex,nofollow\"><title>Referral-Sonderaktion – Verse Radar</title>\n<style>\n*{box-sizing:border-box}body{margin:0 auto;max-width:850px;padding:24px;background:#041016;color:#e2eaea;font:15px/1.55 system-ui,Arial,sans-serif}a{color:#70ceda}h1{color:#79f05c}fieldset{border:1px solid #24404b;border-radius:8px;padding:20px;margin:22px 0}label{display:block;margin:14px 0}input,textarea{display:block;width:100%;margin-top:6px;padding:10px;color:#e2eaea;background:#071219;border:1px solid #24404b;border-radius:4px;font:inherit}button{padding:10px 15px;margin:8px 8px 0 0;color:#e2eaea;background:#184f29;border:1px solid #5dcc62;border-radius:5px;cursor:pointer}button:disabled{opacity:.5;cursor:default}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#071219;border:1px solid #24404b;padding:15px}p{color:#b1c5c9}img{max-width:100%;max-height:320px;object-fit:contain}\n</style>\n</head>\n<body>\n<p><a href=\"/manage\">← Verwaltung</a></p><h1>Referral-Sonderaktion pflegen</h1>\n<p>Nur eine von RSI bestätigte zeitlich begrenzte Referral-Aktion eintragen. Sie erscheint ausschließlich auf der Referral-Seite, zusätzlich zum normalen Bonus. Start und Ende aus der offiziellen Quelle übernehmen; danach verschwindet sie automatisch.</p>\n<button id=\"load\" type=\"button\">Gespeicherten Stand laden</button>\n<fieldset><legend>Zusätzlicher Referral-Bonus</legend>\n<label>Titel der Aktion<input id=\"title\" maxlength=\"150\" placeholder=\"Offizieller Name der Aktion\"></label>\n<label>Offizieller RSI-Link zur Aktion<input id=\"source\" type=\"url\" placeholder=\"https://robertsspaceindustries.com/…\"></label>\n<label>Direkter Bildlink von RSI (optional)<input id=\"image\" type=\"url\" placeholder=\"https://robertsspaceindustries.com/i/…/source.webp\"></label>\n<p>Nur einen direkten JPG-, PNG-, WebP- oder AVIF-Link von RSI verwenden. Das Motiv vor der Veröffentlichung prüfen; es wird kein Bild hochgeladen.</p>\n<label>Beginn (deine lokale Uhrzeit)<input id=\"start\" type=\"datetime-local\"></label>\n<label>Ende (deine lokale Uhrzeit)<input id=\"end\" type=\"datetime-local\"></label>\n<label>Was ist zusätzlich dabei? Eine Belohnung pro Zeile<textarea id=\"rewards\" rows=\"6\" placeholder=\"Belohnung für neue Spieler&#10;Belohnung für Werber\"></textarea></label>\n<label>Zusätzlicher Hinweis laut RSI (optional)<textarea id=\"note\" rows=\"3\" maxlength=\"400\"></textarea></label>\n<p>Die Voraussetzungen stehen sichtbar bei der Aktion: verknüpfter Referral-Code, Game Package und erstmalige Qualifikation als neuer Backer während des Aktionszeitraums. Einen schon vorher erreichten Mindestumsatz bitte nicht als Sonderbonus berechtigt darstellen. Die offizielle Meldung kann weitere Bedingungen nennen.</p>\n<button id=\"preview\" type=\"button\">Sonderaktion prüfen</button><button id=\"disable\" type=\"button\">Sonderaktion beenden – Vorschau</button>\n</fieldset>\n<h2>Vorschau</h2><pre id=\"result\" role=\"status\">Noch nichts geprüft.</pre>\n<figure id=\"image-preview\" hidden><img id=\"preview-img\" alt=\"Vorschau des Referral-Aktionsbildes\"><figcaption id=\"image-status\">Bild wird geladen …</figcaption></figure>\n<button id=\"publish\" type=\"button\" disabled>Geprüfte Änderung veröffentlichen</button>\n<script>\nconst byId=id=>document.getElementById(id);let pending=null;\nfunction iso(id){const value=byId(id).value;return value&&Number.isFinite(Date.parse(value))?new Date(value).toISOString():''}\nfunction invalidate(){pending=null;byId('publish').disabled=true;byId('image-preview').hidden=true;byId('preview-img').removeAttribute('src')}\nfunction show(value){byId('result').textContent=typeof value==='string'?value:JSON.stringify(value,null,2)}\nasync function call(action,payload){const r=await fetch('/manage/referral/'+action,{method:action==='state'?'GET':'POST',headers:{'content-type':'application/json'},body:payload?JSON.stringify(payload):undefined,cache:'no-store'});if(r.status===401){location.replace('/admin');throw Error('Sitzung abgelaufen. Bitte erneut anmelden.')}const data=await r.json();if(!r.ok||!data.ok)throw Error(data.error||`HTTP ${r.status}`);return data}\nasync function load(){try{invalidate();const result=await call('state');const s=result.special;show(s?{gespeichert:s,hinweis:'Für eine neue Prüfung alle Felder anhand der aktuellen RSI-Quelle frisch ausfüllen.'}:'Noch keine Sonderaktion gespeichert. Der normale Referral-Bonus bleibt sichtbar.')}catch(e){show(e.message)}}\nasync function preview(payload){try{invalidate();const result=await call('preview',payload);pending={...payload,expectedSha:result.expectedSha};show({hinweis:'Zeitraum, zusätzliche Belohnungen, Bild und Teilnahmebedingungen anhand der offiziellen RSI-Quelle prüfen.',vorschau:result.proposal});if(payload.action==='set'&&result.proposal.imageUrl){byId('image-preview').hidden=false;byId('image-status').textContent='Bild wird geladen …';byId('preview-img').src=result.proposal.imageUrl}else byId('publish').disabled=false}catch(e){show(e.message)}}\nbyId('preview-img').addEventListener('load',()=>{byId('image-status').textContent='Bild geladen – Motiv bitte mit RSI abgleichen.';if(pending?.action==='set')byId('publish').disabled=false});\nbyId('preview-img').addEventListener('error',()=>{byId('image-status').textContent='Bild kann nicht geladen werden. Bitte einen anderen Bildlink verwenden und erneut prüfen.';pending=null;byId('publish').disabled=true;byId('image-preview').hidden=false});\nbyId('load').addEventListener('click',load);\nbyId('preview').addEventListener('click',()=>preview({action:'set',data:{title:byId('title').value,sourceUrl:byId('source').value,imageUrl:byId('image').value,start:iso('start'),end:iso('end'),rewards:byId('rewards').value,note:byId('note').value}}));\nbyId('disable').addEventListener('click',()=>preview({action:'disable'}));\nbyId('publish').addEventListener('click',async()=>{if(!pending)return;try{const result=await call('publish',pending);invalidate();show(result.published?'Änderung veröffentlicht. Die Anzeige auf /referral.html richtet sich automatisch nach dem Zeitraum.':'Nicht gespeichert.');await load()}catch(e){invalidate();show(e.message)}});\nfor(const field of document.querySelectorAll('input,textarea'))field.addEventListener('input',invalidate);\n</script></body></html>\n";
+function referralAdminPage() {
+  return new Response(REFERRAL_ADMIN_HTML, { headers: {
+    "content-type": "text/html;charset=utf-8", "cache-control": "no-store", "referrer-policy": "no-referrer",
+    "x-frame-options": "DENY", "content-security-policy": "default-src 'none'; connect-src 'self'; img-src https://robertsspaceindustries.com https://*.robertsspaceindustries.com; script-src 'unsafe-inline'; style-src 'unsafe-inline'"
+  } });
+}
+
+const REFERRAL_SPECIAL_PATH = "public/data/referral-special.json";
+function validStoredReferralSpecial(item, now = Date.now()) {
+  if (!item || item.active !== true || typeof item.title !== "string" || !item.title.trim() || !Array.isArray(item.rewards) || !item.rewards.length || item.rewards.some(x=>typeof x!=="string"||!x.trim())) return false;
+  if (typeof item.sourceUrl!=="string" || !officialReferralSource(item.sourceUrl) || item.imageUrl && !officialReferralImage(item.imageUrl)) return false;
+  return typeof item.start==="string" && typeof item.end==="string" && Number.isFinite(Date.parse(item.start)) && Number.isFinite(Date.parse(item.end)) && Date.parse(item.start)<=now && now<Date.parse(item.end) && Date.parse(item.end)>Date.parse(item.start);
+}
+function officialReferralSource(value) {
+  try {const u=new URL(value);return u.protocol==="https:" && ["robertsspaceindustries.com","www.robertsspaceindustries.com"].includes(u.hostname) && !u.username && !u.password && !u.port;}
+  catch {return false;}
+}
+function officialReferralImage(value) {
+  try {const u=new URL(value);return u.protocol==="https:" && (u.hostname==="robertsspaceindustries.com" || u.hostname.endsWith(".robertsspaceindustries.com")) && !u.username && !u.password && !u.port && /\.(?:png|jpe?g|webp|avif)$/i.test(u.pathname);}
+  catch {return false;}
+}
+function publicReferralSpecial(data) {
+  return validStoredReferralSpecial(data) ? {active:true,title:data.title,sourceUrl:data.sourceUrl,imageUrl:data.imageUrl||"",start:data.start,end:data.end,rewards:data.rewards,note:data.note||""} : {active:false};
+}
+async function referralSpecialState(env) {
+  const current=await getGithubJSONStrict(env,REFERRAL_SPECIAL_PATH,{allowMissing:true});
+  if (current.data!==null && (!current.data || typeof current.data!=="object" || Array.isArray(current.data))) throw Error("Gespeicherte Referral-Sonderaktion ungültig; nichts verändert.");
+  return {special:current.data};
+}
+async function editReferralSpecial(env,input,publish) {
+  if (!["set","disable"].includes(input?.action)) throw Error("Unbekannte Aktion.");
+  const current=await getGithubJSONStrict(env,REFERRAL_SPECIAL_PATH,{allowMissing:true});
+  if (current.data!==null && (!current.data || typeof current.data!=="object" || Array.isArray(current.data))) throw Error("Gespeicherte Referral-Sonderaktion ungültig; nichts verändert.");
+  if (publish && (input.expectedSha??null)!==(current.sha??null)) {const e=new Error("Daten wurden seit der Vorschau geändert. Bitte erneut prüfen.");e.status=409;throw e;}
+  let next;
+  if (input.action==="disable") next={active:false};
+  else {
+    const title=String(input.data?.title||"").trim();
+    if (title.length<5 || title.length>150) throw Error("Titel der Sonderaktion (5–150 Zeichen) eintragen.");
+    const sourceUrl=officialEventLink(input.data?.sourceUrl);
+    const start=editorDate(input.data?.start),end=editorDate(input.data?.end);
+    if (Date.parse(end)<=Date.parse(start) || Date.parse(end)<=Date.now()) throw Error("Ein zukünftiges Ende nach dem Beginn eintragen.");
+    const imageUrl=input.data?.imageUrl ? officialPackageImage(input.data.imageUrl) : "";
+    const rewards=activityLines(input.data?.rewards,"Zusätzliche Belohnungen");
+    const note=String(input.data?.note||"").trim();
+    if (note.length>400) throw Error("Hinweis zu lang (maximal 400 Zeichen).");
+    next={active:true,title,sourceUrl,imageUrl,start,end,rewards,note,checkedAt:new Date().toISOString()};
+  }
+  if (publish) await putGithub(env,REFERRAL_SPECIAL_PATH,JSON.stringify(next,null,2)+"\n",`Verse Radar ${VERSION}: referral special ${input.action}`,current.sha);
+  return {published:publish,proposal:next,expectedSha:publish?undefined:current.sha};
 }
 
 const FREE_FLY_DATA_PATH = "public/data/freefly.json";

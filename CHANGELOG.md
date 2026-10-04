@@ -1,3 +1,12 @@
+# 0.13.8
+
+- Normaler Referral-Bonus: 50.000 UEC für neue Spieler, Qualifikationshinweise und offizielle RSI-FAQ auf der Referral-Seite.
+- Geschützter Editor für zeitlich begrenzte Referral-Sonderaktionen unter `/manage/referral`.
+- RSI-Quellenlink, optionaler Bildlink, Zeitraum und zusätzliche Belohnungen einzeln pro Zeile; Vorschau vor Veröffentlichung.
+- Sonderaktion erscheint nur im bestätigten Zeitraum auf der Referral-Seite; keine zusätzliche Event-Kachel.
+- Datenschutztext um mögliche externe RSI-Bilder bei Referral-Aktionen ergänzt.
+- Veröffentlichte Daten unter `public/data/` bleiben bei diesem Update erhalten.
+
 # 0.13.7
 
 - Live-Vorbereitung: Platzhalter im Impressum und Datenschutz durch die vorbereiteten Entwürfe ersetzt.
