@@ -1,7 +1,7 @@
 const CONFIG = {
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.13.4"
+  siteVersion: "0.13.6"
 };
 let usingStaticData = false;
 
@@ -150,8 +150,14 @@ function renderConfirmedEvents(items,now=Date.now()){
 function activeActivities(items,now=Date.now()){
   return Array.isArray(items)?items.filter(a=>a?.type==="Ingame Activity"&&a.active===true&&a.name&&isOfficialSource(a.sourceUrl)&&Array.isArray(a.tasks)&&a.tasks.length&&Array.isArray(a.rewards)&&a.rewards.length&&(!a.end||confirmedTime(a.end)&&Date.parse(a.end)>now)&&(!a.start||confirmedTime(a.start))).sort((a,b)=>(Date.parse(b.start)||0)-(Date.parse(a.start)||0)):[];
 }
+function renderGroupPairs(a){
+  const goals=Array.isArray(a.groupGoals)?a.groupGoals:typeof a.groupGoal==="string"&&a.groupGoal?[a.groupGoal]:[];
+  const rewards=Array.isArray(a.groupRewards)?a.groupRewards:typeof a.groupReward==="string"&&a.groupReward?[a.groupReward]:[];
+  if(!goals.length||goals.length!==rewards.length)return "";
+  return "<h4>Gemeinschaftsziele und Belohnungen</h4><ul>"+goals.map((g,i)=>"<li><strong>Ziel:</strong> "+esc(g)+"<br><strong>Belohnung:</strong> "+esc(rewards[i])+"</li>").join("")+"</ul>";
+}
 function renderActivities(items,limit=items.length){
-  return items.slice(0,limit).map(a=>`<article class="article"><span class="tag">OFFIZIELLE INGAME-AKTION</span><h3>${esc(a.name)}</h3>${/^\/activity-image\/[a-f0-9]{64}\.(?:png|jpg|webp)$/.test(a.imageUrl||"")?`<img class="event-image" src="${esc(a.imageUrl)}" alt="Bild zu ${esc(a.name)}" loading="lazy">`:""}<p>${a.start?`Beginn: ${eventDateTime(a.start)} · `:""}${a.end?`Ende: ${eventDateTime(a.end)}`:"Ende nicht bestätigt – aktuellen Stand bei RSI prüfen"}</p>${a.summary?`<p>${esc(a.summary)}</p>`:""}<h4>Aufgaben</h4><ul>${a.tasks.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><h4>Persönliche Belohnungen</h4><ul>${a.rewards.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>${a.groupGoal&&a.groupReward?`<p><strong>Gemeinschaftsziel:</strong> ${esc(a.groupGoal)}<br><strong>Belohnung:</strong> ${esc(a.groupReward)}</p>`:""}<p>${sourceLink(a)}</p></article>`).join("")||'<p class="page-intro">Derzeit keine offizielle Ingame-Aktion eingetragen.</p>';
+  return items.slice(0,limit).map(a=>`<article class="article"><span class="tag">OFFIZIELLE INGAME-AKTION</span><h3>${esc(a.name)}</h3>${/^\/activity-image\/[a-f0-9]{64}\.(?:png|jpg|webp)$/.test(a.imageUrl||"")?`<img class="event-image" src="${esc(a.imageUrl)}" alt="Bild zu ${esc(a.name)}" loading="lazy">`:""}<p>${a.start?`Beginn: ${eventDateTime(a.start)} · `:""}${a.end?`Ende: ${eventDateTime(a.end)}`:"Ende nicht bestätigt – aktuellen Stand bei RSI prüfen"}</p>${a.summary?`<p>${esc(a.summary)}</p>`:""}<h4>Aufgaben</h4><ul>${a.tasks.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><h4>Persönliche Belohnungen</h4><ul>${a.rewards.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>${renderGroupPairs(a)}<p>${sourceLink(a)}</p></article>`).join("")||'<p class="page-intro">Derzeit keine offizielle Ingame-Aktion eingetragen.</p>';
 }
 function renderEventNews(items){
   return items.slice(0,8).map(n=>`<article class="article"><span class="tag">${esc(n.category)} · MELDUNG VOM ${dateDE(n.date)}</span><h3>${esc(n.title)}</h3><p>${esc(n.summary||"")}</p><p>${sourceLink(n)}</p></article>`).join("")||'<p class="page-intro">Keine aktuellen Event-Meldungen vorhanden.</p>';
@@ -203,4 +209,8 @@ async function listing(){
   }catch(e){target.innerHTML='<div class="empty-state">News konnten nicht geladen werden.</div>';}
 }
 function setupMenu(){document.querySelector(".menu-toggle")?.addEventListener("click",()=>document.querySelector(".site-header").classList.toggle("menu-open"));}
-document.addEventListener("DOMContentLoaded",()=>{setupMenu(); if(location.pathname.endsWith("/")||location.pathname.endsWith("index.html"))home(); listing(); freeFlyPage(); dealsPage(); referralPage();});
+function countPageView(){
+  if(["localhost","127.0.0.1"].includes(location.hostname)||navigator.doNotTrack==="1"||navigator.globalPrivacyControl===true)return;
+  fetch("/api/page-view",{method:"POST",body:"",keepalive:true,cache:"no-store"}).catch(()=>{});
+}
+document.addEventListener("DOMContentLoaded",()=>{setupMenu();countPageView();if(location.pathname.endsWith("/")||location.pathname.endsWith("index.html"))home(); listing(); freeFlyPage(); dealsPage(); referralPage();});

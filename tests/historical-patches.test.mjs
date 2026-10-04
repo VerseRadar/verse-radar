@@ -1,8 +1,9 @@
+import { importWorker } from "./import-worker.mjs";
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const workerSource = await readFile(new URL('../worker/index.js', import.meta.url), 'utf8');
-const worker = (await import(`data:text/javascript;base64,${Buffer.from(workerSource).toString('base64')}`)).default;
+const worker = (await importWorker(workerSource)).default;
 const archivePath = 'public/data/patches.json';
 const statePath = 'public/data/patch-archive-state.json';
 const existingVersions = ['4.10.1','4.10','4.9','4.8.3','4.8.2','4.8.1','4.8','4.7.2','4.7.1','4.7','4.6','4.5','4.4','4.3.2','4.3.1','4.3','4.2.1','4.2','4.1.1','4.1','4.0.2','4.0.1','4.0'];
@@ -145,7 +146,7 @@ for (const version of ['3.17.5', '3.17.4', '3.11.1a']) {
   const item = fullShort.items.find(i => i.version === `Alpha ${version}`);
   assert.ok(item, version);
   assert.match(item.sourceUrl, /robertsspaceindustries\.com\/spectrum/);
-  assert.equal(item.summaryVersion, '0.13.4');
+  assert.equal(item.summaryVersion, '0.13.6');
   assert.ok(item.changes.length >= 1);
 }
 assert.ok(fullShort.items.find(i => i.version === 'Alpha 3.17.5').changes.some(c => c.title === 'Red Festival 2953'));
@@ -177,7 +178,7 @@ assert.equal(minor.date, '2018-04-20T00:00:00.000Z');
 assert.match(minor.sourceUrl, /robertsspaceindustries\.com\/spectrum\/.*3-1-3/);
 assert.ok(minor.changes.some(change => change.title === 'Revel-and-York-Hangar'));
 assert.ok(minor.changes.some(change => change.title === 'Abstürze'));
-assert.equal(major.summaryVersion, '0.13.4');
-assert.equal(minor.summaryVersion, '0.13.4');
+assert.equal(major.summaryVersion, '0.13.6');
+assert.equal(minor.summaryVersion, '0.13.6');
 
 console.log('Historische 3.x-Versionen, Quelllink-Prüfung, Suffixe und Worker-Limit: OK');

@@ -1,8 +1,9 @@
+import { importWorker } from "./import-worker.mjs";
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const source = await readFile(new URL('../worker/index.js', import.meta.url), 'utf8');
-const worker = (await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`)).default;
+const worker = (await importWorker(source)).default;
 const versions = [...source.match(/const HISTORICAL_VERSIONS = \[([\s\S]*?)\];/)[1].matchAll(/"(3\.[^"]+)"/g)].map(m => m[1]);
 const archivePath = 'public/data/patches.json', statePath = 'public/data/patch-archive-state.json';
 const controlPath = 'public/data/patch-backfill-control.json';

@@ -1,8 +1,9 @@
+import { importWorker } from "./import-worker.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const source = await readFile(new URL("../worker/index.js", import.meta.url), "utf8");
-const worker = (await import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`)).default;
+const worker = (await importWorker(source)).default;
 const data = {
   "public/data/freefly.json": { active: false, title: "Kein Free Fly aktiv" },
   "public/data/events.json": []
@@ -42,12 +43,12 @@ assert.match(login.headers.get("set-cookie"),/HttpOnly; Secure; SameSite=Strict/
 assert.equal((await worker.fetch(new Request("https://example.com/manage/login",{method:"POST",headers:{origin:"https://example.com"},body:JSON.stringify({secret:"wrong"})}),env)).status,401);
 assert.equal((await worker.fetch(new Request("https://example.com/manage/login",{method:"POST",headers:{origin:"https://evil.example"},body:JSON.stringify({secret:"private"})}),env)).status,403);
 assert.equal((await worker.fetch(new Request("https://example.com/manage/events/state",{headers:{"x-run-secret":"private"}}),env)).status,401);
-assert.equal((await worker.fetch(new Request("https://example.com/manage/events/state",{headers:{cookie:cookie.replace(/.$/,"X")}}),env)).status,401);
+assert.equal((await worker.fetch(new Request("https://example.com/manage/events/state",{headers:{cookie:cookie.replace(/\.([A-Za-z0-9_-]{43})$/,(_,signature)=>"."+(signature[0]==="A"?"B":"A")+signature.slice(1))}}),env)).status,401);
 const req = (path, payload, key = "private", origin = "https://example.com") => new Request(`https://example.com${path}`, { method: payload ? "POST" : "GET", headers: { cookie:key==="private"?cookie:"vr_admin=wrong", origin }, body: payload ? JSON.stringify(payload) : undefined });
 const official = "https://robertsspaceindustries.com/en/comm-link/transmission/21300-Test";
 const start = "2030-06-01T12:00:00.000Z", end = "2030-06-03T12:00:00.000Z";
 
-assert.equal((await (await worker.fetch(new Request("https://example.com/health"), env)).json()).version, "0.13.4");
+assert.equal((await (await worker.fetch(new Request("https://example.com/health"), env)).json()).version, "0.13.6");
 assert.equal((await worker.fetch(new Request("https://example.com/manage/events/state"), env)).status, 401);
 const initial = await (await worker.fetch(req("/manage/events/state"), env)).json();
 assert.deepEqual(initial.events, []);
@@ -98,8 +99,11 @@ assert.equal((await (await worker.fetch(new Request("https://example.com/api/eve
 const png=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9ZcwYc8AAAAASUVORK5CYII=","base64");
 const uploadRequest=(body,auth=cookie)=>new Request("https://example.com/manage/activities/image",{method:"POST",headers:{origin:"https://example.com",cookie:auth,"content-type":"image/png"},body});
 assert.equal((await worker.fetch(uploadRequest("<svg onload=alert(1)>"),env)).status,413);
+assert.equal((await worker.fetch(uploadRequest(Buffer.alloc(1024*1024+1)),env)).status,413);
 const upload=await (await worker.fetch(uploadRequest(png),env)).json();
 assert.match(upload.imageUrl,/^\/activity-image\/[a-f0-9]{64}\.png$/);
+assert.equal(imageFiles.size,1);
+assert.equal((await (await worker.fetch(uploadRequest(png),env)).json()).imageUrl,upload.imageUrl);
 assert.equal(imageFiles.size,1);
 const image=await worker.fetch(new Request("https://example.com"+upload.imageUrl),env);
 assert.equal(image.headers.get("content-type"),"image/png");
@@ -107,13 +111,16 @@ assert.deepEqual(Buffer.from(await image.arrayBuffer()),png);
 const activity={kind:"activity",action:"set",data:{name:"Orison Relief Support",sourceUrl:"https://robertsspaceindustries.com/spectrum/community/SC/forum/3/thread/orison-relief-support-faq",tasks:"Material laut RSI abgeben",rewards:"Dauerhafte Account-Belohnung laut RSI",summary:"Aufträge mit persönlichem Fortschritt",imageUrl:upload.imageUrl}};
 assert.equal((await (await worker.fetch(req("/manage/events/preview",{...activity,data:{...activity.data,sourceUrl:"https://community.example.org/turnier"}}),env)).json()).ok,false);
 assert.equal((await (await worker.fetch(req("/manage/events/preview",{...activity,data:{...activity.data,imageUrl:"https://evil.example/a.png"}}),env)).json()).ok,false);
-assert.equal((await (await worker.fetch(req("/manage/events/preview",{...activity,data:{...activity.data,groupGoal:"Gemeinsam abgeben"}}),env)).json()).ok,false);
-const activityPreview=await (await worker.fetch(req("/manage/events/preview",activity),env)).json();
+assert.equal((await (await worker.fetch(req("/manage/events/preview",{...activity,data:{...activity.data,groupGoals:"Gemeinsam abgeben"}}),env)).json()).ok,false);
+const activityWithGoals={...activity,data:{...activity.data,groupGoals:"10.000 SCU abgeben\n20.000 SCU abgeben",groupRewards:"Erste Belohnung\nZweite Belohnung"}};
+const activityPreview=await (await worker.fetch(req("/manage/events/preview",activityWithGoals),env)).json();
 assert.equal(activityPreview.ok,true,JSON.stringify(activityPreview));
 assert.equal(activityPreview.proposal[0].type,"Ingame Activity");
 assert.equal(activityPreview.proposal[0].end,null);
 assert.deepEqual(activityPreview.proposal[0].tasks,["Material laut RSI abgeben"]);
-assert.equal((await (await worker.fetch(req("/manage/events/publish",{...activity,expectedSha:activityPreview.expectedSha}),env)).json()).published,true);
+assert.deepEqual(activityPreview.proposal[0].groupGoals,["10.000 SCU abgeben","20.000 SCU abgeben"]);
+assert.deepEqual(activityPreview.proposal[0].groupRewards,["Erste Belohnung","Zweite Belohnung"]);
+assert.equal((await (await worker.fetch(req("/manage/events/publish",{...activityWithGoals,expectedSha:activityPreview.expectedSha}),env)).json()).published,true);
 assert.equal((await (await worker.fetch(new Request("https://example.com/api/activities"),env)).json())[0].imageUrl,upload.imageUrl);
 const removeActivity={kind:"activity",action:"remove",data:{sourceUrl:activity.data.sourceUrl}};
 const removalPreview=await (await worker.fetch(req("/manage/events/preview",removeActivity),env)).json();

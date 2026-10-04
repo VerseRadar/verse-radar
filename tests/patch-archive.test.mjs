@@ -1,10 +1,11 @@
+import { importWorker } from "./import-worker.mjs";
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const source = await readFile(new URL('../worker/index.js', import.meta.url), 'utf8');
 // Keep the older content and archive regression cases in one invocation;
 // worker-subrequest.test.mjs exercises the production batch limit separately.
-const worker = (await import(`data:text/javascript;base64,${Buffer.from(source.replace('const PATCH_SEEDS_PER_IMPORT = 2;', 'const PATCH_SEEDS_PER_IMPORT = 99;').replace('const HISTORICAL_PATCHES_PER_IMPORT = 8;', 'const HISTORICAL_PATCHES_PER_IMPORT = 0;')).toString('base64')}`)).default;
+const worker = (await importWorker(source.replace('const PATCH_SEEDS_PER_IMPORT = 2;', 'const PATCH_SEEDS_PER_IMPORT = 99;').replace('const HISTORICAL_PATCHES_PER_IMPORT = 8;', 'const HISTORICAL_PATCHES_PER_IMPORT = 0;'))).default;
 const env = { GITHUB_TOKEN: 'test', GITHUB_REPO: 'example/radar', RUN_SECRET: 'private' };
 const patchesPath = 'public/data/patches.json';
 const statePath = 'public/data/patch-archive-state.json';

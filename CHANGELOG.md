@@ -1,3 +1,18 @@
+# 0.13.6
+
+- Geschützte Admin-Übersicht mit Seitenaufrufen der letzten sechs Monate.
+- Zählt öffentliche Seiten ohne neues Cookie; Browser mit Do Not Track oder Global Privacy Control werden ausgelassen.
+- Speichert je Monat nur eine Anzahl im Cloudflare Durable Object; keine individuellen Besucherkennungen und keine GitHub-Schreibzugriffe pro Aufruf.
+- Version auf 0.13.6 angehoben.
+
+# 0.13.5
+
+- Ingame-Bilder: Originale bis 12 MB auswählen; große Bilder im Browser auf höchstens 1600 Pixel und 900 KB WebP verkleinern.
+- Worker speichert höchstens 1 MB pro Bild im GitHub-Repository, SHA-256 verhindert doppelte identische Dateien.
+- Gemeinschaftsziele und zugehörige Belohnungen jeweils eine pro Zeile, mit Prüfung gleicher Anzahl.
+- Bereits veröffentlichte einzelne Gemeinschaftsziele bleiben sichtbar.
+- Version auf 0.13.5 angehoben.
+
 # 0.13.4
 
 - Admin Login und geschützte Verwaltung aus 0.13.3 beibehalten.

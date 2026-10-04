@@ -1,9 +1,10 @@
+import { importWorker } from "./import-worker.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import vm from "node:vm";
 
 const source = await readFile(new URL("../worker/index.js", import.meta.url), "utf8");
-const worker = (await import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`)).default;
+const worker = (await importWorker(source)).default;
 const path = "public/data/deals.json";
 const catalogPath = "public/data/ship-images.json";
 let deals = [], sha = "deals-sha-1", writes = 0, shipImages = [], catalogSha = null, catalogWrites = 0;

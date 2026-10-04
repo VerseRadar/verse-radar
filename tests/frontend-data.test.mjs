@@ -81,6 +81,8 @@ const activity={name:"Orison Relief Support",type:"Ingame Activity",active:true,
 assert.equal(ctx.activeActivities([activity],now).length,1);
 assert.match(ctx.renderActivities([activity]),/Ende nicht bestätigt/);
 assert.match(ctx.renderActivities([activity]),/Material abgeben/);
+assert.match(ctx.renderActivities([{...activity,groupGoals:["10.000 SCU","20.000 SCU"],groupRewards:["Paint","Waffe"]}]),/20.000 SCU/);
+assert.match(ctx.renderActivities([{...activity,groupGoal:"Altes Ziel",groupReward:"Alte Belohnung"}]),/Alte Belohnung/);
 assert.equal(ctx.activeActivities([{...activity,sourceUrl:"https://evil.example/"}],now).length,0);
 assert.equal(ctx.activeEvents([{...scheduled,type:"Community Event"}],now).length,0);
 assert.match(ctx.renderConfirmedEvents([scheduled],now),/BESTÄTIGT/);

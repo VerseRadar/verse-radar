@@ -1,8 +1,9 @@
+import { importWorker } from "./import-worker.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const source = await readFile(new URL("../worker/index.js", import.meta.url), "utf8");
-const worker = (await import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`)).default;
+const worker = (await importWorker(source)).default;
 const placeholder = "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.";
 const url = (id, slug) => `https://robertsspaceindustries.com/en/comm-link/transmission/${id}-${slug}`;
 const hash = value => { let h = 2166136261; for (let i = 0; i < value.length; i++) h = Math.imul(h ^ value.charCodeAt(i), 16777619); return (h >>> 0).toString(16); };
@@ -57,7 +58,7 @@ globalThis.fetch = async (target, options = {}) => {
 
 const env = { GITHUB_TOKEN: "test-token", GITHUB_REPO: "example/verse-radar", GITHUB_BRANCH: "main" };
 const health = await worker.fetch(new Request("https://example.com/health"), env);
-assert.equal((await health.json()).version, "0.13.4");
+assert.equal((await health.json()).version, "0.13.6");
 const patchApi = await worker.fetch(new Request("https://example.com/api/patches"), env);
 assert.equal(patchApi.headers.get("x-verse-radar-patches-source"), "github");
 

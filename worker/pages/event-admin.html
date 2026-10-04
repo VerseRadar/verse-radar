@@ -30,17 +30,17 @@
 <button id="event-preview" type="button">Event prüfen</button><div id="saved-events"></div>
 </fieldset>
 <fieldset><legend>Offizielle Ingame-Aktion</legend>
-<p class="page-intro">Zum Beispiel Orison Relief Support: Aufgaben im Spiel und Belohnungen für den eigenen Account. Gemeinschaftsziel nur ausfüllen, wenn die offizielle Quelle es bestätigt.</p>
+<p class="page-intro">Zum Beispiel Orison Relief Support: Aufgaben im Spiel und Belohnungen für den eigenen Account. Gemeinschaftsziele nur ausfüllen, wenn die offizielle Quelle sie bestätigt. Jede Belohnung gehört zum Ziel in derselben Zeile.</p>
 <label>Name<input id="activity-name" maxlength="150" placeholder="Name der Ingame-Aktion"></label>
 <label>Offizielle RSI-Quelle<input id="activity-url" type="url" placeholder="https://robertsspaceindustries.com/spectrum/…"></label>
 <label>Aufgaben (eine pro Zeile)<textarea id="activity-tasks" rows="4" placeholder="Aufgabe und erforderliche Menge laut Quelle"></textarea></label>
 <label>Persönliche Belohnungen (eine pro Zeile)<textarea id="activity-rewards" rows="4" placeholder="Belohnung und Voraussetzung laut Quelle"></textarea></label>
-<label>Gemeinschaftsziel (optional)<input id="activity-group-goal" maxlength="240" placeholder="Nur wenn offiziell bestätigt"></label>
-<label>Gemeinschaftsbelohnung (optional)<input id="activity-group-reward" maxlength="240"></label>
+<label>Gemeinschaftsziele (optional, eines pro Zeile)<textarea id="activity-group-goals" rows="4" placeholder="Nur wenn offiziell bestätigt"></textarea></label>
+<label>Gemeinschaftsbelohnungen (optional, eine pro Zeile)<textarea id="activity-group-rewards" rows="4" placeholder="Reihenfolge wie bei den Zielen"></textarea></label>
 <label>Beginn, falls bestätigt (deine lokale Uhrzeit)<input id="activity-start" type="datetime-local"></label>
 <label>Ende, falls bestätigt (deine lokale Uhrzeit)<input id="activity-end" type="datetime-local"></label>
 <label>Kurzer Hinweis (optional)<textarea id="activity-summary" rows="3" maxlength="400"></textarea></label>
-<label>Eigenes Bild (optional, PNG/JPG/WebP, maximal 512 KB)<input id="activity-image" type="file" accept="image/png,image/jpeg,image/webp"></label><button id="upload-image" type="button">Bild hochladen</button><p id="upload-status" role="status"></p><img id="activity-image-preview" alt="Vorschau des Bildes zur Ingame-Aktion" style="max-width:100%;max-height:260px" hidden>
+<label>Eigenes Bild (optional, PNG/JPG/WebP, Original bis 12 MB)<input id="activity-image" type="file" accept="image/png,image/jpeg,image/webp"></label><p class="page-intro">Größere Bilder werden vor dem Upload im Browser auf höchstens 1600 Pixel und unter 1 MB verkleinert. Nur die verkleinerte Datei landet bei GitHub.</p><button id="upload-image" type="button">Bild hochladen</button><p id="upload-status" role="status"></p><img id="activity-image-preview" alt="Vorschau des Bildes zur Ingame-Aktion" style="max-width:100%;max-height:260px" hidden>
 <button id="activity-preview" type="button">Ingame-Aktion prüfen</button><div id="saved-activities"></div>
 </fieldset>
 <h2>Vorschau</h2><pre id="result">Noch nichts geprüft.</pre><button id="publish" type="button" disabled>Geprüfte Änderung veröffentlichen</button>
@@ -60,9 +60,29 @@ byId('event-source').addEventListener('change',e=>{const option=e.target.selecte
 byId('fly-preview').addEventListener('click',()=>preview({kind:'freefly',action:'set',data:{title:byId('fly-title').value,sourceUrl:byId('fly-url').value,start:iso('fly-start'),end:iso('fly-end'),summary:byId('fly-summary').value}}));
 byId('fly-disable').addEventListener('click',()=>preview({kind:'freefly',action:'disable'}));
 byId('event-preview').addEventListener('click',()=>preview({kind:'event',action:'set',data:{name:byId('event-name').value,sourceUrl:byId('event-url').value,start:iso('event-start'),end:iso('event-end'),summary:byId('event-summary').value}}));
+async function preparedActivityImage(file){
+  if(!['image/png','image/jpeg','image/webp'].includes(file.type))throw Error('Bitte PNG, JPG oder WebP auswählen.');
+  if(file.size>12*1024*1024)throw Error('Das Ausgangsbild ist größer als 12 MB.');
+  if(file.size<=900*1024)return file;
+  const bitmap=await createImageBitmap(file);
+  try{
+    for(const maxSide of [1600,1200,1000,800]){
+      const factor=Math.min(1,maxSide/Math.max(bitmap.width,bitmap.height));
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.max(1,Math.round(bitmap.width*factor));
+      canvas.height=Math.max(1,Math.round(bitmap.height*factor));
+      canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);
+      for(const quality of [0.82,0.7,0.58]){
+        const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',quality));
+        if(blob?.type==='image/webp'&&blob.size<=900*1024)return blob;
+      }
+    }
+    throw Error('Bild konnte nicht ausreichend verkleinert werden. Bitte ein anderes Bild wählen.');
+  }finally{bitmap.close()}
+}
 byId('activity-image').addEventListener('change',()=>{activityImageUrl='';byId('upload-status').textContent='Bild ausgewählt. Bitte erst hochladen.';byId('activity-image-preview').hidden=true;invalidate()});
-byId('upload-image').addEventListener('click',async()=>{const file=byId('activity-image').files[0];if(!file){byId('upload-status').textContent='Bitte zuerst eine Bilddatei auswählen.';return}if(file.size>512*1024){byId('upload-status').textContent='Bild ist größer als 512 KB.';return}try{byId('upload-status').textContent='Bild wird hochgeladen …';const r=await fetch('/manage/activities/image',{method:'POST',headers:{'content-type':file.type},body:file,cache:'no-store'});if(r.status===401){location.replace('/admin');return}const data=await r.json();if(!r.ok||!data.ok)throw Error(data.error||'Upload fehlgeschlagen');activityImageUrl=data.imageUrl;byId('activity-image-preview').src=data.imageUrl;byId('activity-image-preview').hidden=false;byId('upload-status').textContent='Bild hochgeladen. Motiv in der Vorschau prüfen.';invalidate()}catch(e){byId('upload-status').textContent=e.message}});
-byId('activity-preview').addEventListener('click',()=>{if(byId('activity-image').files[0]&&!activityImageUrl){show('Ausgewähltes Bild bitte vor der Prüfung hochladen.');return}preview({kind:'activity',action:'set',data:{name:byId('activity-name').value,sourceUrl:byId('activity-url').value,tasks:byId('activity-tasks').value,rewards:byId('activity-rewards').value,groupGoal:byId('activity-group-goal').value,groupReward:byId('activity-group-reward').value,start:iso('activity-start'),end:iso('activity-end'),summary:byId('activity-summary').value,imageUrl:activityImageUrl}})});
+byId('upload-image').addEventListener('click',async()=>{const file=byId('activity-image').files[0];if(!file){byId('upload-status').textContent='Bitte zuerst eine Bilddatei auswählen.';return}try{byId('upload-status').textContent='Bild wird vorbereitet …';const ready=await preparedActivityImage(file);byId('upload-status').textContent='Bild wird hochgeladen …';const r=await fetch('/manage/activities/image',{method:'POST',headers:{'content-type':ready.type},body:ready,cache:'no-store'});if(r.status===401){location.replace('/admin');return}const data=await r.json();if(!r.ok||!data.ok)throw Error(data.error||'Upload fehlgeschlagen');activityImageUrl=data.imageUrl;byId('activity-image-preview').src=data.imageUrl;byId('activity-image-preview').hidden=false;byId('upload-status').textContent='Bild hochgeladen ('+Math.round(data.size/1024)+' KB bei GitHub). Motiv in der Vorschau prüfen.';invalidate()}catch(e){byId('upload-status').textContent=e.message}});
+byId('activity-preview').addEventListener('click',()=>{if(byId('activity-image').files[0]&&!activityImageUrl){show('Ausgewähltes Bild bitte vor der Prüfung hochladen.');return}preview({kind:'activity',action:'set',data:{name:byId('activity-name').value,sourceUrl:byId('activity-url').value,tasks:byId('activity-tasks').value,rewards:byId('activity-rewards').value,groupGoals:byId('activity-group-goals').value,groupRewards:byId('activity-group-rewards').value,start:iso('activity-start'),end:iso('activity-end'),summary:byId('activity-summary').value,imageUrl:activityImageUrl}})});
 byId('publish').addEventListener('click',async()=>{if(!pending)return;try{const result=await call('publish',pending);invalidate();show(`Gespeichert: ${result.kind==='event'?'Event':result.kind==='activity'?'Ingame-Aktion':'Free Fly'}. Die öffentliche Seite übernimmt die Änderung aus den Website-Daten.`);await load()}catch(e){invalidate();show(e.message)}});
 for(const input of document.querySelectorAll('input,textarea,select'))input.addEventListener('input',invalidate);
 suggestions();
