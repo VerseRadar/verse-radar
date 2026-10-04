@@ -4,6 +4,7 @@
 - Inoffizieller Fanstatus und Hinweis auf fremde Rechteinhaber auf allen öffentlichen Seiten gut sichtbar.
 - Bestehende Daten und Admin-Anmeldung bleiben erhalten.
 - Impressum und Datenschutz erhalten `noindex`: für Besucher erreichbar, für Suchmaschinen nicht zur Indexierung vorgesehen.
+- Worker-Name in `wrangler.toml` an den vorhandenen produktiven Worker `verse-radar` angepasst.
 
 # 0.13.6
 

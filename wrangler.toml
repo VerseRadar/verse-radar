@@ -1,4 +1,4 @@
-name = "verse-radar-updater"
+name = "verse-radar"
 main = "worker/index.js"
 compatibility_date = "2026-09-01"
 
