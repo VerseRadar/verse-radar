@@ -33,3 +33,6 @@ main{max-width:var(--max);margin:auto;padding:0 24px}.hero{min-height:430px;disp
 
 /* Verse Radar 0.13.6 */
 .event-image{display:block;width:100%;max-height:360px;object-fit:contain;border-radius:6px;margin:16px 0;background:#071219}
+
+/* Verse Radar 0.13.7: sichtbarer Hinweis auf allen öffentlichen Seiten */
+.fan-notice{max-width:var(--max);margin:0 auto;padding:11px 24px;color:#c8d7da;background:#091820;border:1px solid #17313b;font-size:14px;line-height:1.5}

@@ -1,7 +1,7 @@
 const CONFIG = {
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.13.6"
+  siteVersion: "0.13.7"
 };
 let usingStaticData = false;
 

@@ -1,4 +1,7 @@
-# Verse Radar 0.13.6
+# Verse Radar 0.13.7
+
+**0.13.7 Live-Vorbereitung:** Die Entwürfe von Impressum und Datenschutz ersetzen die bisherigen Platzhalter. Auf allen öffentlichen Seiten erscheint ein gut sichtbarer Hinweis, dass Verse Radar eine unabhängige Star-Citizen-Fanseite ist und fremde Inhalte ihren jeweiligen Rechteinhabern gehören. Vor dem öffentlichen Start: Kontaktdaten, Cloudflare-Einstellungen und externe RSI-Bilder gegen die Entwürfe prüfen; die Entwürfe sind keine rechtliche Prüfung. Nach dem Einspielen `/health` (0.13.7), `/impressum.html`, `/datenschutz.html` und die Anzeige des Hinweises auf Mobilgerät prüfen. Die ZIP enthält weiterhin keine veröffentlichten Daten unter `public/data/`.
+
 
 **Neu in 0.13.6:** Nach dem Admin Login zeigt `/manage` die Seitenaufrufe der letzten sechs Monate. Es werden nur Monat und Anzahl gespeichert, keine Kennungen einzelner Besucher. Wiederholte Aufrufe zählen erneut; die Anzeige ist keine Zahl unterschiedlicher Personen. Sie startet ab dem Deployment, zählt öffentliche Seiten mit aktivem JavaScript und berücksichtigt Browser mit „Do Not Track“ oder Global Privacy Control nicht. Ein weiteres Cookie, ein API-Schlüssel oder GitHub-Schreibzugriffe pro Aufruf sind nicht nötig. Die neue SQLite-Durable-Object-Bindung `PAGE_VIEWS` steht in `wrangler.toml` und muss mit dem Worker aus dieser ZIP veröffentlicht werden. Nach dem Deployment `/health` (0.13.6), eine öffentliche Seite und dann angemeldet `/manage` prüfen. Bestehende News, Patches und Angebotsdaten bleiben erhalten.
 

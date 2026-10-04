@@ -1,3 +1,9 @@
+# 0.13.7
+
+- Live-Vorbereitung: Platzhalter im Impressum und Datenschutz durch die vorbereiteten Entwürfe ersetzt.
+- Inoffizieller Fanstatus und Hinweis auf fremde Rechteinhaber auf allen öffentlichen Seiten gut sichtbar.
+- Bestehende Daten und Admin-Anmeldung bleiben erhalten.
+
 # 0.13.6
 
 - Geschützte Admin-Übersicht mit Seitenaufrufen der letzten sechs Monate.
