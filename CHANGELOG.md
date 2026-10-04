@@ -4,6 +4,7 @@
 - Zählt öffentliche Seiten ohne neues Cookie; Browser mit Do Not Track oder Global Privacy Control werden ausgelassen.
 - Speichert je Monat nur eine Anzahl im Cloudflare Durable Object; keine individuellen Besucherkennungen und keine GitHub-Schreibzugriffe pro Aufruf.
 - Version auf 0.13.6 angehoben.
+- Login-Seite: „Zugangsschlüssel“ statt des technischen Namens `RUN_SECRET`; bestehender Schlüssel bleibt gültig.
 
 # 0.13.5
 
