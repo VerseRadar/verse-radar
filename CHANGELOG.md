@@ -3,6 +3,7 @@
 - Live-Vorbereitung: Platzhalter im Impressum und Datenschutz durch die vorbereiteten Entwürfe ersetzt.
 - Inoffizieller Fanstatus und Hinweis auf fremde Rechteinhaber auf allen öffentlichen Seiten gut sichtbar.
 - Bestehende Daten und Admin-Anmeldung bleiben erhalten.
+- Impressum und Datenschutz erhalten `noindex`: für Besucher erreichbar, für Suchmaschinen nicht zur Indexierung vorgesehen.
 
 # 0.13.6
 
