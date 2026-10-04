@@ -22,29 +22,5 @@
     "checkedAt": "2026-09-29T06:53:01.807Z",
     "officialEndProvided": true,
     "active": true
-  },
-  {
-    "name": "Generalist Starter Pack",
-    "type": "Game Package",
-    "sourceUrl": "https://robertsspaceindustries.com/en/pledge/Packages/Generalist-Starter-Pack",
-    "imageUrl": "https://robertsspaceindustries.com/i/0c482ee6066480e99a34b45941f8034b9d07938b/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResepeK7BAu6EjS8hckAHBPai6cPktxmDb74)/source.webp",
-    "price": 55,
-    "oldPrice": 62.12,
-    "currency": "EUR",
-    "referralEligible": true,
-    "gameAccessConfirmed": true,
-    "contents": {
-      "ship": "Cutter",
-      "extras": [
-        "6 Monate Versicherung",
-        "10.000 UEC",
-        "Self-Landing Hangar"
-      ]
-    },
-    "note": "",
-    "validUntil": "2026-10-06T06:56:12.705Z",
-    "checkedAt": "2026-09-29T06:56:12.705Z",
-    "officialEndProvided": false,
-    "active": true
   }
 ]
