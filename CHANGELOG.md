@@ -1,3 +1,9 @@
+# 0.13.11
+
+- Teilnahmehinweis bei Referral-Sonderaktionen konkretisiert: Game Package für mindestens 40 USD während der Aktion als klarer Weg, früher angelegte Konten bei erstmaliger Qualifikation möglich.
+- Referral-Code innerhalb von 24 Stunden nach Registrierung; Store Credit und geschenkte Pledges ausgeschlossen; jeweilige RSI-Aktionsmeldung maßgeblich.
+- Erläuterung im Referral-Editor aktualisiert. Bestehende Daten bleiben erhalten.
+
 # 0.13.10
 
 - News laufen automatisch alle zwei Stunden; Patch Notes laufen um 30 Minuten versetzt ebenfalls alle zwei Stunden.

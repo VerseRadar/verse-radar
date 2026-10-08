@@ -1,7 +1,7 @@
 const CONFIG = {
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.13.10"
+  siteVersion: "0.13.11"
 };
 let usingStaticData = false;
 
@@ -183,7 +183,7 @@ async function dealsPage(){const target=document.querySelector("#deals");if(!tar
 function renderReferralSpecial(data,now=Date.now()){
   if(!data || data.active!==true || typeof data.title!=="string" || !data.title.trim() || !isOfficialSource(data.sourceUrl) || data.imageUrl && !isOfficialPackageImage(data.imageUrl) || !confirmedTime(data.start) || !confirmedTime(data.end) || Date.parse(data.start)>now || Date.parse(data.end)<=now || !Array.isArray(data.rewards) || !data.rewards.length || data.rewards.some(x=>typeof x!=="string"||!x.trim()))return "";
   const range=new Intl.DateTimeFormat("de-DE",{timeZone:"Europe/Berlin",dateStyle:"medium",timeStyle:"short"});
-  return `<h2>Zusätzlich während der Referral-Sonderaktion</h2><p><strong>${esc(data.title)}</strong> · ${range.format(new Date(data.start))} bis ${range.format(new Date(data.end))} Uhr</p>${data.imageUrl?`<figure class="referral-special-image"><img src="${esc(data.imageUrl)}" alt="Bild zur Referral-Sonderaktion ${esc(data.title)}" loading="lazy" referrerpolicy="no-referrer"><figcaption>Bild von RSI</figcaption></figure>`:""}<h3>Was erhält der neue Spieler zusätzlich?</h3><ul>${data.rewards.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>${data.note?`<p>${esc(data.note)}</p>`:""}<p>Der Sonderbonus gilt für neu geworbene Spieler. Der Referral-Code muss bei der Kontoerstellung oder innerhalb von 24 Stunden danach eingetragen werden; später lässt sich kein Code für die Aktion nachtragen. Der neue Spieler benötigt ein Game Package und muss während der Aktion mindestens 40 USD mit eigenen Käufen im Pledge Store ausgeben. Das Konto darf schon vor der Aktion erstellt worden sein, solange die 40-USD-Grenze erst währenddessen erreicht wird. Store Credit und geschenkte Pledges zählen nicht. Maßgeblich sind die Bedingungen der offiziellen Aktionsmeldung.</p><p><a class="source" href="${esc(data.sourceUrl)}" target="_blank" rel="noopener noreferrer">Offizielle Sonderaktion bei RSI ↗</a></p>`;
+  return `<h2>Zusätzlich während der Referral-Sonderaktion</h2><p><strong>${esc(data.title)}</strong> · ${range.format(new Date(data.start))} bis ${range.format(new Date(data.end))} Uhr</p>${data.imageUrl?`<figure class="referral-special-image"><img src="${esc(data.imageUrl)}" alt="Bild zur Referral-Sonderaktion ${esc(data.title)}" loading="lazy" referrerpolicy="no-referrer"><figcaption>Bild von RSI</figcaption></figure>`:""}<h3>Was erhält der neue Spieler zusätzlich?</h3><ul>${data.rewards.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>${data.note?`<p>${esc(data.note)}</p>`:""}<p>Der Sonderbonus gilt für neu geworbene Spieler. Der Referral-Code muss bei der Kontoerstellung oder innerhalb von 24 Stunden danach eingetragen werden. Wer über ein Game Package teilnehmen möchte, kauft während der Aktion im Pledge Store ein Game Package für mindestens 40 USD. Das Konto darf schon vor der Aktion erstellt worden sein, wenn der Spieler erst während der Aktion als neuer Backer qualifiziert wird. Store Credit und geschenkte Pledges zählen nicht. Maßgeblich sind die Bedingungen der offiziellen Aktionsmeldung.</p><p><a class="source" href="${esc(data.sourceUrl)}" target="_blank" rel="noopener noreferrer">Offizielle Sonderaktion bei RSI ↗</a></p>`;
 }
 async function referralPage(){
   if(!document.querySelector("#ref-main"))return;

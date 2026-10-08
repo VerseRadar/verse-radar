@@ -74,5 +74,5 @@ assert.match(ctx.renderReferralSpecial(preview.proposal, now), /Schiff für neue
 assert.match(ctx.renderReferralSpecial(preview.proposal, now), /Was erhält der neue Spieler zusätzlich\?/);
 assert.match(ctx.renderReferralSpecial(preview.proposal, now), /innerhalb von 24 Stunden/);
 assert.match(ctx.renderReferralSpecial(preview.proposal, now), /Game Package/);
-assert.match(ctx.renderReferralSpecial(preview.proposal, now), /40-USD-Grenze erst währenddessen/);
+assert.match(ctx.renderReferralSpecial(preview.proposal, now), /Game Package für mindestens 40 USD/);
 assert.equal(ctx.renderReferralSpecial({ ...preview.proposal, title: "<script>" }, now).includes("<script>"), false);
