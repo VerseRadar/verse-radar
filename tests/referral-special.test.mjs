@@ -71,4 +71,8 @@ vm.createContext(ctx);vm.runInContext(app, ctx);
 assert.equal(ctx.renderReferralSpecial(preview.proposal, Date.parse(preview.proposal.start)-1), "");
 assert.equal(ctx.renderReferralSpecial(preview.proposal, Date.parse(preview.proposal.end)), "");
 assert.match(ctx.renderReferralSpecial(preview.proposal, now), /Schiff für neue Spieler/);
+assert.match(ctx.renderReferralSpecial(preview.proposal, now), /Was erhält der neue Spieler zusätzlich\?/);
+assert.match(ctx.renderReferralSpecial(preview.proposal, now), /innerhalb von 24 Stunden/);
+assert.match(ctx.renderReferralSpecial(preview.proposal, now), /Game Package/);
+assert.match(ctx.renderReferralSpecial(preview.proposal, now), /40-USD-Grenze erst währenddessen/);
 assert.equal(ctx.renderReferralSpecial({ ...preview.proposal, title: "<script>" }, now).includes("<script>"), false);

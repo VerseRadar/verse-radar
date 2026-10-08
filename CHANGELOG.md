@@ -1,3 +1,10 @@
+# 0.13.9
+
+- Referral-Sonderaktion zeigt die eingetragenen Belohnungen ausdrücklich als Vorteile für neu geworbene Spieler.
+- Voraussetzungen verdeutlicht: Referral-Code bei Kontoerstellung oder innerhalb von 24 Stunden, Game Package und erstmals 40 USD eigene Pledge-Store-Ausgaben während der Aktion; zuvor erstellte, noch nicht qualifizierte Konten können teilnehmen.
+- Redaktioneller Hinweis im Admin-Formular auf Belohnungen für den neuen Spieler begrenzt.
+- Keine Datenüberschreibung; bestehende Sonderaktionen nutzen automatisch den überarbeiteten Anzeigetext.
+
 # 0.13.8
 
 - Normaler Referral-Bonus: 50.000 UEC für neue Spieler, Qualifikationshinweise und offizielle RSI-FAQ auf der Referral-Seite.
