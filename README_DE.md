@@ -1,4 +1,6 @@
-# Verse Radar 0.13.9
+# Verse Radar 0.13.10
+
+**Neu in 0.13.10:** Der regelmäßige Import ist standardmäßig eingeschaltet: News alle zwei Stunden um Minute 00, Patch Notes alle zwei Stunden um Minute 30 (jeweils UTC). Beide laufen in getrennten Worker-Aufrufen und benötigen keinen manuellen `/run`-Aufruf oder `RUN_SECRET`. Sind keine Inhalte neu, schreibt der Worker keine unveränderten Archiv- oder Metadatendateien nach GitHub; der Datenstand auf der Startseite zeigt die letzte gespeicherte Aktualisierung, nicht die letzte Prüfung. Mit `NEWS_AUTO_PUBLISH=false` bzw. `PATCH_AUTO_PUBLISH=false` lässt sich der jeweilige Zeitplan bei Bedarf pausieren; vorhandene explizite `false`-Variablen bleiben wirksam. Der Zwei-Minuten-Takt für den alten Backfill bleibt separat, führt bei abgeschlossener Steuerung aber keinen Import aus. Der manuelle `/run`-Aufruf verlangt weiterhin `?key=DEIN_WERT` und startet beide Importe zusammen; zur Fehlerprüfung besser `/run/news` und `/run/patches` einzeln verwenden. Die ZIP enthält keine Dateien unter `public/data/`. Nach dem Einspielen `/health` (0.13.10) und im Cloudflare-Dashboard drei Cron-Trigger prüfen; nach dem nächsten Zeitfenster neue News oder Patches kontrollieren.
 
 **Neu in 0.13.9:** Die Referral-Sonderaktion beschreibt jetzt ausdrücklich die Zusatzbelohnungen für den geworbenen Spieler. Die Teilnahmebedingungen nennen gemeinsam den Referral-Code (bei Kontoerstellung oder innerhalb von 24 Stunden danach), ein Game Package und die erstmalige Qualifikation durch mindestens 40 USD an eigenen Pledge-Store-Käufen im Aktionszeitraum. Laut RSI darf das Konto schon vor der Aktion erstellt worden sein, sofern die Qualifikation erst währenddessen erfolgt; die konkrete Aktionsmeldung ist maßgeblich. Änderungen an bereits veröffentlichten Sonderaktionen sind nicht nötig; die Anzeige aktualisiert sich mit dem neuen Code. Das Update enthält keine Dateien unter `public/data/`. Nach dem Einspielen `/health` (0.13.9) und `/referral.html` prüfen.
 
@@ -31,10 +33,10 @@ Der Worker liest die offizielle RSI Comm-Link-Seite ein, erkennt aktuelle Comm-L
 - Variable: `GITHUB_REPO` = `VerseRadar/verse-radar`
 - Variable optional: `GITHUB_BRANCH` = `main`
 - Variable optional: `MAX_ITEMS`
-- Variable optional: `NEWS_AUTO_PUBLISH` = `true` **erst nach Prüfung von `/preview/news` und einem erfolgreichen manuellen `/run/news` setzen**. Bis dahin pausiert der automatische News-Import; Patch-Automatik bleibt separat durch `PATCH_AUTO_PUBLISH` gesteuert.
-- Variable optional: `PATCH_AUTO_PUBLISH` = `true` erst nach Prüfung der Patch-Vorschau und dem ersten manuellen Import setzen. Diese Variable steuert nur den automatischen Patch-Import.
+- Variable optional: `NEWS_AUTO_PUBLISH` = `false`, wenn der automatische News-Import vorübergehend pausieren soll. Fehlt sie, läuft er.
+- Variable optional: `PATCH_AUTO_PUBLISH` = `false`, wenn der automatische Patch-Import vorübergehend pausieren soll. Fehlt sie, läuft er.
 
-Cron: bisheriger Zwei-Stunden-Takt (`0 */2 * * *`) und neuer Zwei-Minuten-Takt (`*/2 * * * *`). Der neue Takt schreibt nur nach Start über `/backfill` Patchdaten; News bleiben davon unberührt. Ohne `NEWS_AUTO_PUBLISH=true` und ohne `PATCH_AUTO_PUBLISH=true` schreibt der Zwei-Stunden-Cron keine Daten. Der manuelle Endpunkt `/run/news` veröffentlicht nur News; `/run` veröffentlicht News und Patches. Falls `RUN_SECRET` gesetzt ist, benötigen die manuellen Endpunkte den Schlüssel.
+Cron: News um `0 */2 * * *`, Patches um `30 */2 * * *`, der ältere Backfill-Takt um `*/2 * * * *`. Alle Angaben sind UTC. Der Backfill-Takt schreibt nur, wenn über `/backfill` ein laufender Import gestartet wurde. Der manuelle Endpunkt `/run/news` veröffentlicht nur News; `/run` veröffentlicht News und Patches. Falls `RUN_SECRET` gesetzt ist, benötigen die manuellen Endpunkte den Schlüssel. Der Admin Login ersetzt den Schlüssel für die alten `/run`-URLs nicht.
 
 ### Patch-History automatisch fertigstellen (0.9.7)
 1. Das Cloudflare Worker-Secret `RUN_SECRET` einmalig auf einen eigenen langen Wert setzen. Wenn du schon einen Wert gesetzt hast, diesen weiterverwenden. Danach benötigen die bisherigen manuellen `/run/patches`-Links `?key=DEIN_WERT`.

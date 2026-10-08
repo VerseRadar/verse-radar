@@ -34,6 +34,7 @@ const oldNews = [
   { id: hash(url(21314, 'Roadmap-Roundup-September-9-2026')), title: 'Roadmap Roundup - September 9, 2026', summary: 'Allgemeine Titelbeschreibung.', summaryBasis: 'Titel', sourceUrl: url(21314, 'Roadmap-Roundup-September-9-2026'), date: '2026-09-09' },
   { id: "valid-old", title: "Ship Showdown 2956 Winners", summary: "RSI hat die Sieger bekannt gegeben.", sourceUrl: url(21308, "ship-showdown-2956-winners"), date: "2026-09-07" }
 ];
+let storedNews = oldNews;
 
 const calls = [];
 let failNewsRead = false;
@@ -45,12 +46,12 @@ globalThis.fetch = async (target, options = {}) => {
     return new Response(html);
   }
   if (address.startsWith("https://api.star-citizen.wiki/api/comm-links?")) return Response.json({ data: archive });
-  if (address.includes("/contents/public/data/news.json?ref=main")) return failNewsRead ? new Response("Unavailable", { status: 503 }) : Response.json({ sha: "news-sha", content: Buffer.from(JSON.stringify(oldNews)).toString("base64") });
+  if (address.includes("/contents/public/data/news.json?ref=main")) return failNewsRead ? new Response("Unavailable", { status: 503 }) : Response.json({ sha: "news-sha", content: Buffer.from(JSON.stringify(storedNews)).toString("base64") });
   if (address.includes("/contents/public/data/patches.json?ref=main")) {
     const patches = [{ sourceUrl: "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21330-Star-Citizen-Alpha-4101", summaryVersion: "0.6.8", summary: "Alpha 4.10.1 bringt Orison Relief Support. Der Patch enthält weitere Änderungen an Aufträgen und Fahrzeugen. Noch ein dritter Satz." }];
     return Response.json({ sha: "patch-sha", content: Buffer.from(JSON.stringify(patches)).toString("base64") });
   }
-  if (address.includes("/contents/public/data/news.json") && options.method === "PUT") return Response.json({ ok: true });
+  if (address.includes("/contents/public/data/news.json") && options.method === "PUT") { storedNews = JSON.parse(Buffer.from(JSON.parse(options.body).content, "base64").toString()); return Response.json({ ok: true }); }
   if (address.includes("/contents/public/data/meta.json") && options.method === "PUT") return Response.json({ ok: true });
   if (address.includes("/contents/")) return new Response("Not found", { status: 404 });
   throw new Error(`Unexpected request: ${address}`);
@@ -58,12 +59,12 @@ globalThis.fetch = async (target, options = {}) => {
 
 const env = { GITHUB_TOKEN: "test-token", GITHUB_REPO: "example/verse-radar", GITHUB_BRANCH: "main" };
 const health = await worker.fetch(new Request("https://example.com/health"), env);
-assert.equal((await health.json()).version, "0.13.9");
+assert.equal((await health.json()).version, "0.13.10");
 const patchApi = await worker.fetch(new Request("https://example.com/api/patches"), env);
 assert.equal(patchApi.headers.get("x-verse-radar-patches-source"), "github");
 
 calls.length = 0;
-await worker.scheduled(null, env, { waitUntil: () => { throw new Error("Cron should remain paused until enabled"); } });
+await worker.scheduled({ cron: "0 */2 * * *" }, { ...env, NEWS_AUTO_PUBLISH: "false" }, { waitUntil: () => { throw new Error("News schedule is explicitly paused"); } });
 assert.equal(calls.length, 0);
 
 const preview = await worker.fetch(new Request("https://example.com/preview/news"), env);
@@ -102,9 +103,16 @@ assert.deepEqual(calls.filter(x => x.method === "PUT").map(x => x.address.split(
 
 calls.length = 0;
 let scheduled;
-await worker.scheduled(null, { ...env, NEWS_AUTO_PUBLISH: "true" }, { waitUntil: promise => { scheduled = promise; } });
+await worker.scheduled({ cron: "0 */2 * * *" }, env, { waitUntil: promise => { scheduled = promise; } });
+await scheduled;
+assert.deepEqual(calls.filter(x => x.method === "PUT"), []);
+
+archive.push({ id: 21342, title: "New Ship Announcement", created_at: "2026-10-08", rsi_url: url(21342, "new-ship-announcement") });
+calls.length = 0;
+await worker.scheduled({ cron: "0 */2 * * *" }, env, { waitUntil: promise => { scheduled = promise; } });
 await scheduled;
 assert.deepEqual(calls.filter(x => x.method === "PUT").map(x => x.address.split("/contents/")[1]), ["public/data/news.json", "public/data/meta.json"]);
+assert.equal(calls.some(x => x.address.includes("/api/comm-links?page[number]=")), false);
 
 calls.length = 0;
 failNewsRead = true;

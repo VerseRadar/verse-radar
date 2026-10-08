@@ -84,4 +84,14 @@ assert.equal(resumed.patchDeferredSeedItems, 6);
 assert.equal(stored.get(state).data.nextPage, 11);
 assert.ok(requests.length < 50);
 
+requests = [];
+let patchCron;
+await worker.scheduled({ cron: '30 */2 * * *' }, env, { waitUntil: promise => { patchCron = promise; } });
+await patchCron;
+assert.ok(requests.length < 50);
+assert.equal(requests.some(item => item.url.startsWith('https://robertsspaceindustries.com/en/comm-link?')), false);
+requests = [];
+await worker.scheduled({ cron: '30 */2 * * *' }, { ...env, PATCH_AUTO_PUBLISH: 'false' }, { waitUntil: () => { throw Error('Patch-Cron ausdrücklich pausiert'); } });
+assert.equal(requests.length, 0);
+
 console.log('Worker-Budget und Teilveröffentlichung mit anschließendem Fortsetzen: OK');

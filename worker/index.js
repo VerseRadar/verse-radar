@@ -23,8 +23,10 @@ const HISTORICAL_PATCHES_PER_IMPORT = 8;
 const PATCH_STATE_PATH = "public/data/patch-archive-state.json";
 const PATCH_BACKFILL_PATH = "public/data/patch-backfill-control.json";
 const PATCH_BACKFILL_CRON = "*/2 * * * *";
+const NEWS_UPDATE_CRON = "0 */2 * * *";
+const PATCH_UPDATE_CRON = "30 */2 * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "0.13.9";
+const VERSION = "0.13.10";
 const DEFAULT_REFERRAL_URL = "https://www.robertsspaceindustries.com/enlist?referral=STAR-6KT2-XJBC";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
@@ -252,7 +254,7 @@ export default {
             count: result.patches.length, newItems: result.newItems,
             scannedPages: result.scannedPages, nextPage: result.nextState.nextPage,
             backfillComplete: result.nextState.complete, pageDiagnostics: result.pageDiagnostics,
-            patchAutoPublishEnabled: env.PATCH_AUTO_PUBLISH === "true",
+            patchAutoPublishEnabled: env.PATCH_AUTO_PUBLISH !== "false",
             deferredSeedItems: result.deferredSeedItems,
             deferredPageItems: result.deferredPageItems,
             historicalCandidates: result.historicalCandidates,
@@ -391,10 +393,12 @@ export default {
       await runBackfillTick(env);
       return;
     }
-    // Both data types require a reviewed preview before scheduled publishing.
-    const includeNews = env.NEWS_AUTO_PUBLISH === "true";
-    const includePatches = env.PATCH_AUTO_PUBLISH === "true";
-    if (includeNews || includePatches) ctx.waitUntil(updateSite(env, { includeNews, includePatches }));
+    // Keep the two imports in separate invocations to stay within the Worker
+    // subrequest budget. Explicit "false" pauses the respective schedule.
+    if (event?.cron === NEWS_UPDATE_CRON && env.NEWS_AUTO_PUBLISH !== "false")
+      ctx.waitUntil(updateSite(env, { includeNews: true, includePatches: false, onlyWhenChanged: true }));
+    if (event?.cron === PATCH_UPDATE_CRON && env.PATCH_AUTO_PUBLISH !== "false")
+      ctx.waitUntil(updateSite(env, { includeNews: false, includePatches: true, onlyWhenChanged: true }));
   }
 };
 
@@ -1216,10 +1220,10 @@ async function buildNews(env) {
   }
   news.sort((a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0));
   const finalNews = dedupeNewsItems(news).slice(0, 60);
-  return { news: finalNews, fetchedItems: items.length, newItems: finalNews.filter(n => n.id && !known.has(n.id)).length, refreshedItems, aiItems: aiCount };
+  return { news: finalNews, changed: JSON.stringify(finalNews) !== JSON.stringify(existing), fetchedItems: items.length, newItems: finalNews.filter(n => n.id && !known.has(n.id)).length, refreshedItems, aiItems: aiCount };
 }
 
-async function updateSite(env, { includeNews = true, includePatches = true } = {}) {
+async function updateSite(env, { includeNews = true, includePatches = true, onlyWhenChanged = false } = {}) {
   const newsResult = includeNews ? await buildNews(env) : null;
 
   const patchResult = includePatches ? await updatePatches(env) : null;
@@ -1231,16 +1235,21 @@ async function updateSite(env, { includeNews = true, includePatches = true } = {
     return { ok: true, version: VERSION, published: false, ...meta, note: "GitHub Secrets fehlen; nichts zurückgeschrieben." };
   }
 
+  const newsChanged = includeNews && (!onlyWhenChanged || newsResult.changed);
+  const patchChanged = includePatches && (!onlyWhenChanged || patchResult.changed);
+  let cursorChanged = false;
   if (includePatches) {
     // Publish the archive before advancing its cursor. A failed cursor write
     // merely repeats a page; it can never skip unsaved older versions.
-    const savedPatches = await publishPatchArchive(env, patchResult.patches);
+    const savedPatches = patchChanged ? await publishPatchArchive(env, patchResult.patches) : patchResult.patches;
     meta.patchItems = savedPatches.length;
     const storedVersions = new Set(savedPatches.map(p => patchKey(p.version)));
     meta.patchHistoricalMissingItems = HISTORICAL_VERSIONS.filter(v => !storedVersions.has(patchKey(`Alpha ${v}`))).length;
-    await publishPatchCursor(env, patchResult.nextState);
+    cursorChanged = await publishPatchCursor(env, patchResult.nextState);
   }
-  if (includeNews) await putGithub(env, "public/data/news.json", JSON.stringify(newsResult.news, null, 2) + "\n", `Verse Radar ${VERSION}: update news`);
+  if (newsChanged) await putGithub(env, "public/data/news.json", JSON.stringify(newsResult.news, null, 2) + "\n", `Verse Radar ${VERSION}: update news`);
+  if (onlyWhenChanged && !newsChanged && !patchChanged && !cursorChanged)
+    return { ok: true, version: VERSION, published: false, ...meta, note: "Keine neuen Inhalte; nichts geändert." };
   await putGithub(env, "public/data/meta.json", JSON.stringify(meta, null, 2) + "\n", `Verse Radar ${VERSION}: update meta`);
   return { ok: true, version: VERSION, published: true, ...meta };
 }
@@ -1293,10 +1302,10 @@ async function publishPatchCursor(env, desired) {
     const next = { nextPage: Math.max(current.nextPage, desired.nextPage),
       complete: current.complete || desired.complete, historicalNextIndex };
     if (latest.data && current.nextPage === next.nextPage && current.complete === next.complete &&
-        current.historicalNextIndex === next.historicalNextIndex) return;
+        current.historicalNextIndex === next.historicalNextIndex) return false;
     try {
       await putGithub(env, PATCH_STATE_PATH, JSON.stringify(next, null, 2) + "\n", `Verse Radar ${VERSION}: advance patch archive`, latest.sha);
-      return;
+      return true;
     } catch (e) {
       if (e.status !== 409 || attempt === 2) throw e;
       await new Promise(resolve => setTimeout(resolve, 150 * (attempt + 1)));
@@ -1348,7 +1357,7 @@ async function updatePatches(env) {
     });
   }
   const patches = [...byVersion.values()].sort(comparePatchVersionsDesc).map((p, i, all) => ({ ...p, previous: all[i + 1]?.version || null }));
-  return { patches, items: unique, newItems: patches.length - existing.length, aiItems, scannedPages, nextState, pageDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems, historicalCandidates, historicalDeferredItems, historicalUnusableItems, historicalDiagnostics, archiveSha: archive.sha, stateSha: stateFile.sha };
+  return { patches, changed: JSON.stringify(patches) !== JSON.stringify(existing), items: unique, newItems: patches.length - existing.length, aiItems, scannedPages, nextState, pageDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems, historicalCandidates, historicalDeferredItems, historicalUnusableItems, historicalDiagnostics, archiveSha: archive.sha, stateSha: stateFile.sha };
 }
 
 function parsePatchState(value) {

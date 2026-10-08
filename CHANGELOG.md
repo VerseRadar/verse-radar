@@ -1,3 +1,11 @@
+# 0.13.10
+
+- News laufen automatisch alle zwei Stunden; Patch Notes laufen um 30 Minuten versetzt ebenfalls alle zwei Stunden.
+- Beide Importe nutzen getrennte Cloudflare-Aufrufe und umgehen das frühere gemeinsame Subrequest-Limit.
+- Bei unveränderten Daten kein erneutes Schreiben von News, Patcharchiv oder Metadaten nach GitHub.
+- `NEWS_AUTO_PUBLISH=false` und `PATCH_AUTO_PUBLISH=false` pausieren bei Bedarf den jeweiligen Zeitplan; ohne diese Variablen ist der Import aktiv.
+- Manuelle `/run`-Aufrufe bleiben mit `RUN_SECRET` geschützt. Gespeicherte Daten bleiben erhalten.
+
 # 0.13.9
 
 - Referral-Sonderaktion zeigt die eingetragenen Belohnungen ausdrücklich als Vorteile für neu geworbene Spieler.

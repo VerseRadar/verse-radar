@@ -15,7 +15,7 @@ type = "durable-object"
 storage = "sqlite"
 
 [triggers]
-crons = ["0 */2 * * *", "*/2 * * * *"]
+crons = ["0 */2 * * *", "30 */2 * * *", "*/2 * * * *"]
 
 [vars]
 GITHUB_REPO = "VerseRadar/verse-radar"

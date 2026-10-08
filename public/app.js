@@ -1,7 +1,7 @@
 const CONFIG = {
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "0.13.9"
+  siteVersion: "0.13.10"
 };
 let usingStaticData = false;
 
@@ -207,7 +207,7 @@ async function home(){
     const fly=freeFlyState(freefly);
     if(fly.status==="active"){ff.classList.remove("hidden");document.querySelector("#freefly-title").textContent=fly.title;document.querySelector("#freefly-dates").textContent=fly.dateText;document.querySelector("#freefly-text").textContent=fly.summary;document.querySelector("#freefly-link").href="/free-fly.html";}
     radarContacts(news,liveEvents); renderStats(news,patches,deals,liveEvents);
-    if(status){if(usingStaticData){status.classList.remove("online");status.innerHTML=`<span></span> Letzter gespeicherter News-/Patch-Import: ${dateDE(meta.updatedAt)} · ${timeDE(meta.updatedAt)} Uhr`;}else{status.classList.add("online");status.innerHTML=`<span></span> Letzter News-/Patch-Import: ${dateDE(meta.updatedAt)} · ${timeDE(meta.updatedAt)} Uhr <b>● DATENABFRAGE ONLINE</b>`;}}
+    if(status){if(usingStaticData){status.classList.remove("online");status.innerHTML=`<span></span> Letzter gespeicherter News-/Patch-Stand: ${dateDE(meta.updatedAt)} · ${timeDE(meta.updatedAt)} Uhr`;}else{status.classList.add("online");status.innerHTML=`<span></span> Letzter gespeicherter News-/Patch-Stand: ${dateDE(meta.updatedAt)} · ${timeDE(meta.updatedAt)} Uhr <b>● DATENABFRAGE ONLINE</b>`;}}
     const badge=document.querySelector(".demo-badge"); if(badge)badge.textContent=`VERSION ${CONFIG.siteVersion} · LIVE PIPELINE`;
   }catch(e){console.error(e);if(status)status.innerHTML='<span></span> Lokaler Datenstand · Automatische Aktualisierung noch nicht verbunden';}
 }

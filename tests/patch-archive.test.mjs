@@ -142,7 +142,7 @@ assert.equal((await request('/run/patches')).status, 401);
 assert.deepEqual(writes(), []);
 const diagnostic = await (await request('/preview/patches?diagnostic=1')).json();
 assert.equal(diagnostic.published, false);
-assert.equal(diagnostic.patchAutoPublishEnabled, false);
+assert.equal(diagnostic.patchAutoPublishEnabled, true);
 assert.equal(diagnostic.items, undefined);
 assert.deepEqual(diagnostic.pageDiagnostics.map(p => p.page), [1, 2]);
 assert.equal(diagnostic.pageDiagnostics[1].alphaRecords.find(p => p.title === 'Star Citizen Alpha 4.7.2').accepted, false);
