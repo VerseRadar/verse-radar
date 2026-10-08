@@ -1,5 +1,41 @@
 [
   {
+    "id": "2b3be958",
+    "title": "Star Citizen Monthly Report: September 2026",
+    "category": "NEWS",
+    "date": "2026-10-07T21:00:00.000Z",
+    "summary": "Monatsbericht zur Entwicklung von Star Citizen für September 2026. Die behandelten Arbeiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21373-Star-Citizen-Monthly-Report-September-2026",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
+    "id": "6e40887",
+    "title": "This Week in Star Citizen - October 5, 2026",
+    "category": "NEWS",
+    "date": "2026-10-05T19:00:00.000Z",
+    "summary": "Wochenüberblick vom 5. Oktober 2026. Die konkreten Themen stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21352-This-Week-In-Star-Citizen",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
+    "id": "2670637a",
+    "title": "This Week in Star Citizen - September 28, 2026",
+    "category": "NEWS",
+    "date": "2026-09-28T18:00:00.000Z",
+    "summary": "Wochenüberblick vom 28. September 2026. Die konkreten Themen stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21342-This-Week-In-Star-Citizen",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "373157c",
     "title": "This Week in Star Citizen - September 21, 2026",
     "category": "NEWS",
