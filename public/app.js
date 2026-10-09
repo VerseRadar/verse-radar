@@ -1,7 +1,7 @@
 const CONFIG = {
   dataBase: "/data/",
   newsEndpoint: "/api/news",
-  siteVersion: "1.0.0"
+  siteVersion: "1.0.1"
 };
 let usingStaticData = false;
 
@@ -148,7 +148,7 @@ function renderConfirmedEvents(items,now=Date.now()){
   return items.map(e=>`<article class="article"><span class="tag">${Date.parse(e.start)<=now?"JETZT AKTIV":"BESTÄTIGT · DEMNÄCHST"}</span><h3>${esc(e.name)}</h3><p>${eventDateTime(e.start)} – ${eventDateTime(e.end)}</p>${e.summary?`<p>${esc(e.summary)}</p>`:""}<p>${sourceLink(e)}</p></article>`).join("")||'<p class="page-intro">Derzeit keine laufenden oder kommenden Termine eingetragen.</p>';
 }
 function activeActivities(items,now=Date.now()){
-  return Array.isArray(items)?items.filter(a=>a?.type==="Ingame Activity"&&a.active===true&&a.name&&isOfficialSource(a.sourceUrl)&&Array.isArray(a.tasks)&&a.tasks.length&&Array.isArray(a.rewards)&&a.rewards.length&&(!a.end||confirmedTime(a.end)&&Date.parse(a.end)>now)&&(!a.start||confirmedTime(a.start))).sort((a,b)=>(Date.parse(b.start)||0)-(Date.parse(a.start)||0)):[];
+  return Array.isArray(items)?items.filter(a=>a?.type==="Ingame Activity"&&a.active===true&&a.name&&isOfficialSource(a.sourceUrl)&&Array.isArray(a.tasks)&&a.tasks.length&&((Array.isArray(a.rewards)&&a.rewards.length)||(Array.isArray(a.progressTracks)&&a.progressTracks.length))&&(!a.end||confirmedTime(a.end)&&Date.parse(a.end)>now)&&(!a.start||confirmedTime(a.start))).sort((a,b)=>(Date.parse(b.start)||0)-(Date.parse(a.start)||0)):[];
 }
 function renderGroupPairs(a){
   const goals=Array.isArray(a.groupGoals)?a.groupGoals:typeof a.groupGoal==="string"&&a.groupGoal?[a.groupGoal]:[];
@@ -156,8 +156,18 @@ function renderGroupPairs(a){
   if(!goals.length||goals.length!==rewards.length)return "";
   return "<h4>Gemeinschaftsziele und Belohnungen</h4><ul>"+goals.map((g,i)=>"<li><strong>Ziel:</strong> "+esc(g)+"<br><strong>Belohnung:</strong> "+esc(rewards[i])+"</li>").join("")+"</ul>";
 }
+function renderProgressTracks(a){
+  if(!Array.isArray(a.progressTracks)||!a.progressTracks.length)return "";
+  const tracks=a.progressTracks.filter(t=>t&&typeof t.name==="string"&&Array.isArray(t.milestones)&&t.milestones.length);
+  if(!tracks.length)return "";
+  return '<h4>Persönliche Fortschrittspfade</h4><div class="progress-tracks">'+tracks.map(t=>'<section class="progress-track"><h5>'+esc(t.name)+'</h5><ul>'+t.milestones.filter(m=>Number.isSafeInteger(m.points)&&m.points>0&&typeof m.reward==="string").map(m=>'<li><strong>'+new Intl.NumberFormat("de-DE").format(m.points)+' Punkte:</strong> '+esc(m.reward)+'</li>').join('')+'</ul></section>').join('')+'</div>';
+}
+function activityImageUrl(value){
+  if(/^\/activity-image\/[a-f0-9]{64}\.(?:png|jpg|webp)$/.test(value||""))return value;
+  try{const url=new URL(value);return url.protocol==="https:"&&!url.username&&!url.password&&/^(?:www\.|cdn\.)?robertsspaceindustries\.com$/i.test(url.hostname)&&/\.(?:png|jpe?g|webp|avif)$/i.test(url.pathname)?url.href:""}catch{return ""}
+}
 function renderActivities(items,limit=items.length){
-  return items.slice(0,limit).map(a=>`<article class="article"><span class="tag">OFFIZIELLE INGAME-AKTION</span><h3>${esc(a.name)}</h3>${/^\/activity-image\/[a-f0-9]{64}\.(?:png|jpg|webp)$/.test(a.imageUrl||"")?`<img class="event-image" src="${esc(a.imageUrl)}" alt="Bild zu ${esc(a.name)}" loading="lazy">`:""}<p>${a.start?`Beginn: ${eventDateTime(a.start)} · `:""}${a.end?`Ende: ${eventDateTime(a.end)}`:"Ende nicht bestätigt – aktuellen Stand bei RSI prüfen"}</p>${a.summary?`<p>${esc(a.summary)}</p>`:""}<h4>Aufgaben</h4><ul>${a.tasks.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><h4>Persönliche Belohnungen</h4><ul>${a.rewards.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>${renderGroupPairs(a)}<p>${sourceLink(a)}</p></article>`).join("")||'<p class="page-intro">Derzeit keine offizielle Ingame-Aktion eingetragen.</p>';
+  return items.slice(0,limit).map(a=>`<article class="article"><span class="tag">OFFIZIELLE INGAME-AKTION</span><h3>${esc(a.name)}</h3>${activityImageUrl(a.imageUrl)?`<img class="event-image" src="${esc(activityImageUrl(a.imageUrl))}" alt="Bild zu ${esc(a.name)}" loading="lazy">`:""}<p>${a.start?`Beginn: ${eventDateTime(a.start)} · `:""}${a.end?`Ende: ${eventDateTime(a.end)}`:"Ende nicht bestätigt – aktuellen Stand bei RSI prüfen"}</p>${a.summary?`<p>${esc(a.summary)}</p>`:""}<h4>Aufgaben</h4><ul>${a.tasks.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>${Array.isArray(a.rewards)&&a.rewards.length?`<h4>Persönliche Belohnungen</h4><ul>${a.rewards.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}${renderProgressTracks(a)}${renderGroupPairs(a)}<p>${sourceLink(a)}</p></article>`).join("")||'<p class="page-intro">Derzeit keine offizielle Ingame-Aktion eingetragen.</p>';
 }
 function renderEventNews(items){
   return items.slice(0,8).map(n=>`<article class="article"><span class="tag">${esc(n.category)} · MELDUNG VOM ${dateDE(n.date)}</span><h3>${esc(n.title)}</h3><p>${esc(n.summary||"")}</p><p>${sourceLink(n)}</p></article>`).join("")||'<p class="page-intro">Keine aktuellen Event-Meldungen vorhanden.</p>';

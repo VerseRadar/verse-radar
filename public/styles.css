@@ -33,6 +33,7 @@ main{max-width:var(--max);margin:auto;padding:0 24px}.hero{min-height:430px;disp
 
 /* Verse Radar 0.13.6 */
 .event-image{display:block;width:100%;max-height:360px;object-fit:contain;border-radius:6px;margin:16px 0;background:#071219}
+.progress-tracks{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr));gap:12px;margin:12px 0 20px}.progress-track{border:1px solid var(--line);border-radius:7px;padding:14px;background:#071219}.progress-track h5{font-size:15px;color:var(--green);margin:0 0 9px}.progress-track ul{margin:0;padding-left:19px}.progress-track li{margin:7px 0;line-height:1.45}.progress-track strong{color:var(--cyan)}
 
 /* Verse Radar 0.13.7: sichtbarer Hinweis auf allen öffentlichen Seiten */
 .fan-notice{max-width:var(--max);margin:0 auto;padding:11px 24px;color:#c8d7da;background:#091820;border:1px solid #17313b;font-size:14px;line-height:1.5}

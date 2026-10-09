@@ -1,3 +1,11 @@
+# 1.0.1
+
+- Ingame-Aktionen können mehrere frei benennbare persönliche Fortschrittspfade mit Punkteschwellen und zugehörigen Belohnungen anzeigen; der Gesamtfortschritt bleibt von Gemeinschaftszielen getrennt.
+- Neue Zeileneingabe im Event-Manager: `Bereich | Punkte | Belohnung`. Die bisherigen Aufgaben- und Belohnungslisten sowie veröffentlichte Aktionen bleiben kompatibel.
+- Bild für neue Ingame-Aktionen wieder als direkter RSI-Bildlink mit Ladeprüfung statt Upload. Bereits gespeicherte hochgeladene Bilder bleiben abrufbar.
+- RSI-JSON-Feed erkennt auch Meldungen ohne eigenes Titelfeld über ihren offiziellen Artikellink. Patch-Links mit eindeutigem vierstelligem Versionsslug werden ebenfalls erkannt; der Patchtext muss weiter die Inhaltsprüfung bestehen.
+- Version 1.0.1; bestehende News, Patches, Ingame-Aktionen und Bilder werden beim Update nicht überschrieben.
+
 # 1.0.0
 
 - Alpha 4.10.2 wird trotz derzeit leerem automatischem RSI-Abruf mit einer redaktionell geprüften deutschen Zusammenfassung und offiziellem Quellenlink in die Patch-Vorschau übernommen.

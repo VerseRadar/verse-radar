@@ -56,7 +56,7 @@ globalThis.fetch = async (input, init = {}) => {
     return new Response(`<article><h1>Star Citizen Alpha 4.10.2 LIVE Release Notes</h1><h2>Build Information</h2><p>${'RSI Discovery Month missions reward points career tracks, cargo transport and salvage missions. '.repeat(12)}</p></article>`);
   }
   if (feedNewPatch && url.host === 'leonick.se') return Response.json({ items: [
-    { title: 'Star Citizen Alpha 4.10.3', url: 'https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21390-Star-Citizen-Alpha-4103', date_published: '2026-10-11T18:00:00Z' },
+    { url: 'https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21390-Star-Citizen-Alpha-4103', date_published: '2026-10-11T18:00:00Z' },
     { title: 'Star Citizen Alpha 4.10.4', url: 'https://robertsspaceindustries.com/en/comm-link/transmission/21391-Star-Citizen-Alpha-4104', date_published: '2026-10-11T19:00:00Z' }
   ] });
   if (feedNewPatch && url.host === 'api.star-citizen.wiki' && url.pathname === '/api/comm-links/21390') {
@@ -168,7 +168,7 @@ const first = await (await request('/preview/patches')).json();
 assert.equal(first.published, false);
 assert.equal(first.count, 6);
 assert.equal(first.newItems, 3);
-assert.equal(first.items.find(p => p.version === 'Alpha 4.10.2').summaryVersion, '1.0.0');
+assert.equal(first.items.find(p => p.version === 'Alpha 4.10.2').summaryVersion, '1.0.1');
 assert.match(first.items.find(p => p.version === 'Alpha 4.10.2').note, /Redaktionell geprüft/);
 assert.equal(first.items.some(p => p.version === 'Alpha 4.7.2'), false);
 assert.equal(first.items.find(p => p.version === 'Alpha 4.8.1').sourceType, 'Release Info');

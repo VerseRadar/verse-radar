@@ -48,7 +48,7 @@ globalThis.fetch = async (target, options = {}) => {
   }
   if (address.startsWith("https://api.star-citizen.wiki/api/comm-links?")) return Response.json({ data: archive });
   if (address === "https://leonick.se/feeds/rsi/json") return Response.json({ items: feedFresh ? [
-    { title: "New Ship Announcement", url: url(21380, "new-ship-announcement"), date_published: "2026-10-10T12:00:00Z" },
+    { url: url(21380, "new-ship-announcement"), content_html: "<p>Details stehen im Artikel.</p>", date_published: "2026-10-10T12:00:00Z" },
     { title: "New Ship Scam", url: "https://example.net/fake", date_published: "2026-10-10T12:01:00Z" }
   ] : [] });
   if (address.includes("/contents/public/data/news.json?ref=main")) return failNewsRead ? new Response("Unavailable", { status: 503 }) : Response.json({ sha: "news-sha", content: Buffer.from(JSON.stringify(storedNews)).toString("base64") });
@@ -64,7 +64,7 @@ globalThis.fetch = async (target, options = {}) => {
 
 const env = { GITHUB_TOKEN: "test-token", GITHUB_REPO: "example/verse-radar", GITHUB_BRANCH: "main" };
 const health = await worker.fetch(new Request("https://example.com/health"), env);
-assert.equal((await health.json()).version, "1.0.0");
+assert.equal((await health.json()).version, "1.0.1");
 const patchApi = await worker.fetch(new Request("https://example.com/api/patches"), env);
 assert.equal(patchApi.headers.get("x-verse-radar-patches-source"), "github");
 
@@ -124,6 +124,7 @@ assert.equal(calls.some(x => x.address.includes("/api/comm-links?page[number]=")
 feedFresh = true;
 const feedPreview = await (await worker.fetch(new Request("https://example.com/preview/news"), env)).json();
 assert.ok(feedPreview.items.some(x => x.sourceUrl === url(21380, "new-ship-announcement")));
+assert.ok(feedPreview.items.some(x => x.title === "New Ship Announcement"));
 assert.equal(feedPreview.items.some(x => x.sourceUrl === "https://example.net/fake"), false);
 assert.ok(feedPreview.sourceDiagnostics.some(x => x.source === "https://leonick.se/feeds/rsi/json" && x.accepted === 1));
 
