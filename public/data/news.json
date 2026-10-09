@@ -120,6 +120,30 @@
     "summaryVersion": "0.10.1"
   },
   {
+    "id": "af211bf0",
+    "title": "Star Citizen Alpha 4101",
+    "category": "PATCH NOTES",
+    "date": "2026-09-16T18:20:03.000Z",
+    "summary": "Offizielle Mitteilung zu Star Citizen Alpha 4101. Die konkreten Änderungen findest du in den verlinkten Patch Notes.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21218-Star-Citizen-Alpha-4101",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
+    "id": "d318d82",
+    "title": "Q&A: Aegis Sabre Raven EX and Argo ATLS IKTI Akuma",
+    "category": "SCHIFFE",
+    "date": "2026-09-16T18:00:00.000Z",
+    "summary": "Fragen und Antworten zu Aegis Sabre Raven EX and Argo ATLS IKTI Akuma. Die einzelnen Aussagen stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/engineering/21329-Q-A-Aegis-Sabre-Raven-EX-And-Argo-ATLS-IKTI-Akuma",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.1"
+  },
+  {
     "id": "2172e784",
     "title": "Aegis Sabre Raven EX | Star Citizen",
     "category": "SCHIFFE",
@@ -141,18 +165,6 @@
     "source": "RSI Comm-Link",
     "ai": false,
     "summaryBasis": "Patch Notes",
-    "summaryVersion": "0.10.1"
-  },
-  {
-    "id": "d318d82",
-    "title": "Q&A: Aegis Sabre Raven EX and Argo ATLS IKTI Akuma",
-    "category": "SCHIFFE",
-    "date": "2026-09-16T18:00:00.000Z",
-    "summary": "Fragen und Antworten zu Aegis Sabre Raven EX and Argo ATLS IKTI Akuma. Die einzelnen Aussagen stehen in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/engineering/21329-Q-A-Aegis-Sabre-Raven-EX-And-Argo-ATLS-IKTI-Akuma",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
     "summaryVersion": "0.10.1"
   },
   {
