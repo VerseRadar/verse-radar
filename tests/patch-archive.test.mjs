@@ -159,13 +159,17 @@ assert.equal(diagnostic.items, undefined);
 assert.deepEqual(diagnostic.pageDiagnostics.map(p => p.page), [1, 2]);
 assert.equal(diagnostic.pageDiagnostics[1].alphaRecords.find(p => p.title === 'Star Citizen Alpha 4.7.2').accepted, false);
 assert.equal(diagnostic.pageDiagnostics[1].alphaRecords.find(p => p.title === 'Star Citizen Alpha 4.9').accepted, true);
+assert.deepEqual(diagnostic.seedDiagnostics.find(p => p.version === 'Alpha 4.10.2'),
+  { version: 'Alpha 4.10.2', sourceId: 21351, sourceContentLength: 0, eligible: true, editorialSummary: true });
 assert.deepEqual(diagnostic.seedDiagnostics.find(p => p.version === 'Alpha 4.7'),
   { version: 'Alpha 4.7', sourceId: 21070, sourceContentLength: 0, eligible: false });
 assert.deepEqual(writes(), []);
 const first = await (await request('/preview/patches')).json();
 assert.equal(first.published, false);
-assert.equal(first.count, 5);
-assert.equal(first.newItems, 2);
+assert.equal(first.count, 6);
+assert.equal(first.newItems, 3);
+assert.equal(first.items.find(p => p.version === 'Alpha 4.10.2').summaryVersion, '1.0.0');
+assert.match(first.items.find(p => p.version === 'Alpha 4.10.2').note, /Redaktionell geprüft/);
 assert.equal(first.items.some(p => p.version === 'Alpha 4.7.2'), false);
 assert.equal(first.items.find(p => p.version === 'Alpha 4.8.1').sourceType, 'Release Info');
 assert.match(first.items.find(p => p.version === 'Alpha 4.8.1').sourceUrl, /\/transmission\/21177-/);
@@ -201,7 +205,7 @@ calls.length = 0;
 archiveConflictOnce = true;
 stateWriteFailure = true;
 assert.equal((await request('/run/patches?key=private')).status, 500);
-assert.equal(stored.get(patchesPath).data.length, 6);
+assert.equal(stored.get(patchesPath).data.length, 7);
 assert.equal(stored.get(patchesPath).data.find(p => p.version === 'Alpha 4.6').summary, externalPatch.summary);
 assert.equal(stored.has(statePath), false);
 stateWriteFailure = false;
@@ -217,18 +221,18 @@ calls.length = 0;
 const second = await (await request('/preview/patches')).json();
 assert.deepEqual(second.scannedPages, [1, 3]);
 assert.deepEqual(second.pageDiagnostics.map(p => p.page), [1, 3]);
-assert.equal(second.count, 7);
+assert.equal(second.count, 8);
 assert.equal(second.newItems, 1);
 assert.equal(second.backfillComplete, true);
 assert.equal(second.items.at(-1).previous, null);
-assert.equal(second.items[0].summary, 'Geprüft 4.10.1');
+assert.equal(second.items[1].summary, 'Geprüft 4.10.1');
 assert.deepEqual(writes(), []);
 
 const final = await (await request('/run/patches?key=private')).json();
 assert.equal(final.published, true);
-assert.equal(stored.get(patchesPath).data.length, 7);
+assert.equal(stored.get(patchesPath).data.length, 8);
 assert.equal(stored.get(statePath).data.complete, true);
-assert.equal(stored.get(patchesPath).data[0].summary, 'Geprüft 4.10.1');
+assert.equal(stored.get(patchesPath).data[1].summary, 'Geprüft 4.10.1');
 
 alpha47DetailAvailable = true;
 stored.get(patchesPath).data = stored.get(patchesPath).data.filter(p => p.version !== 'Alpha 4.7');
@@ -299,11 +303,14 @@ for (const version of ['Alpha 4.8.2','Alpha 4.7.2','Alpha 4.7.1']) {
 assert.equal(stored.get(patchesPath).data.some(p => p.version === 'Alpha 4.7.1'), false);
 
 latestOfficialAvailable = true;
+stored.get(patchesPath).data = stored.get(patchesPath).data.filter(p => p.version !== 'Alpha 4.10.2');
 const latest = await (await request('/preview/patches?diagnostic=1')).json();
 assert.equal(latest.seedDiagnostics.find(p => p.version === 'Alpha 4.10.2').eligible, true);
+assert.equal(latest.seedDiagnostics.find(p => p.version === 'Alpha 4.10.2').editorialSummary, undefined);
 const latestItems = await (await request('/preview/patches')).json();
 assert.equal(latestItems.items.find(p => p.version === 'Alpha 4.10.2').sourceUrl,
   'https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21351-Star-Citizen-Alpha-4102');
+assert.doesNotMatch(latestItems.items.find(p => p.version === 'Alpha 4.10.2').note, /Redaktionell geprüft/);
 feedNewPatch = true;
 const feedPatch = await (await request('/preview/patches?diagnostic=1')).json();
 assert.equal(feedPatch.feedDiagnostics.accepted, 1);

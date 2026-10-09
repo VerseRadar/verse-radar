@@ -1,3 +1,10 @@
+# 1.0.0
+
+- Alpha 4.10.2 wird trotz derzeit leerem automatischem RSI-Abruf mit einer redaktionell geprüften deutschen Zusammenfassung und offiziellem Quellenlink in die Patch-Vorschau übernommen.
+- Die Vorschau kennzeichnet diesen Übergang mit `editorialSummary: true`; ein später automatisch auswertbarer Originaltext erhält beim erstmaligen Import Vorrang.
+- Zusätzliche Diagnose für die Struktur des öffentlichen Feeds, falls sein Index weiterhin keine verwertbaren Links liefert.
+- Versionsnummern auf 1.0.0 angehoben; veröffentlichte News, Patchdaten und hochgeladene Bilder bleiben beim Update erhalten.
+
 # 0.13.12
 
 - News-Import vereint RSI-Comm-Link, Wiki-Index und einen zusätzlichen öffentlichen Feed; die fünf gemeldeten RSI-Links vom 9. Oktober sind als Übergang hinterlegt.

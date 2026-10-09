@@ -1,6 +1,6 @@
 import { DurableObject } from "cloudflare:workers";
 
-/* Verse Radar 0.9.10 – RSI news + patch notes ingestion
+/* Verse Radar – RSI news + patch notes ingestion
    Purpose: fetch the official RSI Comm-Link page, normalize current posts,
    filter relevant Star Citizen news, and (when GitHub secrets are configured)
    publish public/data/news.json back to the connected repository.
@@ -26,7 +26,7 @@ const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const NEWS_UPDATE_CRON = "0 */2 * * *";
 const PATCH_UPDATE_CRON = "30 */2 * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "0.13.12";
+const VERSION = "1.0.0";
 const COMMUNITY_FEED_URL = "https://leonick.se/feeds/rsi/json";
 const DEFAULT_REFERRAL_URL = "https://www.robertsspaceindustries.com/enlist?referral=STAR-6KT2-XJBC";
 // These two release announcements were imported as patch notes before the
@@ -58,6 +58,25 @@ const PATCH_SEEDS = [
   { version: "Alpha 4.7.2", id: 0, date: "2026-04-22T00:00:00.000Z", sourceType: "Content Update", sourceUrl: "https://robertsspaceindustries.com/en/comm-link/transmission/21125-Star-Citizen-Alpha-472" },
   { version: "Alpha 4.7.1", id: 0, date: "2026-04-08T00:00:00.000Z", sourceType: "Content Update", sourceUrl: "https://starcitizen.tools/Update:Star_Citizen_Alpha_4.7.1" }
 ];
+// This release was checked against the official LIVE notes on October 9.
+// RSI's frontend currently sends an app shell to the Worker and the mirror
+// has no 21351 record. Keep this independent German editorial summary until
+// the indexed source becomes readable; never label it as extracted raw text.
+const CURATED_LIVE_PATCHES = {
+  "Alpha 4.10.2": {
+    summary: "Alpha 4.10.2 bringt RSI Discovery Month mit Kämpfen, Transport, Rohstoffsuche und Bergung sowie eigenen Fortschrittswegen und Belohnungen. Die Constellation Mk IV wurde bei Brücke, Zugängen, Aufzügen, Türmen, Snub-Bucht und Innenräumen überarbeitet. Ein neues Physik-Netcode soll lose Gegenstände ruhiger und genauer synchronisieren. Dazu kommen ein regelbarer VR-Zoom, neue Ausrüstung und weitere Korrekturen.",
+    changes: [
+      { category: "Missionen", title: "RSI Discovery Month", description: "Neue Aufträge für Schiffs- und FPS-Kampf, Transport, Rohstoffe und Bergung; Fortschritt über Karrierepfade mit Belohnungen." },
+      { category: "Schiffe & Fahrzeuge", title: "Constellation Mk IV überarbeitet", description: "Brücke, Luftschleuse, Fracht- und Crewaufzüge, Geschütztürme, Snub-Bucht, Technikbereiche und Innenräume wurden erneuert." },
+      { category: "Technik", title: "Physik-Netcode für lose Objekte", description: "Kisten, Granaten und andere lose Gegenstände sollen seltener springen, rutschen oder nach einer Korrektur versetzt erscheinen." },
+      { category: "VR", title: "Einstellbarer Zoom", description: "VR erhält eine eigene Zoomfunktion für Interaktionen, präzises Zielen im Schiff und FPS-Visiere; die Stärke lässt sich anpassen oder abschalten." },
+      { category: "Schiffe & Fahrzeuge", title: "Schilde und abgestellte Fahrzeuge", description: "Feste Schildwiderstände werden korrekt angewandt; verlassene Fahrzeuge an mehreren Stationen verschwinden nach einem eigenen Timer." },
+      { category: "Ausrüstung", title: "Rüstungen und Wikelo-Rezepte", description: "Heavy Combat Hunter 3 und neue RRS-Tarnvarianten kommen hinzu; Wikelo bietet weitere Rezepte für Gemini LMG und Grey Combat Armour." },
+      { category: "Technik", title: "VR- und Bedienfehler behoben", description: "Unter anderem wurden verschwindende UI-Symbole und zurückgesetzte Mauseinstellungen beim Wechsel zu VR korrigiert." }
+    ],
+    fullSummary: "RSI Discovery Month erweitert Stanton um Aufträge für Schiffs- und FPS-Gefechte, Warentransport, Rohstoffe und Bergung. Die Aufgaben bringen Eventpunkte, Fortschritt in eigenen Karrierepfaden und Belohnungen. Die Constellation Mk IV wurde umfassend modernisiert: Eine klarere Brückenverglasung, veränderte Luftschleuse, neue Fracht- und Crewaufzüge, überarbeitete Geschütztürme und Snub-Bucht sowie angepasste Technik- und Wohnbereiche gehören dazu. Das neue experimentelle Physik-Netcode synchronisiert lose Gegenstände wie Kisten und Wurfobjekte mit sanfteren Korrekturen; Schiffe und Figuren nutzen weiterhin das bisherige System. VR erhält einen regelbaren Zoom für Interaktionen, Zielvorgänge in Schiffen und FPS-Visiere. Feste Schildwiderstände wirken nun wie vorgesehen, verlassene Fahrzeuge an ausgewählten Stationen haben einen eigenen Ablauf-Timer. Neue Rüstungsvarianten und Wikelo-Rezepte ergänzen Ausrüstung und Herstellung. Die offiziellen Notizen führen außerdem Fehlerbehebungen bei VR und Benutzeroberfläche auf."
+  }
+};
 // The public category lists 80 releases; 3.17.2a is separately documented
 // in RSI Spectrum and the comm-link archive. Keep the combined historical
 // index locally: the Wiki categorymembers API can return an empty list.
@@ -967,7 +986,7 @@ async function fetchRSIItems() {
     const body = r.ok ? await r.json() : null;
     const feedItems = Array.isArray(body?.items) ? body.items.map(normalizeFeedItem).filter(Boolean) : [];
     diagnostics.push({ source: COMMUNITY_FEED_URL, httpStatus: r.status, records: body?.items?.length ?? 0,
-      accepted: feedItems.length });
+      accepted: feedItems.length, sample: feedSample(body?.items?.[0]) });
     collected.push(...feedItems.filter(x => relevantNewsTitle(x.title)));
   } catch (e) {
     diagnostics.push({ source: COMMUNITY_FEED_URL, error: e.message });
@@ -991,11 +1010,33 @@ function normalizeFeedItem(record) {
   const title = strip(record?.title || "");
   // The feed is a discovery aid only. Never publish a feed-owned URL or
   // arbitrary external link as an official RSI article.
-  const url = cleanUrl(record?.external_url || record?.url || record?.id);
-  if (!validTitle(title) || !isArticleUrl(url) || !/^https:\/\/robertsspaceindustries\.com\//i.test(url)) return null;
-  const date = validDate(record?.date_published || record?.date_modified || "");
+  const url = feedArticleUrl(record);
+  if (!validTitle(title) || !url) return null;
+  const date = validDate(record?.date_published || record?.published_at || record?.published || record?.date_modified || record?.date || "");
   if (!date) return null;
   return { title, url, date, description: "" };
+}
+
+function feedArticleUrl(record) {
+  for (const value of [record?.external_url, record?.url, record?.link, record?.id]) {
+    const candidate = cleanUrl(value);
+    if (!candidate) continue;
+    const parsed = new URL(candidate);
+    if (!/^(?:www\.)?robertsspaceindustries\.com$/i.test(parsed.hostname)) continue;
+    const path = parsed.pathname.replace(/^\/comm-link\//i, "/en/comm-link/");
+    const canonical = `https://robertsspaceindustries.com${path}`;
+    if (isArticleUrl(canonical)) return canonical;
+  }
+  return null;
+}
+
+function feedSample(record) {
+  if (!record || typeof record !== "object") return null;
+  const rawUrl = String(record.external_url || record.url || record.link || "");
+  let host = null, path = null;
+  try { const u = new URL(rawUrl); host = u.hostname; path = u.pathname.slice(0, 120); } catch {}
+  return { keys: Object.keys(record).slice(0, 15), title: strip(record.title || "").slice(0, 100), host, path,
+    datePublished: String(record.date_published || record.published_at || record.published || record.date || "").slice(0, 40) };
 }
 
 function normalizeWikiCommLink(record) {
@@ -1376,21 +1417,22 @@ async function updatePatches(env) {
     // differently formatted source data.
     if (byVersion.has(key)) continue;
     let ai = null;
-    if (env.OPENAI_API_KEY && item.content) {
+    if (env.OPENAI_API_KEY && item.content && !item.curated) {
       try { ai = await summarizePatch(item, null, env.OPENAI_API_KEY); aiItems++; } catch (_) {}
     }
     byVersion.set(key, {
       version: item.version,
       date: item.date,
       previous: null,
-      summary: ai?.summary || item.fallbackSummary,
-      changes: ai?.changes?.length ? ai.changes : buildPatchChanges(item),
-      fullSummary: ai?.fullSummary || item.fallbackFullSummary,
+      summary: item.curated?.summary || ai?.summary || item.fallbackSummary,
+      changes: item.curated?.changes || (ai?.changes?.length ? ai.changes : buildPatchChanges(item)),
+      fullSummary: item.curated?.fullSummary || ai?.fullSummary || item.fallbackFullSummary,
       sourceUrl: item.sourceUrl,
       sourceType: item.sourceType || "Patch Notes",
       ai: Boolean(ai),
-      summaryVersion: Object.hasOwn(HISTORICAL_SHORT_RELEASES, item.version) ? VERSION : item.historical ? "0.9.6" : "0.6.8",
-      note: item.sourceType === "Community Archive"
+      summaryVersion: item.curated || Object.hasOwn(HISTORICAL_SHORT_RELEASES, item.version) ? VERSION : item.historical ? "0.9.6" : "0.6.8",
+      note: item.curated ? "Redaktionell geprüfte deutsche Zusammenfassung der offiziellen RSI-Patch-Notes. Der Worker konnte den Quelltext beim Import nicht automatisch auslesen. Kein offizieller RSI-Text."
+        : item.sourceType === "Community Archive"
         ? "Deutsche Zusammenfassung einer archivierten Patchseite der Star Citizen Wiki; ein eigenständiger offizieller Patch-Notes-Link ist dort nicht belegt."
         : item.sourceType === "RSI Release Info"
         ? "Deutsche Zusammenfassung aus dem archivierten Patchtext; der Original-Link führt zu einer offiziellen RSI-Veröffentlichung."
@@ -1494,14 +1536,15 @@ async function fetchPatchItems(state, existingVersions) {
     const body = r.ok ? await r.json() : null;
     const records = Array.isArray(body?.items) ? body.items : [];
     const candidates = records.map(record => {
-      const sourceUrl = cleanUrl(record?.external_url || record?.url || record?.id);
+      const sourceUrl = feedArticleUrl(record);
       const title = strip(record?.title || "");
       const id = Number(sourceUrl?.match(/\/Patch-Notes\/(\d+)-/i)?.[1]);
       if (!id || !/^https:\/\/robertsspaceindustries\.com\/en\/comm-link\/Patch-Notes\/\d+-/i.test(sourceUrl) || !/^Star Citizen Alpha \d+(?:\.\d+){1,2}(?:\s|:|$)/i.test(title)) return null;
       return { id, version: normalizePatchVersion(title.replace(/^Star Citizen /i, "").trim()), sourceUrl,
         date: validDate(record?.date_published || record?.date_modified || "") };
     }).filter(x => x && x.date);
-    feedDiagnostics = { source: COMMUNITY_FEED_URL, httpStatus: r.status, records: records.length, accepted: candidates.length };
+    feedDiagnostics = { source: COMMUNITY_FEED_URL, httpStatus: r.status, records: records.length, accepted: candidates.length,
+      sample: feedSample(records[0]) };
     for (const candidate of candidates) {
       if (existingVersions.has(patchKey(candidate.version)) || discovered.some(x => patchKey(x.version) === patchKey(candidate.version))) continue;
       if (fetchedDetails >= PATCH_DETAILS_PER_IMPORT) { deferredPageItems++; continue; }
@@ -1519,7 +1562,7 @@ async function fetchPatchItems(state, existingVersions) {
   let fetchedSeeds = 0;
   let deferredSeedItems = 0;
   for (const seed of [...PATCH_SEEDS].sort(comparePatchVersionsDesc)) {
-    const already = discovered.some(x => x.version === seed.version);
+    const already = discovered.some(x => x.version === seed.version && publishablePatch(x.version, x.content));
     if (already) continue;
     if (existingVersions.has(patchKey(seed.version))) {
       seedDiagnostics.push({ version: seed.version, sourceId: seed.id, alreadyStored: true });
@@ -1544,11 +1587,14 @@ async function fetchPatchItems(state, existingVersions) {
       const wikiContent = cleanPatchText(await fetchWikiUpdatePage(seed.version, ""));
       if (publishablePatch(seed.version, wikiContent) || wikiContent.length > content.length) content = wikiContent;
     }
+    const curated = !publishablePatch(seed.version, content) ? CURATED_LIVE_PATCHES[seed.version] : null;
     seedDiagnostics.push({ version: seed.version, sourceId: seed.id, sourceContentLength: content.length,
-      eligible: publishablePatch(seed.version, content),
+      eligible: publishablePatch(seed.version, content) || Boolean(curated),
+      ...(curated ? { editorialSummary: true } : {}),
       matchedChanges: Object.hasOwn(ARCHIVE_HIGHLIGHTS, seed.version)
         ? (archiveHighlights(seed.version, content) || []).map(change => change.title) : undefined });
-    discovered.push({ version: seed.version, date: seed.date, sourceUrl, sourceType: seed.sourceType || "Patch Notes", sourceId: seed.id, content, fallbackSummary: fallbackPatchSummary(seed.version, content), fallbackFullSummary: fallbackFullSummary(seed.version, content) });
+    discovered.push({ version: seed.version, date: seed.date, sourceUrl, sourceType: seed.sourceType || "Patch Notes", sourceId: seed.id, content, curated,
+      fallbackSummary: fallbackPatchSummary(seed.version, content), fallbackFullSummary: fallbackFullSummary(seed.version, content) });
   }
 
   // The comm-link mirror assigns placeholder links to many 3.x notes. Read
@@ -1592,7 +1638,7 @@ async function fetchPatchItems(state, existingVersions) {
   // A title variant (e.g. "Alpha 4.8: Tactical Strike") is not a separate
   // predecessor of the same numbered release. Never publish empty source text
   // as a generic patch summary.
-  const unique = dedupePatchItems(discovered).filter(item => publishablePatch(item.version, item.content)).sort(comparePatchVersionsDesc);
+  const unique = dedupePatchItems(discovered).filter(item => item.curated || publishablePatch(item.version, item.content)).sort(comparePatchVersionsDesc);
   if (!unique.length && !existingVersions.size) throw Error("Keine Patch Notes mit auswertbarem Quelltext erkannt.");
   const lastScanned = scannedPages[scannedPages.length - 1];
   const complete = !firstDeferredPage && (state.complete || reachedEnd || (lastPage !== null && lastScanned >= lastPage));
@@ -1810,9 +1856,13 @@ function dedupePatchItems(items) {
   for (const item of items) {
     const key = patchKey(item.version);
     const old = map.get(key);
-    if (!old ||
-        (item.content.length >= 500 && old.content.length < 500) ||
-        ((item.content.length >= 500) === (old.content.length >= 500) && Number(item.sourceId||0) > Number(old.sourceId||0))) map.set(key,item);
+    if (!old) { map.set(key, item); continue; }
+    const verified = publishablePatch(item.version, item.content);
+    const oldVerified = publishablePatch(old.version, old.content);
+    if (verified !== oldVerified) { if (verified) map.set(key, item); continue; }
+    if (Boolean(item.curated) !== Boolean(old.curated)) { if (item.curated) map.set(key, item); continue; }
+    if ((item.content.length >= 500 && old.content.length < 500) ||
+        ((item.content.length >= 500) === (old.content.length >= 500) && Number(item.sourceId||0) > Number(old.sourceId||0))) map.set(key, item);
   }
   return [...map.values()];
 }

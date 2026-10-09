@@ -61,8 +61,8 @@ const env = { GITHUB_TOKEN: 'test', GITHUB_REPO: 'example/radar' };
 const request = async path => worker.fetch(new Request(`https://example.test${path}`), env);
 
 let preview = await (await request('/preview/patches?diagnostic=1')).json();
-assert.equal(preview.count, 14);
-assert.equal(preview.newItems, 1);
+assert.equal(preview.count, 15);
+assert.equal(preview.newItems, 2);
 assert.equal(preview.deferredSeedItems, 9);
 assert.equal(preview.seedDiagnostics.find(item => item.version === 'Alpha 4.10').alreadyStored, true);
 assert.equal(requests.some(item => item.url.endsWith('/api/comm-links/21293')), false);
@@ -71,16 +71,16 @@ assert.ok(requests.length < 50);
 requests = [];
 const interrupted = await (await request('/run/patches')).json();
 assert.equal(interrupted.ok, false);
-assert.equal(stored.get(archive).data.length, 14);
+assert.equal(stored.get(archive).data.length, 15);
 assert.equal(stored.get(state).data.nextPage, 9);
 assert.ok(requests.length < 50);
 
 requests = [];
 const resumed = await (await request('/run/patches')).json();
 assert.equal(resumed.ok, true);
-assert.equal(resumed.patchItems, 15);
-assert.equal(resumed.patchNewItems, 1);
-assert.equal(resumed.patchDeferredSeedItems, 8);
+assert.equal(resumed.patchItems, 17);
+assert.equal(resumed.patchNewItems, 2);
+assert.equal(resumed.patchDeferredSeedItems, 7);
 assert.equal(stored.get(state).data.nextPage, 11);
 assert.ok(requests.length < 50);
 
