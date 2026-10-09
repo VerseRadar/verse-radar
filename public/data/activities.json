@@ -1,1 +1,107 @@
-[]
+[
+  {
+    "name": "RSI Discovery Month",
+    "type": "Ingame Activity",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21334-Alpha-4102-RSI-Discovery-Month",
+    "start": "2026-10-09T13:00:00.000Z",
+    "end": null,
+    "summary": "",
+    "tasks": [
+      "Transport Missionen",
+      "Defense Missionen",
+      "Collection Missionen"
+    ],
+    "rewards": [],
+    "progressTracks": [
+      {
+        "name": "Gesamtfortschritt",
+        "milestones": [
+          {
+            "points": 4500,
+            "reward": "S1 Grade B Cooler, S1 Grade B Power Plant, S1 Grade B Radar"
+          },
+          {
+            "points": 9900,
+            "reward": "Ursa Paint"
+          },
+          {
+            "points": 24000,
+            "reward": "Aurora MK II Paint, Aurora Mk II flight blades (Handling & Speed)"
+          },
+          {
+            "points": 30000,
+            "reward": "Constellation Mk IV Paint, Armor, Constellation Mk IV HND & SPD, S1–S3 Grade A Power Plants"
+          }
+        ]
+      },
+      {
+        "name": "Transport",
+        "milestones": [
+          {
+            "points": 2000,
+            "reward": "Zeus Mk II Paint, S2 Grade B Cooler"
+          },
+          {
+            "points": 4000,
+            "reward": "Zeus Mk II flight blades (Handling & Speed)"
+          },
+          {
+            "points": 6500,
+            "reward": "S3 Grade B Cooler"
+          },
+          {
+            "points": 10000,
+            "reward": "RSI Tool"
+          }
+        ]
+      },
+      {
+        "name": "Defense",
+        "milestones": [
+          {
+            "points": 2000,
+            "reward": "Meteor Paint, S2 Grade B Power Plant"
+          },
+          {
+            "points": 4000,
+            "reward": "Meteor flight blades (Handling & Speed)"
+          },
+          {
+            "points": 6500,
+            "reward": "S3 Grade B Power Plant"
+          },
+          {
+            "points": 10000,
+            "reward": "RSI Weapon"
+          }
+        ]
+      },
+      {
+        "name": "Collection",
+        "milestones": [
+          {
+            "points": 2000,
+            "reward": "Mantis Paint, S2 Grade B Radar"
+          },
+          {
+            "points": 4000,
+            "reward": "Mantis flight blades (Handling & Speed)"
+          },
+          {
+            "points": 6500,
+            "reward": "S3 Grade B Radar"
+          },
+          {
+            "points": 10000,
+            "reward": "RSI Tool"
+          }
+        ]
+      }
+    ],
+    "groupGoals": [],
+    "groupRewards": [],
+    "imageUrl": "https://robertsspaceindustries.com/i/ad6180dbb9ed81c8593fe7840b992aeafe065a05/resize(3000,1210,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskZxsqC3z9mWq67HXHw7F6Tf8Tsro6mPEn)/85/rsi-eventrewards-6.webp",
+    "active": true,
+    "checkedAt": "2026-10-09T20:20:23.694Z"
+  }
+]
