@@ -26,7 +26,8 @@ const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const NEWS_UPDATE_CRON = "0 */2 * * *";
 const PATCH_UPDATE_CRON = "30 */2 * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "0.13.11";
+const VERSION = "0.13.12";
+const COMMUNITY_FEED_URL = "https://leonick.se/feeds/rsi/json";
 const DEFAULT_REFERRAL_URL = "https://www.robertsspaceindustries.com/enlist?referral=STAR-6KT2-XJBC";
 // These two release announcements were imported as patch notes before the
 // source channel was checked. Keep their summaries, repair their RSI links.
@@ -35,6 +36,8 @@ const LEGACY_RELEASE_LINKS = new Map([
   ["4.8.1", "https://robertsspaceindustries.com/en/comm-link/transmission/21177-Star-Citizen-Alpha-481"]
 ]);
 const PATCH_SEEDS = [
+  // Official LIVE note reported while the community index was still stale.
+  { version: "Alpha 4.10.2", id: 21351, date: "2026-10-09T00:00:00.000Z", sourceUrl: "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21351-Star-Citizen-Alpha-4102" },
   { version: "Alpha 4.10", id: 21293, date: "2026-08-26T18:00:00.000Z" },
   { version: "Alpha 4.9", id: 21245, date: "2026-07-15T18:00:00.000Z" },
   { version: "Alpha 4.7", id: 21070, date: "2026-03-25T00:00:00.000Z" },
@@ -129,7 +132,7 @@ const HISTORICAL_SHORT_RELEASES = {
 };
 const VERSION_RE = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?$/;
 const PATCH_NOTES_URL = "https://robertsspaceindustries.com/en/patch-notes";
-const RELEVANT = /patch|alpha\s*\d|free\s*fly|foundation festival|fleet week|invictus|iae|event|roadmap|ship showdown|siege|monthly report|this week in star citizen|live experience|pirate week|subscriber|vehicle|ship|aegis|argo|anvil|kruger|sabre|aurora|gameplay|engineering|q\s*&\s*a|letter from the chairman/i;
+const RELEVANT = /patch|alpha\s*\d|free\s*fly|foundation festival|fleet week|invictus|iae|event|roadmap|ship showdown|siege|monthly report|this week in star citizen|live experience|pirate week|discovery month|constellation|subscriber|vehicle|ship|aegis|argo|anvil|kruger|sabre|aurora|gameplay|engineering|q\s*&\s*a|letter from the chairman/i;
 const NEWS_SUMMARY_VERSION = "0.10.3";
 // The archived metadata for this article still names the August edition;
 // RSI redirects its old URL to the September 9 edition with the same ID.
@@ -141,6 +144,18 @@ const NEWS_SOURCE_CORRECTIONS = {
     summary: "Orison Relief Support ist laut Roadmap für ein kommendes 4.10.x-Update vorgesehen. Alpha 4.11 wurde auf das vierte Quartal 2026 verschoben."
   }
 };
+// Temporary bridge for official October 9 articles until public indexes catch up.
+// Keep the original RSI links, and let later feed/API records replace these
+// date-only headlines when a precise publication time becomes available.
+const CONFIRMED_NEWS = [
+  [21353, "Roadmap Roundup - October 9, 2026", "Roadmap-Roundup-October-9-2026"],
+  [21350, "FAQ: RSI Discovery Month", "FAQ-RSI-Discovery-Month"],
+  [21334, "Alpha 4.10.2: RSI Discovery Month - Missions, Rewards, & Icons", "Alpha-4102-RSI-Discovery-Month"],
+  [21276, "RSI Discovery Month Digital Goodies Pack", "RSI-Discovery-Month-Digital-Goodies-Pack"],
+  [21336, "RSI Constellation Mk IV Celebration", "RSI-Constellation-Mk-IV-Celebration"]
+].map(([sourceId, title, slug]) => ({ sourceId, title,
+  url: `https://robertsspaceindustries.com/en/comm-link/transmission/${sourceId}-${slug}`,
+  date: "2026-10-09T00:00:00.000Z", description: "" }));
 const OLD_NEWS_PLACEHOLDER = "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.";
 
 export default {
@@ -240,7 +255,7 @@ export default {
     if (u.pathname === "/preview/news") {
       try {
         const result = await buildNews(env);
-        return json({ ok: true, count: result.news.length, fetchedItems: result.fetchedItems, newItems: result.newItems, refreshedItems: result.refreshedItems, aiItems: result.aiItems, published: false, items: result.news });
+        return json({ ok: true, version: VERSION, count: result.news.length, fetchedItems: result.fetchedItems, newItems: result.newItems, refreshedItems: result.refreshedItems, aiItems: result.aiItems, published: false, sourceDiagnostics: result.sourceDiagnostics, items: result.news });
       } catch (e) {
         return json({ ok: false, error: e.message }, 502);
       }
@@ -261,6 +276,7 @@ export default {
             historicalDeferredItems: result.historicalDeferredItems,
             historicalUnusableItems: result.historicalUnusableItems,
             historicalDiagnostics: result.historicalDiagnostics,
+            feedDiagnostics: result.feedDiagnostics,
             seedDiagnostics: result.seedDiagnostics });
         }
         return json({
@@ -893,15 +909,16 @@ for(const action of ['start','stop','status'])document.getElementById(action==='
 }
 
 async function fetchRSIItems() {
-  // Primary: current RSI HTML. In some server-side requests RSI returns the
-  // app shell without article anchors, so we also use the community-maintained
-  // Star Citizen Wiki API as a structured fallback. Original source URLs still
-  // point directly to RSI.
+  // RSI may return only its app shell to server-side requests. Combine the
+  // official listing with two independently updated indexes, rather than
+  // returning early when one source has three old articles.
   const urls = [
     "https://robertsspaceindustries.com/en/comm-link?sort=publish_new&type=post",
-    "https://robertsspaceindustries.com/en/comm-link?sort=publish_new"
+    "https://robertsspaceindustries.com/en/comm-link?sort=publish_new",
+    "https://robertsspaceindustries.com/en/comm-link/transmission"
   ];
   const diagnostics = [];
+  const collected = [];
 
   for (const url of urls) {
     try {
@@ -915,10 +932,7 @@ async function fetchRSIItems() {
       const html = await r.text();
       const parsed = r.ok ? parseCommLink(html) : { candidates: 0, items: [] };
       diagnostics.push({ source: url, httpStatus: r.status, htmlLength: html.length, candidates: parsed.candidates, parsedItems: parsed.items.length });
-      if (r.ok && parsed.items.length) {
-        const relevant = dedupeNewsItems(parsed.items.filter(x => relevantNewsTitle(x.title))).slice(0, MAX);
-        if (relevant.length >= 3) return await enrichDates(relevant);
-      }
+      if (r.ok && parsed.items.length) collected.push(...parsed.items.filter(x => relevantNewsTitle(x.title)));
     } catch (e) {
       diagnostics.push({ source: url, error: e.message });
     }
@@ -938,21 +952,50 @@ async function fetchRSIItems() {
     let body = null;
     try { body = JSON.parse(textBody); } catch {}
     const records = Array.isArray(body?.data) ? body.data : [];
-    diagnostics.push({ source: apiUrl, httpStatus: r.status, bodyLength: textBody.length, records: records.length });
+    diagnostics.push({ source: apiUrl, httpStatus: r.status, bodyLength: textBody.length, records: records.length,
+      firstId: records[0]?.id ?? null });
     if (r.ok && records.length) {
       const items = records.map(normalizeWikiCommLink).filter(Boolean);
-      const relevant = dedupeNewsItems(items.filter(x => relevantNewsTitle(x.title))).slice(0, MAX);
-      if (relevant.length >= 3) return relevant;
+      collected.push(...items.filter(x => relevantNewsTitle(x.title)));
     }
   } catch (e) {
     diagnostics.push({ source: "star-citizen-wiki-api", error: e.message });
   }
+
+  try {
+    const r = await fetch(COMMUNITY_FEED_URL, { headers: { "accept": "application/feed+json,application/json", "user-agent": `Verse-Radar/${VERSION} (+independent fan site)` } });
+    const body = r.ok ? await r.json() : null;
+    const feedItems = Array.isArray(body?.items) ? body.items.map(normalizeFeedItem).filter(Boolean) : [];
+    diagnostics.push({ source: COMMUNITY_FEED_URL, httpStatus: r.status, records: body?.items?.length ?? 0,
+      accepted: feedItems.length });
+    collected.push(...feedItems.filter(x => relevantNewsTitle(x.title)));
+  } catch (e) {
+    diagnostics.push({ source: COMMUNITY_FEED_URL, error: e.message });
+  }
+
+  collected.push(...CONFIRMED_NEWS);
+  diagnostics.push({ source: "confirmed-rsi-links", records: CONFIRMED_NEWS.length });
+  const relevant = dedupeNewsItems(collected.filter(x => relevantNewsTitle(x.title))
+    .sort((a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0)))
+    .slice(0, MAX);
+  if (relevant.length >= 3) return { items: relevant, diagnostics };
 
   const detail = diagnostics.map(d => {
     if (d.source.includes('api.star-citizen.wiki')) return `${d.source}: HTTP ${d.httpStatus ?? "?"}, JSON ${d.bodyLength ?? 0}, Datensätze ${d.records ?? 0}`;
     return `${d.source}: HTTP ${d.httpStatus ?? "?"}, HTML ${d.htmlLength ?? 0}, Kandidaten ${d.candidates ?? 0}, erkannt ${d.parsedItems ?? 0}`;
   }).join(" | ");
   throw Error(`Keine Comm-Link-Beiträge erkannt. [Debug: ${detail}]`);
+}
+
+function normalizeFeedItem(record) {
+  const title = strip(record?.title || "");
+  // The feed is a discovery aid only. Never publish a feed-owned URL or
+  // arbitrary external link as an official RSI article.
+  const url = cleanUrl(record?.external_url || record?.url || record?.id);
+  if (!validTitle(title) || !isArticleUrl(url) || !/^https:\/\/robertsspaceindustries\.com\//i.test(url)) return null;
+  const date = validDate(record?.date_published || record?.date_modified || "");
+  if (!date) return null;
+  return { title, url, date, description: "" };
 }
 
 function normalizeWikiCommLink(record) {
@@ -1067,7 +1110,7 @@ function parseCommLink(html) {
     out.push({
       title,
       url: href,
-      date: new Date().toISOString(),
+      date: null,
       description: ""
     });
     if (out.length >= 60) break;
@@ -1189,7 +1232,7 @@ function extractDateFromSlug(url) {
 }
 
 async function buildNews(env) {
-  const items = await fetchRSIItems();
+  const { items, diagnostics: sourceDiagnostics } = await fetchRSIItems();
   if (items.length < 3) throw Error("Zu wenige redaktionelle Comm-Link-Beiträge erkannt; News-Import nicht veröffentlicht.");
   const existingData = env.GITHUB_TOKEN && env.GITHUB_REPO ? await readGithubJSON(env, "public/data/news.json", null) : [];
   if (!Array.isArray(existingData)) throw Error("Gespeicherte News aus GitHub nicht lesbar; News-Import sicherheitshalber abgebrochen.");
@@ -1220,7 +1263,7 @@ async function buildNews(env) {
   }
   news.sort((a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0));
   const finalNews = dedupeNewsItems(news).slice(0, 60);
-  return { news: finalNews, changed: JSON.stringify(finalNews) !== JSON.stringify(existing), fetchedItems: items.length, newItems: finalNews.filter(n => n.id && !known.has(n.id)).length, refreshedItems, aiItems: aiCount };
+  return { news: finalNews, changed: JSON.stringify(finalNews) !== JSON.stringify(existing), fetchedItems: items.length, newItems: finalNews.filter(n => n.id && !known.has(n.id)).length, refreshedItems, aiItems: aiCount, sourceDiagnostics };
 }
 
 async function updateSite(env, { includeNews = true, includePatches = true, onlyWhenChanged = false } = {}) {
@@ -1321,7 +1364,7 @@ async function updatePatches(env) {
   validateArchiveEntries(existing);
   const state = parsePatchState(stateFile.data);
   const existingVersions = new Set(existing.map(x => patchKey(x.version)));
-  const { items, scannedPages, nextState, pageDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems, historicalCandidates, historicalDeferredItems, historicalUnusableItems, historicalDiagnostics } = await fetchPatchItems(state, existingVersions);
+  const { items, scannedPages, nextState, pageDiagnostics, feedDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems, historicalCandidates, historicalDeferredItems, historicalUnusableItems, historicalDiagnostics } = await fetchPatchItems(state, existingVersions);
   const unique = dedupePatchItems(items).sort(comparePatchVersionsDesc);
   const byVersion = new Map(existing.map(x => [patchKey(x.version), correctLegacyLink(x)]));
   let aiItems = 0;
@@ -1357,7 +1400,7 @@ async function updatePatches(env) {
     });
   }
   const patches = [...byVersion.values()].sort(comparePatchVersionsDesc).map((p, i, all) => ({ ...p, previous: all[i + 1]?.version || null }));
-  return { patches, changed: JSON.stringify(patches) !== JSON.stringify(existing), items: unique, newItems: patches.length - existing.length, aiItems, scannedPages, nextState, pageDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems, historicalCandidates, historicalDeferredItems, historicalUnusableItems, historicalDiagnostics, archiveSha: archive.sha, stateSha: stateFile.sha };
+  return { patches, changed: JSON.stringify(patches) !== JSON.stringify(existing), items: unique, newItems: patches.length - existing.length, aiItems, scannedPages, nextState, pageDiagnostics, feedDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems, historicalCandidates, historicalDeferredItems, historicalUnusableItems, historicalDiagnostics, archiveSha: archive.sha, stateSha: stateFile.sha };
 }
 
 function parsePatchState(value) {
@@ -1373,6 +1416,7 @@ async function fetchPatchItems(state, existingVersions) {
   const discovered = [];
   const scannedPages = [];
   const pageDiagnostics = [];
+  let feedDiagnostics = { source: COMMUNITY_FEED_URL, records: 0, accepted: 0 };
   const seedDiagnostics = [];
   let fetchedDetails = 0;
   let deferredPageItems = 0;
@@ -1435,11 +1479,40 @@ async function fetchPatchItems(state, existingVersions) {
       const date = validDate(record?.created_at) || validDate(record?.published_at) || new Date().toISOString();
       let content = cleanPatchText(extractPatchContent(record));
       if (content.length < 500) content = cleanPatchText(await fetchPatchDetail(id, content));
+      if (content.length < 500) content = cleanPatchText(await fetchOfficialPatchText(sourceUrl, version, content));
       if (content.length < 500) content = cleanPatchText(await fetchWikiUpdatePage(version, content));
       discovered.push({ version, date, sourceUrl, sourceId: id, content, fallbackSummary: fallbackPatchSummary(version, content), fallbackFullSummary: fallbackFullSummary(version, content) });
     }
   }
   if (!scannedPages.length || (scannedPages.length === 1 && !recognizedPatchNotes)) throw Error("Keine Patch Notes in der aktuellen Quelle erkannt; Import abgebrochen.");
+
+  // A fresh LIVE patch can appear in the feed before the wiki index. A feed
+  // link only discovers the official note; the text still has to pass the
+  // same patch-source and content checks as an indexed record.
+  try {
+    const r = await fetch(COMMUNITY_FEED_URL, { headers: { "accept": "application/feed+json,application/json", "user-agent": `Verse-Radar/${VERSION} (+independent fan site)` } });
+    const body = r.ok ? await r.json() : null;
+    const records = Array.isArray(body?.items) ? body.items : [];
+    const candidates = records.map(record => {
+      const sourceUrl = cleanUrl(record?.external_url || record?.url || record?.id);
+      const title = strip(record?.title || "");
+      const id = Number(sourceUrl?.match(/\/Patch-Notes\/(\d+)-/i)?.[1]);
+      if (!id || !/^https:\/\/robertsspaceindustries\.com\/en\/comm-link\/Patch-Notes\/\d+-/i.test(sourceUrl) || !/^Star Citizen Alpha \d+(?:\.\d+){1,2}(?:\s|:|$)/i.test(title)) return null;
+      return { id, version: normalizePatchVersion(title.replace(/^Star Citizen /i, "").trim()), sourceUrl,
+        date: validDate(record?.date_published || record?.date_modified || "") };
+    }).filter(x => x && x.date);
+    feedDiagnostics = { source: COMMUNITY_FEED_URL, httpStatus: r.status, records: records.length, accepted: candidates.length };
+    for (const candidate of candidates) {
+      if (existingVersions.has(patchKey(candidate.version)) || discovered.some(x => patchKey(x.version) === patchKey(candidate.version))) continue;
+      if (fetchedDetails >= PATCH_DETAILS_PER_IMPORT) { deferredPageItems++; continue; }
+      fetchedDetails++;
+      let content = cleanPatchText(await fetchPatchDetail(candidate.id, ""));
+      if (!publishablePatch(candidate.version, content)) content = cleanPatchText(await fetchOfficialPatchText(candidate.sourceUrl, candidate.version, content));
+      if (!publishablePatch(candidate.version, content)) content = cleanPatchText(await fetchWikiUpdatePage(candidate.version, content));
+      discovered.push({ version: candidate.version, date: candidate.date, sourceUrl: candidate.sourceUrl, sourceId: candidate.id, content,
+        fallbackSummary: fallbackPatchSummary(candidate.version, content), fallbackFullSummary: fallbackFullSummary(candidate.version, content) });
+    }
+  } catch (e) { feedDiagnostics = { source: COMMUNITY_FEED_URL, error: e.message }; }
 
   // RSI's patch index is sometimes only partially mirrored by the archive API.
   // Seed the current major patches so a temporary archive/index gap cannot hide them.
@@ -1461,7 +1534,11 @@ async function fetchPatchItems(state, existingVersions) {
     const title = `Star Citizen ${seed.version}`;
     const sourceUrl = seed.sourceUrl || officialPatchUrl(seed.id, title);
     let content = seed.id ? cleanPatchText(await fetchPatchDetail(seed.id, "")) : "";
-    if (!publishablePatch(seed.version, content)) {
+    if (!publishablePatch(seed.version, content) && seed.sourceUrl) {
+      const official = cleanPatchText(await fetchOfficialPatchText(sourceUrl, seed.version, ""));
+      if (official.length > content.length) content = official;
+    }
+    if (!publishablePatch(seed.version, content) && seed.version !== "Alpha 4.10.2") {
       // A detail record may be long yet omit whole feature sections. Check
       // the full wiki update before deciding that a major patch is unusable.
       const wikiContent = cleanPatchText(await fetchWikiUpdatePage(seed.version, ""));
@@ -1520,7 +1597,7 @@ async function fetchPatchItems(state, existingVersions) {
   const lastScanned = scannedPages[scannedPages.length - 1];
   const complete = !firstDeferredPage && (state.complete || reachedEnd || (lastPage !== null && lastScanned >= lastPage));
   const nextPage = firstDeferredPage || (complete ? Math.max(lastScanned, state.nextPage) : lastScanned + 1);
-  return { items: unique, scannedPages, pageDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems,
+  return { items: unique, scannedPages, pageDiagnostics, feedDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems,
     historicalCandidates, historicalDeferredItems, historicalUnusableItems, historicalDiagnostics,
     nextState: { nextPage, complete,
       historicalStartIndex: historicalCursorIndex,
@@ -1554,6 +1631,21 @@ async function fetchPatchDetail(id, current = "") {
     const d = dj?.data || dj;
     return extractPatchContent(d) || current;
   } catch (_) { return current; }
+}
+
+async function fetchOfficialPatchText(sourceUrl, version, current = "") {
+  if (!/^https:\/\/robertsspaceindustries\.com\/en\/comm-link\/Patch-Notes\/\d+-/i.test(sourceUrl)) return current;
+  try {
+    const r = await fetch(sourceUrl, { headers: { "user-agent": `Verse-Radar/${VERSION} (+independent fan site)`, "accept": "text/html" } });
+    if (!r.ok) return current;
+    const html = await r.text();
+    const main = html.match(/<article\b[\s\S]*?<\/article>/i)?.[0] || html.match(/<main\b[\s\S]*?<\/main>/i)?.[0] || "";
+    const content = cleanPatchText(main);
+    // App shells, previews and marketing articles are not patch texts.
+    const number = version.replace(/^Alpha\s+/i, "");
+    if (!content.includes(number) || !/\b(?:release notes|patch notes|build information)\b/i.test(content) || content.length < 500) return current;
+    return content;
+  } catch { return current; }
 }
 
 async function fetchWikiUpdatePage(version, current = "") {
@@ -2003,6 +2095,7 @@ function publishablePatch(version, content) {
   if (shortRelease) return content.length >= 300 &&
     historicalPatchChanges(content, version).length >= shortRelease.minimum;
   if (content.length < 500) return false;
+  if (version === "Alpha 4.10.2" && (!/4\.10\.2/.test(content) || !/\b(?:release notes|patch notes|build information)\b/i.test(content))) return false;
   if (/^Alpha 3\./.test(version)) return historicalPatchChanges(content, version).length > 0 &&
     /\bpatch notes\b|\bfeatures and gameplay\b|\bbug fixes\b/i.test(content);
   if (Object.hasOwn(ARCHIVE_HIGHLIGHTS, version)) {

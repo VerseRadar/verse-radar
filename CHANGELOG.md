@@ -1,3 +1,10 @@
+# 0.13.12
+
+- News-Import vereint RSI-Comm-Link, Wiki-Index und einen zusätzlichen öffentlichen Feed; die fünf gemeldeten RSI-Links vom 9. Oktober sind als Übergang hinterlegt.
+- Aktuelle Patch Notes können auch über den zusätzlichen Feed entdeckt werden. Alpha 4.10.2 hat einen geprüften offiziellen Patch-Link als Übergang; ohne ausreichend auswertbaren Originaltext wird kein Patch-Eintrag veröffentlicht.
+- `/preview/news` zeigt `sourceDiagnostics`; `/preview/patches?diagnostic=1` zeigt `feedDiagnostics` und den Prüfstatus des 4.10.2-Seeds.
+- Die Versionsplakette auf der Startseite bleibt entfernt. Gespeicherte Live-Daten und hochgeladene Bilder sind nicht im Update-ZIP.
+
 # 0.13.11
 
 - Teilnahmehinweis bei Referral-Sonderaktionen konkretisiert: Game Package für mindestens 40 USD während der Aktion als klarer Weg, früher angelegte Konten bei erstmaliger Qualifikation möglich.

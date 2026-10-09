@@ -38,6 +38,8 @@ let archivePartialDetails = false;
 let archive43DetailsAvailable = false;
 let archive41DetailsAvailable = false;
 let remaining4DetailsAvailable = false;
+let latestOfficialAvailable = false;
+let feedNewPatch = false;
 const externalPatch = { version: 'Alpha 4.6', previous: null, sourceUrl: 'https://robertsspaceindustries.com/external', summary: 'Parallel gespeicherter Patch' };
 
 globalThis.fetch = async (input, init = {}) => {
@@ -49,6 +51,16 @@ globalThis.fetch = async (input, init = {}) => {
     if (sourceFailure && page === 2) return new Response('', { status: 503 });
     const records = repeatFirstPage && page === 2 ? pages[1] : pages[page] || [];
     return Response.json({ data: missingSourceUrl && page === 2 ? [{ ...records[0], rsi_url: '' }, ...records.slice(1)] : records, meta: { current_page: page, last_page: 3 } });
+  }
+  if (latestOfficialAvailable && url.host === 'robertsspaceindustries.com' && url.pathname.includes('/Patch-Notes/21351-')) {
+    return new Response(`<article><h1>Star Citizen Alpha 4.10.2 LIVE Release Notes</h1><h2>Build Information</h2><p>${'RSI Discovery Month missions reward points career tracks, cargo transport and salvage missions. '.repeat(12)}</p></article>`);
+  }
+  if (feedNewPatch && url.host === 'leonick.se') return Response.json({ items: [
+    { title: 'Star Citizen Alpha 4.10.3', url: 'https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21390-Star-Citizen-Alpha-4103', date_published: '2026-10-11T18:00:00Z' },
+    { title: 'Star Citizen Alpha 4.10.4', url: 'https://robertsspaceindustries.com/en/comm-link/transmission/21391-Star-Citizen-Alpha-4104', date_published: '2026-10-11T19:00:00Z' }
+  ] });
+  if (feedNewPatch && url.host === 'api.star-citizen.wiki' && url.pathname === '/api/comm-links/21390') {
+    return Response.json({ data: { content: ('Alpha 4.10.3 Release Notes Gameplay missions and fixes. ').repeat(15) } });
   }
   if (alpha47DetailAvailable && url.host === 'api.star-citizen.wiki' && url.pathname === '/api/comm-links/21070') {
     return Response.json({ data: { content: ('Operation Breaker Stations Inventory Rework Two-Panel Layout Nearby Inventories Search, Sort, and Filter Crafting, Fabricator, and Blueprints Material Quality and Mining Updates New Ship: RSI Aurora Mk II Shield Balance Armor Balance Radar-Based Aim Assist People\'s Service Stations Virtual Reality Updates over 150 bug and crash fixes. ').repeat(4) } });
@@ -285,5 +297,18 @@ for (const version of ['Alpha 4.8.2','Alpha 4.7.2','Alpha 4.7.1']) {
   assert.match(item.note, /kein eigenständiger RSI-Patch-Notes-Link/i);
 }
 assert.equal(stored.get(patchesPath).data.some(p => p.version === 'Alpha 4.7.1'), false);
+
+latestOfficialAvailable = true;
+const latest = await (await request('/preview/patches?diagnostic=1')).json();
+assert.equal(latest.seedDiagnostics.find(p => p.version === 'Alpha 4.10.2').eligible, true);
+const latestItems = await (await request('/preview/patches')).json();
+assert.equal(latestItems.items.find(p => p.version === 'Alpha 4.10.2').sourceUrl,
+  'https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21351-Star-Citizen-Alpha-4102');
+feedNewPatch = true;
+const feedPatch = await (await request('/preview/patches?diagnostic=1')).json();
+assert.equal(feedPatch.feedDiagnostics.accepted, 1);
+const feedPatchItems = await (await request('/preview/patches')).json();
+assert.ok(feedPatchItems.items.some(p => p.version === 'Alpha 4.10.3'));
+assert.equal(feedPatchItems.items.some(p => p.version === 'Alpha 4.10.4'), false);
 
 console.log('Patch-Archiv: Vorschau, Nachladen, Fehlerschutz und Cursor-Recovery: OK');
