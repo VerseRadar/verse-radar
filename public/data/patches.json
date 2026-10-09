@@ -1,5 +1,54 @@
 [
   {
+    "version": "Alpha 4.10.2",
+    "date": "2026-10-09T00:00:00.000Z",
+    "previous": "Alpha 4.10.1",
+    "summary": "Alpha 4.10.2 bringt RSI Discovery Month mit Kämpfen, Transport, Rohstoffsuche und Bergung sowie eigenen Fortschrittswegen und Belohnungen. Die Constellation Mk IV wurde bei Brücke, Zugängen, Aufzügen, Türmen, Snub-Bucht und Innenräumen überarbeitet. Ein neues Physik-Netcode soll lose Gegenstände ruhiger und genauer synchronisieren. Dazu kommen ein regelbarer VR-Zoom, neue Ausrüstung und weitere Korrekturen.",
+    "changes": [
+      {
+        "category": "Missionen",
+        "title": "RSI Discovery Month",
+        "description": "Neue Aufträge für Schiffs- und FPS-Kampf, Transport, Rohstoffe und Bergung; Fortschritt über Karrierepfade mit Belohnungen."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Constellation Mk IV überarbeitet",
+        "description": "Brücke, Luftschleuse, Fracht- und Crewaufzüge, Geschütztürme, Snub-Bucht, Technikbereiche und Innenräume wurden erneuert."
+      },
+      {
+        "category": "Technik",
+        "title": "Physik-Netcode für lose Objekte",
+        "description": "Kisten, Granaten und andere lose Gegenstände sollen seltener springen, rutschen oder nach einer Korrektur versetzt erscheinen."
+      },
+      {
+        "category": "VR",
+        "title": "Einstellbarer Zoom",
+        "description": "VR erhält eine eigene Zoomfunktion für Interaktionen, präzises Zielen im Schiff und FPS-Visiere; die Stärke lässt sich anpassen oder abschalten."
+      },
+      {
+        "category": "Schiffe & Fahrzeuge",
+        "title": "Schilde und abgestellte Fahrzeuge",
+        "description": "Feste Schildwiderstände werden korrekt angewandt; verlassene Fahrzeuge an mehreren Stationen verschwinden nach einem eigenen Timer."
+      },
+      {
+        "category": "Ausrüstung",
+        "title": "Rüstungen und Wikelo-Rezepte",
+        "description": "Heavy Combat Hunter 3 und neue RRS-Tarnvarianten kommen hinzu; Wikelo bietet weitere Rezepte für Gemini LMG und Grey Combat Armour."
+      },
+      {
+        "category": "Technik",
+        "title": "VR- und Bedienfehler behoben",
+        "description": "Unter anderem wurden verschwindende UI-Symbole und zurückgesetzte Mauseinstellungen beim Wechsel zu VR korrigiert."
+      }
+    ],
+    "fullSummary": "RSI Discovery Month erweitert Stanton um Aufträge für Schiffs- und FPS-Gefechte, Warentransport, Rohstoffe und Bergung. Die Aufgaben bringen Eventpunkte, Fortschritt in eigenen Karrierepfaden und Belohnungen. Die Constellation Mk IV wurde umfassend modernisiert: Eine klarere Brückenverglasung, veränderte Luftschleuse, neue Fracht- und Crewaufzüge, überarbeitete Geschütztürme und Snub-Bucht sowie angepasste Technik- und Wohnbereiche gehören dazu. Das neue experimentelle Physik-Netcode synchronisiert lose Gegenstände wie Kisten und Wurfobjekte mit sanfteren Korrekturen; Schiffe und Figuren nutzen weiterhin das bisherige System. VR erhält einen regelbaren Zoom für Interaktionen, Zielvorgänge in Schiffen und FPS-Visiere. Feste Schildwiderstände wirken nun wie vorgesehen, verlassene Fahrzeuge an ausgewählten Stationen haben einen eigenen Ablauf-Timer. Neue Rüstungsvarianten und Wikelo-Rezepte ergänzen Ausrüstung und Herstellung. Die offiziellen Notizen führen außerdem Fehlerbehebungen bei VR und Benutzeroberfläche auf.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21351-Star-Citizen-Alpha-4102",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "1.0.0",
+    "note": "Redaktionell geprüfte deutsche Zusammenfassung der offiziellen RSI-Patch-Notes. Der Worker konnte den Quelltext beim Import nicht automatisch auslesen. Kein offizieller RSI-Text."
+  },
+  {
     "version": "Alpha 4.10.1",
     "date": "2026-09-16T18:00:00.000Z",
     "previous": "Alpha 4.10",
