@@ -1,5 +1,29 @@
 [
   {
+    "id": "79f1944b",
+    "title": "This Week in Star Citizen - October 12, 2026",
+    "category": "NEWS",
+    "date": "2026-10-12T22:15:03.000Z",
+    "summary": "Wochenüberblick vom 12. Oktober 2026. Die konkreten Themen stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21374-This-Week-In-Star-Citizen",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
+    "id": "543610bd",
+    "title": "Twitch Drops: RSI Discovery Month",
+    "category": "SCHIFFE",
+    "date": "2026-10-12T19:30:02.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „Twitch Drops: RSI Discovery Month“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21341-Twitch-Drops-RSI-Discovery-Month",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "4f03c503",
     "title": "Roadmap Roundup - October 9, 2026",
     "category": "ROADMAP",
