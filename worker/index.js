@@ -26,7 +26,7 @@ const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const NEWS_UPDATE_CRON = "0 */2 * * *";
 const PATCH_UPDATE_CRON = "30 */2 * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "1.0.1";
+const VERSION = "1.0.2";
 const COMMUNITY_FEED_URL = "https://leonick.se/feeds/rsi/json";
 const DEFAULT_REFERRAL_URL = "https://www.robertsspaceindustries.com/enlist?referral=STAR-6KT2-XJBC";
 // These two release announcements were imported as patch notes before the
@@ -163,7 +163,7 @@ const NEWS_SOURCE_CORRECTIONS = {
     summary: "Orison Relief Support ist laut Roadmap für ein kommendes 4.10.x-Update vorgesehen. Alpha 4.11 wurde auf das vierte Quartal 2026 verschoben."
   }
 };
-// Temporary bridge for official October 9 articles until public indexes catch up.
+// Temporary bridge for confirmed official articles until public indexes catch up.
 // Keep the original RSI links, and let later feed/API records replace these
 // date-only headlines when a precise publication time becomes available.
 const CONFIRMED_NEWS = [
@@ -171,10 +171,12 @@ const CONFIRMED_NEWS = [
   [21350, "FAQ: RSI Discovery Month", "FAQ-RSI-Discovery-Month"],
   [21334, "Alpha 4.10.2: RSI Discovery Month - Missions, Rewards, & Icons", "Alpha-4102-RSI-Discovery-Month"],
   [21276, "RSI Discovery Month Digital Goodies Pack", "RSI-Discovery-Month-Digital-Goodies-Pack"],
-  [21336, "RSI Constellation Mk IV Celebration", "RSI-Constellation-Mk-IV-Celebration"]
+  [21336, "RSI Constellation Mk IV Celebration", "RSI-Constellation-Mk-IV-Celebration"],
+  [21341, "Twitch Drops: RSI Discovery Month", "Twitch-Drops-RSI-Discovery-Month"],
+  [21374, "This Week in Star Citizen - October 12, 2026", "This-Week-In-Star-Citizen"]
 ].map(([sourceId, title, slug]) => ({ sourceId, title,
   url: `https://robertsspaceindustries.com/en/comm-link/transmission/${sourceId}-${slug}`,
-  date: "2026-10-09T00:00:00.000Z", description: "" }));
+  date: sourceId === 21374 ? "2026-10-12T22:15:03.000Z" : sourceId === 21341 ? "2026-10-12T00:00:00.000Z" : "2026-10-09T00:00:00.000Z", description: "" }));
 const OLD_NEWS_PLACEHOLDER = "Offizieller RSI Comm-Link-Beitrag. Öffne die Originalquelle für den vollständigen Inhalt.";
 
 export default {
@@ -988,7 +990,8 @@ async function fetchRSIItems() {
     const body = r.ok ? await r.json() : null;
     const feedItems = Array.isArray(body?.items) ? body.items.map(normalizeFeedItem).filter(Boolean) : [];
     diagnostics.push({ source: COMMUNITY_FEED_URL, httpStatus: r.status, records: body?.items?.length ?? 0,
-      accepted: feedItems.length, sample: feedSample(body?.items?.[0]) });
+      accepted: feedItems.length, relevant: feedItems.filter(x => relevantNewsTitle(x.title)).length,
+      sample: feedSample(body?.items?.[0]), recognized: feedItems.slice(0, 3).map(({ title, url, date }) => ({ title, url, date })) });
     collected.push(...feedItems.filter(x => relevantNewsTitle(x.title)));
   } catch (e) {
     diagnostics.push({ source: COMMUNITY_FEED_URL, error: e.message });
@@ -999,6 +1002,8 @@ async function fetchRSIItems() {
   const relevant = dedupeNewsItems(collected.filter(x => relevantNewsTitle(x.title))
     .sort((a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0)))
     .slice(0, MAX);
+  diagnostics.push({ source: "selected-news", records: relevant.length,
+    sample: relevant.slice(0, 5).map(({ title, url, date }) => ({ title, url, date })) });
   if (relevant.length >= 3) return { items: relevant, diagnostics };
 
   const detail = diagnostics.map(d => {
@@ -1024,14 +1029,20 @@ function feedTitle(record) {
   const confirmed = CONFIRMED_NEWS.find(item => item.url === sourceUrl);
   if (confirmed) return confirmed.title;
   const supplied = strip(record?.title || "");
-  if (validTitle(supplied)) return supplied;
+  if (relevantNewsTitle(supplied)) return datedWeeklyTitle(supplied, record);
   const heading = String(record?.content_html || "").match(/<h[12]\b[^>]*>([\s\S]*?)<\/h[12]>/i);
   const extracted = strip(heading?.[1] || "");
-  if (validTitle(extracted)) return extracted;
+  if (relevantNewsTitle(extracted)) return datedWeeklyTitle(extracted, record);
   if (!sourceUrl) return "";
   const slug = decodeURIComponent(new URL(sourceUrl).pathname.split("/").at(-1) || "").replace(/^\d+-/, "");
   const title = strip(slug.replace(/[-_]+/g, " ")).replace(/\b[a-z]/g, x=>x.toUpperCase()).replace(/\b(Rsi|Faq|Ptu|Live|Uec)\b/g, x=>x.toUpperCase());
-  return validTitle(title) ? title : "";
+  return relevantNewsTitle(title) ? datedWeeklyTitle(title, record) : "";
+}
+
+function datedWeeklyTitle(title, record) {
+  if (!/^this week in star citizen$/i.test(title)) return title;
+  const date = validDate(record?.date_published || record?.published_at || record?.published || record?.date_modified || record?.date || "");
+  return date ? `${title} - ${new Intl.DateTimeFormat("en-US", { timeZone: "UTC", month: "long", day: "numeric", year: "numeric" }).format(new Date(date))}` : title;
 }
 
 function feedArticleUrl(record) {

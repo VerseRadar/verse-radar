@@ -1,3 +1,10 @@
+# 1.0.2
+
+- News-Feed erkennt RSI-Meldungen auch dann, wenn der Feed keinen Titel liefert und im Artikel-HTML nur ein allgemeiner Seitenkopf steht.
+- Wiederkehrende „This Week in Star Citizen“-Meldungen bekommen das Veröffentlichungsdatum im Titel, damit einzelne Wochen nicht zusammenfallen.
+- Die zwei bestätigten Meldungen vom 12. Oktober („Twitch Drops: RSI Discovery Month“ und „This Week in Star Citizen“) werden mit ihren offiziellen RSI-Links als Übergang erfasst.
+- `/preview/news` zeigt bei Feed und ausgewählten News konkrete Titel und Links zur Fehlersuche. Der automatische Zwei-Stunden-Lauf bleibt aktiv; Live-Daten werden beim Update nicht überschrieben.
+
 # 1.0.1
 
 - Ingame-Aktionen können mehrere frei benennbare persönliche Fortschrittspfade mit Punkteschwellen und zugehörigen Belohnungen anzeigen; der Gesamtfortschritt bleibt von Gemeinschaftszielen getrennt.

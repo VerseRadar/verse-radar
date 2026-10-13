@@ -168,7 +168,7 @@ const first = await (await request('/preview/patches')).json();
 assert.equal(first.published, false);
 assert.equal(first.count, 6);
 assert.equal(first.newItems, 3);
-assert.equal(first.items.find(p => p.version === 'Alpha 4.10.2').summaryVersion, '1.0.1');
+assert.equal(first.items.find(p => p.version === 'Alpha 4.10.2').summaryVersion, '1.0.2');
 assert.match(first.items.find(p => p.version === 'Alpha 4.10.2').note, /Redaktionell geprüft/);
 assert.equal(first.items.some(p => p.version === 'Alpha 4.7.2'), false);
 assert.equal(first.items.find(p => p.version === 'Alpha 4.8.1').sourceType, 'Release Info');

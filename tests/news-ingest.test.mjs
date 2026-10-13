@@ -48,7 +48,8 @@ globalThis.fetch = async (target, options = {}) => {
   }
   if (address.startsWith("https://api.star-citizen.wiki/api/comm-links?")) return Response.json({ data: archive });
   if (address === "https://leonick.se/feeds/rsi/json") return Response.json({ items: feedFresh ? [
-    { url: url(21380, "new-ship-announcement"), content_html: "<p>Details stehen im Artikel.</p>", date_published: "2026-10-10T12:00:00Z" },
+    { url: url(21380, "new-ship-announcement"), content_html: "<h1>Roberts Space Industries</h1><p>Details stehen im Artikel.</p>", date_published: "2026-10-10T12:00:00Z" },
+    { url: url(21381, "This-Week-In-Star-Citizen"), content_html: "<h1>Roberts Space Industries</h1>", date_published: "2026-10-13T12:00:00Z" },
     { title: "New Ship Scam", url: "https://example.net/fake", date_published: "2026-10-10T12:01:00Z" }
   ] : [] });
   if (address.includes("/contents/public/data/news.json?ref=main")) return failNewsRead ? new Response("Unavailable", { status: 503 }) : Response.json({ sha: "news-sha", content: Buffer.from(JSON.stringify(storedNews)).toString("base64") });
@@ -64,7 +65,7 @@ globalThis.fetch = async (target, options = {}) => {
 
 const env = { GITHUB_TOKEN: "test-token", GITHUB_REPO: "example/verse-radar", GITHUB_BRANCH: "main" };
 const health = await worker.fetch(new Request("https://example.com/health"), env);
-assert.equal((await health.json()).version, "1.0.1");
+assert.equal((await health.json()).version, "1.0.2");
 const patchApi = await worker.fetch(new Request("https://example.com/api/patches"), env);
 assert.equal(patchApi.headers.get("x-verse-radar-patches-source"), "github");
 
@@ -76,14 +77,17 @@ const preview = await worker.fetch(new Request("https://example.com/preview/news
 assert.equal(preview.status, 200);
 const body = await preview.json();
 assert.equal(body.published, false);
-assert.equal(body.fetchedItems, 14);
-assert.equal(body.count, 15);
+assert.equal(body.fetchedItems, 16);
+assert.equal(body.count, 17);
 assert.equal(body.refreshedItems, 2);
 assert.equal(body.aiItems, 0);
-assert.equal(body.newItems, 12);
-assert.ok(body.sourceDiagnostics.some(x => x.source === "confirmed-rsi-links" && x.records === 5));
+assert.equal(body.newItems, 14);
+assert.ok(body.sourceDiagnostics.some(x => x.source === "confirmed-rsi-links" && x.records === 7));
+assert.ok(body.items.some(x => x.sourceUrl === url(21341, "Twitch-Drops-RSI-Discovery-Month")));
+assert.ok(body.items.some(x => x.sourceUrl === url(21374, "This-Week-In-Star-Citizen")));
+assert.ok(body.sourceDiagnostics.some(x => x.source === "selected-news" && x.sample.some(y => y.url.includes("21374-"))));
 assert.equal(body.items.find(x => x.sourceUrl.includes("/21353-")).title, "Roadmap Roundup - October 9, 2026");
-assert.equal(body.items.filter(x => x.title.startsWith("This Week in Star Citizen - ")).length, 2);
+assert.equal(body.items.filter(x => x.title.startsWith("This Week in Star Citizen - ")).length, 3);
 assert.equal(body.items.filter(x => x.title.startsWith("Roadmap Roundup")).length, 3);
 assert.equal(body.items.find(x => x.title === 'Roadmap Roundup - September 9, 2026').date, "2026-09-09T20:00:00.000Z");
 assert.match(body.items.find(x => x.title === 'Roadmap Roundup - September 9, 2026').sourceUrl, /21314-Roadmap-Roundup-September-9-2026/);
@@ -125,8 +129,9 @@ feedFresh = true;
 const feedPreview = await (await worker.fetch(new Request("https://example.com/preview/news"), env)).json();
 assert.ok(feedPreview.items.some(x => x.sourceUrl === url(21380, "new-ship-announcement")));
 assert.ok(feedPreview.items.some(x => x.title === "New Ship Announcement"));
+assert.ok(feedPreview.items.some(x => x.sourceUrl === url(21381, "This-Week-In-Star-Citizen") && x.title.endsWith("October 13, 2026")));
 assert.equal(feedPreview.items.some(x => x.sourceUrl === "https://example.net/fake"), false);
-assert.ok(feedPreview.sourceDiagnostics.some(x => x.source === "https://leonick.se/feeds/rsi/json" && x.accepted === 1));
+assert.ok(feedPreview.sourceDiagnostics.some(x => x.source === "https://leonick.se/feeds/rsi/json" && x.accepted === 2 && x.relevant === 2));
 
 calls.length = 0;
 failNewsRead = true;
