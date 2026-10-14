@@ -1,5 +1,41 @@
 [
   {
+    "id": "65a0ce5c",
+    "title": "BEHIND THE SHIPS",
+    "category": "SCHIFFE",
+    "date": "2026-10-14T16:20:02.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „BEHIND THE SHIPS“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21381-Star-Citizen-Behind-The-Ships-RSI-Constellation-Mk-V-Centaurus-Video",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
+    "id": "7e58b7a5",
+    "title": "The Constellation series is one of the most recognizable ship lines in the 'verse. What sets the Mk V apart for players who are familiar with the Mk IV series?",
+    "category": "SCHIFFE",
+    "date": "2026-10-14T16:10:02.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „The Constellation series is one of the most recognizable ship lines in the 'verse. What sets the Mk V apart for players who are familiar with the Mk IV series?“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/engineering/21377-Q-A-RSI-Constellation-Mk-V-Centaurus",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
+    "id": "8b8384e8",
+    "title": "RSI Constellation Mk V Centaurus",
+    "category": "SCHIFFE",
+    "date": "2026-10-14T16:05:02.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „RSI Constellation Mk V Centaurus“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21335-RSI-Constellation-Mk-V-Centaurus",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "79f1944b",
     "title": "This Week in Star Citizen - October 12, 2026",
     "category": "NEWS",
@@ -306,18 +342,6 @@
     "date": "2026-08-26T22:00:00.000Z",
     "summary": "RSI veröffentlicht „Roadmap Roundup - August 26, 2026“. Welche Punkte des Entwicklungsplans besprochen werden, steht in der Originalmeldung.",
     "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21299-Roadmap-Roundup-August-26-2026",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
-    "summaryVersion": "0.10.1"
-  },
-  {
-    "id": "dea2d1eb",
-    "title": "Behind the Ships",
-    "category": "SCHIFFE",
-    "date": "2026-08-26T18:00:00.000Z",
-    "summary": "RSI-Beitrag mit dem Titel „Behind the Ships“. Die Einzelheiten stehen in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21289-Behind-The-Ships",
     "source": "RSI Comm-Link",
     "ai": false,
     "summaryBasis": "Titel",
