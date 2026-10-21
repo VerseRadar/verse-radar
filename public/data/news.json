@@ -96,6 +96,18 @@
     "summaryVersion": "0.10.3"
   },
   {
+    "id": "be00c824",
+    "title": "RSI Constellation Mk IV Celebration",
+    "category": "SCHIFFE",
+    "date": "2026-10-09T00:00:00.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „RSI Constellation Mk IV Celebration“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21336-RSI-Constellation-Mk-IV-Celebration",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "a8355f3",
     "title": "Alpha 4.10.2: RSI Discovery Month - Missions, Rewards, & Icons",
     "category": "PATCH NOTES",
@@ -114,18 +126,6 @@
     "date": "2026-10-09T00:00:00.000Z",
     "summary": "RSI-Beitrag mit dem Titel „RSI Discovery Month Digital Goodies Pack“. Die Einzelheiten stehen in der Originalmeldung.",
     "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21276-RSI-Discovery-Month-Digital-Goodies-Pack",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
-    "summaryVersion": "0.10.3"
-  },
-  {
-    "id": "be00c824",
-    "title": "RSI Constellation Mk IV Celebration",
-    "category": "SCHIFFE",
-    "date": "2026-10-09T00:00:00.000Z",
-    "summary": "RSI-Beitrag mit dem Titel „RSI Constellation Mk IV Celebration“. Die Einzelheiten stehen in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21336-RSI-Constellation-Mk-IV-Celebration",
     "source": "RSI Comm-Link",
     "ai": false,
     "summaryBasis": "Titel",
@@ -204,18 +204,6 @@
     "summaryVersion": "0.10.3"
   },
   {
-    "id": "d318d82",
-    "title": "Q&A: Aegis Sabre Raven EX and Argo ATLS IKTI Akuma",
-    "category": "SCHIFFE",
-    "date": "2026-09-16T18:00:00.000Z",
-    "summary": "Fragen und Antworten zu Aegis Sabre Raven EX and Argo ATLS IKTI Akuma. Die einzelnen Aussagen stehen in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/engineering/21329-Q-A-Aegis-Sabre-Raven-EX-And-Argo-ATLS-IKTI-Akuma",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
-    "summaryVersion": "0.10.1"
-  },
-  {
     "id": "2172e784",
     "title": "Aegis Sabre Raven EX | Star Citizen",
     "category": "SCHIFFE",
@@ -237,6 +225,18 @@
     "source": "RSI Comm-Link",
     "ai": false,
     "summaryBasis": "Patch Notes",
+    "summaryVersion": "0.10.1"
+  },
+  {
+    "id": "d318d82",
+    "title": "Q&A: Aegis Sabre Raven EX and Argo ATLS IKTI Akuma",
+    "category": "SCHIFFE",
+    "date": "2026-09-16T18:00:00.000Z",
+    "summary": "Fragen und Antworten zu Aegis Sabre Raven EX and Argo ATLS IKTI Akuma. Die einzelnen Aussagen stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/engineering/21329-Q-A-Aegis-Sabre-Raven-EX-And-Argo-ATLS-IKTI-Akuma",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
     "summaryVersion": "0.10.1"
   },
   {
