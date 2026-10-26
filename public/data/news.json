@@ -1,5 +1,17 @@
 [
   {
+    "id": "ab649b00",
+    "title": "This Week In Star Citizen - October 26, 2026",
+    "category": "NEWS",
+    "date": "2026-10-26T19:15:02.000Z",
+    "summary": "Wochenüberblick vom 26. Oktober 2026. Die konkreten Themen stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21421-This-Week-In-Star-Citizen",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "96480e6",
     "title": "Roadmap Roundup October 21 2026",
     "category": "ROADMAP",
