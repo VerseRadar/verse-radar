@@ -1,5 +1,17 @@
 [
   {
+    "id": "b533bdda",
+    "title": "Countdown To IAE 2956",
+    "category": "EVENT",
+    "date": "2026-11-06T16:05:02.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „Countdown To IAE 2956“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21389-Countdown-To-IAE-2956",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "fbc425f",
     "title": "Star Citizen Monthly Report October 2026",
     "category": "NEWS",
