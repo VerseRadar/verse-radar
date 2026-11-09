@@ -1,5 +1,29 @@
 [
   {
+    "id": "503e3af6",
+    "title": "Intergalactic Aerospace Expo 2956 Free Fly And Manufacturer Schedule",
+    "category": "FREE FLY",
+    "date": "2026-11-09T17:05:02.000Z",
+    "summary": "RSI-Beitrag zu Free Fly: „Intergalactic Aerospace Expo 2956 Free Fly And Manufacturer Schedule“. Termine und Bedingungen stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21386-Intergalactic-Aerospace-Expo-2956-Free-Fly-And-Manufacturer-Schedule",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
+    "id": "dc5f0859",
+    "title": "Star Citizen Behind The Ships RSI Galaxy",
+    "category": "SCHIFFE",
+    "date": "2026-11-09T16:40:03.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „Star Citizen Behind The Ships RSI Galaxy“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21447-Star-Citizen-Behind-The-Ships-RSI-Galaxy",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "b533bdda",
     "title": "Countdown To IAE 2956",
     "category": "EVENT",
