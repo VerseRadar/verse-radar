@@ -1,5 +1,17 @@
 [
   {
+    "id": "c2b5295a",
+    "title": "Star Citizen Alpha 4103 Vanduul Incursion",
+    "category": "PATCH NOTES",
+    "date": "2026-11-12T17:20:03.000Z",
+    "summary": "Offizielle Mitteilung zu Star Citizen Alpha 4103 Vanduul Incursion. Die konkreten Änderungen findest du in den verlinkten Patch Notes.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21420-Star-Citizen-Alpha-4103-Vanduul-Incursion",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "a282d9b2",
     "title": "This Week In Star Citizen - November 9, 2026",
     "category": "NEWS",
