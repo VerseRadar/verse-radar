@@ -1,5 +1,53 @@
 [
   {
+    "id": "968691d8",
+    "title": "Q A IAE 2956 New Ships",
+    "category": "EVENT",
+    "date": "2026-11-13T16:05:05.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „Q A IAE 2956 New Ships“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/engineering/21448-Q-A-IAE-2956-New-Ships",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
+    "id": "2fadbed2",
+    "title": "IAE 2956 Merchandise",
+    "category": "EVENT",
+    "date": "2026-11-13T16:05:04.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „IAE 2956 Merchandise“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21415-IAE-2956-Merchandise",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
+    "id": "cc07936c",
+    "title": "IAE 2956 RSI",
+    "category": "EVENT",
+    "date": "2026-11-13T16:05:04.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „IAE 2956 RSI“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21412-IAE-2956-RSI",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
+    "id": "aec523c9",
+    "title": "IAE 2956 About",
+    "category": "EVENT",
+    "date": "2026-11-13T16:05:03.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „IAE 2956 About“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21414-IAE-2956-About",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "c2b5295a",
     "title": "Star Citizen Alpha 4103 Vanduul Incursion",
     "category": "PATCH NOTES",
