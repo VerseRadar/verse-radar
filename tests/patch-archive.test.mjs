@@ -49,17 +49,17 @@ globalThis.fetch = async (input, init = {}) => {
   if (url.host === 'api.star-citizen.wiki' && url.pathname === '/api/comm-links') {
     const page = Number(url.searchParams.get('page[number]'));
     if (sourceFailure && page === 2) return new Response('', { status: 503 });
-    const records = repeatFirstPage && page === 2 ? pages[1] : pages[page] || [];
+    const records = repeatFirstPage && page === 2 ? pages[1] : (feedNewPatch && page === 1 ? [entry(502, '4.10.5'), entry(501, '4.10.4')] : pages[page] || []);
     return Response.json({ data: missingSourceUrl && page === 2 ? [{ ...records[0], rsi_url: '' }, ...records.slice(1)] : records, meta: { current_page: page, last_page: 3 } });
   }
   if (latestOfficialAvailable && url.host === 'robertsspaceindustries.com' && url.pathname.includes('/Patch-Notes/21351-')) {
     return new Response(`<article><h1>Star Citizen Alpha 4.10.2 LIVE Release Notes</h1><h2>Build Information</h2><p>${'RSI Discovery Month missions reward points career tracks, cargo transport and salvage missions. '.repeat(12)}</p></article>`);
   }
   if (feedNewPatch && url.host === 'leonick.se') return Response.json({ items: [
-    { url: 'https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21390-Star-Citizen-Alpha-4103', date_published: '2026-10-11T18:00:00Z' },
+    { url: 'https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21429-Star-Citizen-Alpha-4103', date_published: '2026-11-13T18:00:00Z' },
     { title: 'Star Citizen Alpha 4.10.4', url: 'https://robertsspaceindustries.com/en/comm-link/transmission/21391-Star-Citizen-Alpha-4104', date_published: '2026-10-11T19:00:00Z' }
   ] });
-  if (feedNewPatch && url.host === 'api.star-citizen.wiki' && url.pathname === '/api/comm-links/21390') {
+  if (feedNewPatch && url.host === 'api.star-citizen.wiki' && url.pathname === '/api/comm-links/21429') {
     return Response.json({ data: { content: ('Alpha 4.10.3 Release Notes Gameplay missions and fixes. ').repeat(15) } });
   }
   if (alpha47DetailAvailable && url.host === 'api.star-citizen.wiki' && url.pathname === '/api/comm-links/21070') {
@@ -168,7 +168,7 @@ const first = await (await request('/preview/patches')).json();
 assert.equal(first.published, false);
 assert.equal(first.count, 6);
 assert.equal(first.newItems, 3);
-assert.equal(first.items.find(p => p.version === 'Alpha 4.10.2').summaryVersion, '1.0.2');
+assert.equal(first.items.find(p => p.version === 'Alpha 4.10.2').summaryVersion, '1.0.3');
 assert.match(first.items.find(p => p.version === 'Alpha 4.10.2').note, /Redaktionell geprüft/);
 assert.equal(first.items.some(p => p.version === 'Alpha 4.7.2'), false);
 assert.equal(first.items.find(p => p.version === 'Alpha 4.8.1').sourceType, 'Release Info');
@@ -316,6 +316,8 @@ const feedPatch = await (await request('/preview/patches?diagnostic=1')).json();
 assert.equal(feedPatch.feedDiagnostics.accepted, 1);
 const feedPatchItems = await (await request('/preview/patches')).json();
 assert.ok(feedPatchItems.items.some(p => p.version === 'Alpha 4.10.3'));
+assert.equal(feedPatchItems.items.some(p => p.version === 'Alpha 4.10.5'), true);
 assert.equal(feedPatchItems.items.some(p => p.version === 'Alpha 4.10.4'), false);
+assert.equal(feedPatchItems.items.find(p => p.version === 'Alpha 4.10.3').sourceUrl, 'https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21429-Star-Citizen-Alpha-4103');
 
 console.log('Patch-Archiv: Vorschau, Nachladen, Fehlerschutz und Cursor-Recovery: OK');

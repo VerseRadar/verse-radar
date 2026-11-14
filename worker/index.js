@@ -26,7 +26,7 @@ const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const NEWS_UPDATE_CRON = "0 */2 * * *";
 const PATCH_UPDATE_CRON = "30 */2 * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "1.0.2";
+const VERSION = "1.0.3";
 const COMMUNITY_FEED_URL = "https://leonick.se/feeds/rsi/json";
 const DEFAULT_REFERRAL_URL = "https://www.robertsspaceindustries.com/enlist?referral=STAR-6KT2-XJBC";
 // These two release announcements were imported as patch notes before the
@@ -1496,6 +1496,37 @@ async function fetchPatchItems(state, existingVersions) {
   let historicalDeferredItems = 0;
   let historicalUnusableItems = 0;
   const historicalDiagnostics = [];
+  // A fresh LIVE patch can appear in the feed before the wiki index. A feed
+  // link only discovers the official note; the text still has to pass the
+  // same patch-source and content checks as an indexed record.
+  try {
+    const r = await fetch(COMMUNITY_FEED_URL, { headers: { "accept": "application/feed+json,application/json", "user-agent": `Verse-Radar/${VERSION} (+independent fan site)` } });
+    const body = r.ok ? await r.json() : null;
+    const records = Array.isArray(body?.items) ? body.items : [];
+    const candidates = records.map(record => {
+      const sourceUrl = feedArticleUrl(record);
+      const title = feedTitle(record);
+      const id = Number(sourceUrl?.match(/\/Patch-Notes\/(\d+)-/i)?.[1]);
+      if (!id || !/^https:\/\/robertsspaceindustries\.com\/en\/comm-link\/Patch-Notes\/\d+-/i.test(sourceUrl)) return null;
+      const version = feedPatchVersion(title, sourceUrl);
+      if (!version) return null;
+      return { id, version, sourceUrl,
+        date: validDate(record?.date_published || record?.date_modified || "") };
+    }).filter(x => x && x.date).sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+    feedDiagnostics = { source: COMMUNITY_FEED_URL, httpStatus: r.status, records: records.length, accepted: candidates.length,
+      sample: feedSample(records[0]) };
+    for (const candidate of candidates) {
+      if (existingVersions.has(patchKey(candidate.version)) || discovered.some(x => patchKey(x.version) === patchKey(candidate.version))) continue;
+      if (fetchedDetails >= PATCH_DETAILS_PER_IMPORT) { deferredPageItems++; continue; }
+      fetchedDetails++;
+      let content = cleanPatchText(await fetchPatchDetail(candidate.id, ""));
+      if (!publishablePatch(candidate.version, content)) content = cleanPatchText(await fetchOfficialPatchText(candidate.sourceUrl, candidate.version, content));
+      if (!publishablePatch(candidate.version, content)) content = cleanPatchText(await fetchWikiUpdatePage(candidate.version, content));
+      discovered.push({ version: candidate.version, date: candidate.date, sourceUrl: candidate.sourceUrl, sourceId: candidate.id, content,
+        fallbackSummary: fallbackPatchSummary(candidate.version, content), fallbackFullSummary: fallbackFullSummary(candidate.version, content) });
+    }
+  } catch (e) { feedDiagnostics = { source: COMMUNITY_FEED_URL, error: e.message }; }
+
   const pages = state.complete ? [1] : [...new Set([1, ...Array.from({ length: PATCH_PAGES_PER_IMPORT }, (_, i) => state.nextPage + i)])];
   let lastPage = null;
   let reachedEnd = false;
@@ -1539,7 +1570,7 @@ async function fetchPatchItems(state, existingVersions) {
       const id = Number(record?.id); if (!id) continue;
       const version = normalizePatchVersion(title.replace(/^Star Citizen /i, "").trim());
       recognizedPatchNotes++;
-      if (existingVersions.has(patchKey(version))) continue;
+      if (existingVersions.has(patchKey(version)) || discovered.some(item => patchKey(item.version) === patchKey(version))) continue;
       if (fetchedDetails >= PATCH_DETAILS_PER_IMPORT) {
         deferredPageItems++;
         firstDeferredPage ??= page;
@@ -1554,38 +1585,8 @@ async function fetchPatchItems(state, existingVersions) {
       discovered.push({ version, date, sourceUrl, sourceId: id, content, fallbackSummary: fallbackPatchSummary(version, content), fallbackFullSummary: fallbackFullSummary(version, content) });
     }
   }
-  if (!scannedPages.length || (scannedPages.length === 1 && !recognizedPatchNotes)) throw Error("Keine Patch Notes in der aktuellen Quelle erkannt; Import abgebrochen.");
-
-  // A fresh LIVE patch can appear in the feed before the wiki index. A feed
-  // link only discovers the official note; the text still has to pass the
-  // same patch-source and content checks as an indexed record.
-  try {
-    const r = await fetch(COMMUNITY_FEED_URL, { headers: { "accept": "application/feed+json,application/json", "user-agent": `Verse-Radar/${VERSION} (+independent fan site)` } });
-    const body = r.ok ? await r.json() : null;
-    const records = Array.isArray(body?.items) ? body.items : [];
-    const candidates = records.map(record => {
-      const sourceUrl = feedArticleUrl(record);
-      const title = feedTitle(record);
-      const id = Number(sourceUrl?.match(/\/Patch-Notes\/(\d+)-/i)?.[1]);
-      if (!id || !/^https:\/\/robertsspaceindustries\.com\/en\/comm-link\/Patch-Notes\/\d+-/i.test(sourceUrl)) return null;
-      const version = feedPatchVersion(title, sourceUrl);
-      if (!version) return null;
-      return { id, version, sourceUrl,
-        date: validDate(record?.date_published || record?.date_modified || "") };
-    }).filter(x => x && x.date);
-    feedDiagnostics = { source: COMMUNITY_FEED_URL, httpStatus: r.status, records: records.length, accepted: candidates.length,
-      sample: feedSample(records[0]) };
-    for (const candidate of candidates) {
-      if (existingVersions.has(patchKey(candidate.version)) || discovered.some(x => patchKey(x.version) === patchKey(candidate.version))) continue;
-      if (fetchedDetails >= PATCH_DETAILS_PER_IMPORT) { deferredPageItems++; continue; }
-      fetchedDetails++;
-      let content = cleanPatchText(await fetchPatchDetail(candidate.id, ""));
-      if (!publishablePatch(candidate.version, content)) content = cleanPatchText(await fetchOfficialPatchText(candidate.sourceUrl, candidate.version, content));
-      if (!publishablePatch(candidate.version, content)) content = cleanPatchText(await fetchWikiUpdatePage(candidate.version, content));
-      discovered.push({ version: candidate.version, date: candidate.date, sourceUrl: candidate.sourceUrl, sourceId: candidate.id, content,
-        fallbackSummary: fallbackPatchSummary(candidate.version, content), fallbackFullSummary: fallbackFullSummary(candidate.version, content) });
-    }
-  } catch (e) { feedDiagnostics = { source: COMMUNITY_FEED_URL, error: e.message }; }
+  if (!scannedPages.length || (scannedPages.length === 1 && !recognizedPatchNotes && !feedDiagnostics.accepted))
+    throw Error("Keine Patch Notes in der aktuellen Quelle erkannt; Import abgebrochen.");
 
   // RSI's patch index is sometimes only partially mirrored by the archive API.
   // Seed the current major patches so a temporary archive/index gap cannot hide them.

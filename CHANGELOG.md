@@ -1,3 +1,10 @@
+# 1.0.3
+
+- Der zusätzliche RSI-Feed wird vor dem Wiki-Archiv ausgewertet, damit neu veröffentlichte offizielle Patch Notes nicht durch ältere Wiki-Treffer aus dem begrenzten Abrufbudget verdrängt werden.
+- Feed-Kandidaten werden nach Veröffentlichungsdatum priorisiert; doppelte Versionen werden beim anschließenden Wiki-Abgleich nicht erneut geladen.
+- Ein vorübergehend leerer Wiki-Patchindex verhindert den Feed-Import nicht mehr, sofern der Feed einen gültigen offiziellen Patch-Notes-Link liefert.
+- Regressionstest mit Alpha 4.10.3 (RSI-Link 21429) und gleichzeitig neuen Wiki-Einträgen ergänzt.
+
 # 1.0.2
 
 - News-Feed erkennt RSI-Meldungen auch dann, wenn der Feed keinen Titel liefert und im Artikel-HTML nur ein allgemeiner Seitenkopf steht.
