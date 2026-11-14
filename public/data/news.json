@@ -1,5 +1,17 @@
 [
   {
+    "id": "dc315cd2",
+    "title": "IAE 2956 Origin Jumpworks",
+    "category": "EVENT",
+    "date": "2026-11-14T16:05:02.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „IAE 2956 Origin Jumpworks“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21411-IAE-2956-Origin-Jumpworks",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "968691d8",
     "title": "Q A IAE 2956 New Ships",
     "category": "EVENT",
