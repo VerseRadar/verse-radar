@@ -26,7 +26,7 @@ const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const NEWS_UPDATE_CRON = "0 */2 * * *";
 const PATCH_UPDATE_CRON = "30 */2 * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "1.0.4";
+const VERSION = "1.0.5";
 const COMMUNITY_FEED_URL = "https://leonick.se/feeds/rsi/json";
 const DEFAULT_REFERRAL_URL = "https://www.robertsspaceindustries.com/enlist?referral=STAR-6KT2-XJBC";
 // These two release announcements were imported as patch notes before the
@@ -1156,17 +1156,27 @@ function parseCommLink(html) {
   // serialized/escaped markup. We deliberately search for the URL pattern
   // itself instead of depending on one specific DOM structure.
   const patterns = [
-    /href\s*=\s*["']([^"']*\/en\/comm-link\/[^"'#?\s<>]+)["']/gi,
-    /["']((?:https?:\/\/robertsspaceindustries\.com)?\/en\/comm-link\/[^"'#?\s<>]+)["']/gi,
-    /\\\/en\\\/comm-link\\\/[^"'\s<>\\]+/gi
+    /href\s*=\s*["']([^"']*\/(?:en\/)?comm-link\/[^"'#?\s<>]+)["']/gi,
+    /["']((?:https?:\/\/robertsspaceindustries\.com)?\/(?:en\/)?comm-link\/[^"'#?\s<>]+)["']/gi,
+    /\\\/(?:en\\\/)?comm-link\\\/[^"'\s<>\\]+/gi
   ];
 
   const hrefs = [];
   for (const re of patterns) {
     for (const m of html.matchAll(re)) {
       const raw = m[1] || m[0];
-      const href = cleanUrl(raw.replace(/\\\//g, "/"));
-      if (!href || !isArticleUrl(href) || seen.has(href)) continue;
+      let href = cleanUrl(raw.replace(/\\\//g, "/"));
+      if (!href) continue;
+      // RSI's public index often emits legacy /comm-link/... links without
+      // the language prefix. Canonicalize them before applying the strict
+      // article URL validator used by the rest of the importer.
+      try {
+        const parsed = new URL(href);
+        if (parsed.hostname !== "robertsspaceindustries.com") continue;
+        if (/^\/comm-link\//i.test(parsed.pathname)) parsed.pathname = `/en${parsed.pathname}`;
+        href = parsed.href;
+      } catch { continue; }
+      if (!isArticleUrl(href) || seen.has(href)) continue;
       seen.add(href);
       hrefs.push(href);
     }

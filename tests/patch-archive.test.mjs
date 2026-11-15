@@ -49,7 +49,7 @@ globalThis.fetch = async (input, init = {}) => {
   calls.push({ url: url.href, method });
   if (url.host === 'robertsspaceindustries.com' && url.pathname === '/en/patch-notes') {
     const html = officialIndexAvailable
-      ? '<a href="https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21429-Star-Citizen-Alpha-4103">patchnotes Star Citizen Alpha 4.10.3 0 Posted: 2 days ago</a>'
+      ? '<a href="https://robertsspaceindustries.com/comm-link/Patch-Notes/21429-Star-Citizen-Alpha-4103">patchnotes Star Citizen Alpha 4.10.3 0 Posted: 2 days ago</a>'
       : '<html></html>';
     return new Response(html, { headers: { 'content-type': 'text/html' } });
   }
@@ -178,7 +178,7 @@ const first = await (await request('/preview/patches')).json();
 assert.equal(first.published, false);
 assert.equal(first.count, 6);
 assert.equal(first.newItems, 3);
-assert.equal(first.items.find(p => p.version === 'Alpha 4.10.2').summaryVersion, '1.0.4');
+assert.equal(first.items.find(p => p.version === 'Alpha 4.10.2').summaryVersion, '1.0.5');
 assert.match(first.items.find(p => p.version === 'Alpha 4.10.2').note, /Redaktionell geprüft/);
 assert.equal(first.items.some(p => p.version === 'Alpha 4.7.2'), false);
 assert.equal(first.items.find(p => p.version === 'Alpha 4.8.1').sourceType, 'Release Info');

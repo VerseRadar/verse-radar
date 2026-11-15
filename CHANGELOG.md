@@ -1,3 +1,9 @@
+# 1.0.5
+
+- RSI-Patch-Notes-Index akzeptiert jetzt sowohl `/comm-link/Patch-Notes/...` als auch `/en/comm-link/Patch-Notes/...`; Links ohne Sprachpräfix werden vor der Prüfung auf die kanonische `/en/`-Adresse normalisiert.
+- Regressionstest ergänzt, der den tatsächlich beobachteten RSI-Index-Link ohne `/en/` prüft.
+- Die übrige Patch-Erkennung, Textprüfung und Veröffentlichungslogik bleiben unverändert.
+
 # 1.0.4
 
 - Der offizielle RSI-Patch-Notes-Index wird zusätzlich zum Community-Feed und zum Wiki-Archiv nach neuen Patch Notes durchsucht.
