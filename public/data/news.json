@@ -1,5 +1,41 @@
 [
   {
+    "id": "b27eb10d",
+    "title": "Star Citizen Behind The Ships Anvil Liberator",
+    "category": "SCHIFFE",
+    "date": "2026-11-15T16:10:02.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „Star Citizen Behind The Ships Anvil Liberator“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21452-Star-Citizen-Behind-The-Ships-Anvil-Liberator",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
+    "id": "c8e207d6",
+    "title": "IAE 2956 Anvil Aerospace",
+    "category": "EVENT",
+    "date": "2026-11-15T16:05:03.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „IAE 2956 Anvil Aerospace“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21410-IAE-2956-Anvil-Aerospace",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
+    "id": "4557aac6",
+    "title": "Anvil Liberator",
+    "category": "SCHIFFE",
+    "date": "2026-11-15T16:05:02.000Z",
+    "summary": "RSI-Beitrag über Anvil Liberator. Weitere Angaben stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21348-Anvil-Liberator",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "dc315cd2",
     "title": "IAE 2956 Origin Jumpworks",
     "category": "EVENT",
