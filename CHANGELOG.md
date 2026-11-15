@@ -1,3 +1,11 @@
+# 1.0.4
+
+- Der offizielle RSI-Patch-Notes-Index wird zusätzlich zum Community-Feed und zum Wiki-Archiv nach neuen Patch Notes durchsucht.
+- Neue offizielle RSI-Patch-Notes-Links werden direkt aus dem Index übernommen; Versionsnummern werden auch aus URL-Slugs ohne brauchbaren Feed-Titel erkannt.
+- Veröffentlichungsdaten werden aus dem Detaildatensatz oder den Metadaten der offiziellen RSI-Seite übernommen. Ein Eintrag ohne belastbares Datum wird nicht mit einem erfundenen Datum veröffentlicht.
+- Die Diagnose zeigt jetzt separat, wie viele Patch-Kandidaten der offizielle RSI-Index liefert.
+- Regressionstest ergänzt: Alpha 4.10.3 wird auch dann erkannt, wenn Community-Feed und Wiki-Index den Beitrag nicht liefern.
+
 # 1.0.3
 
 - Der zusätzliche RSI-Feed wird vor dem Wiki-Archiv ausgewertet, damit neu veröffentlichte offizielle Patch Notes nicht durch ältere Wiki-Treffer aus dem begrenzten Abrufbudget verdrängt werden.

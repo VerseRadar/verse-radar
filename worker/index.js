@@ -26,7 +26,7 @@ const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const NEWS_UPDATE_CRON = "0 */2 * * *";
 const PATCH_UPDATE_CRON = "30 */2 * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "1.0.3";
+const VERSION = "1.0.4";
 const COMMUNITY_FEED_URL = "https://leonick.se/feeds/rsi/json";
 const DEFAULT_REFERRAL_URL = "https://www.robertsspaceindustries.com/enlist?referral=STAR-6KT2-XJBC";
 // These two release announcements were imported as patch notes before the
@@ -292,6 +292,7 @@ export default {
             historicalUnusableItems: result.historicalUnusableItems,
             historicalDiagnostics: result.historicalDiagnostics,
             feedDiagnostics: result.feedDiagnostics,
+            officialIndexDiagnostics: result.officialIndexDiagnostics,
             seedDiagnostics: result.seedDiagnostics });
         }
         return json({
@@ -1130,6 +1131,22 @@ function extractPublishedDate(html) {
   return null;
 }
 
+async function fetchOfficialPatchIndex() {
+  const response = await fetch(PATCH_NOTES_URL, {
+    headers: { "user-agent": `Verse-Radar/${VERSION} (+independent fan site)`, "accept": "text/html,application/xhtml+xml" }
+  });
+  if (!response.ok) return { httpStatus: response.status, candidates: [], links: 0 };
+  const html = await response.text();
+  const parsed = parseCommLink(html);
+  const candidates = parsed.items.map(item => {
+    const sourceUrl = item.url;
+    const id = Number(sourceUrl.match(/\/Patch-Notes\/(\d+)-/i)?.[1]);
+    const version = feedPatchVersion(item.title || "", sourceUrl);
+    return id && version ? { id, version, sourceUrl, title: item.title } : null;
+  }).filter(Boolean).sort(comparePatchVersionsDesc);
+  return { httpStatus: response.status, links: parsed.candidates, candidates };
+}
+
 function parseCommLink(html) {
   const out = [];
   const seen = new Set();
@@ -1433,7 +1450,7 @@ async function updatePatches(env) {
   validateArchiveEntries(existing);
   const state = parsePatchState(stateFile.data);
   const existingVersions = new Set(existing.map(x => patchKey(x.version)));
-  const { items, scannedPages, nextState, pageDiagnostics, feedDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems, historicalCandidates, historicalDeferredItems, historicalUnusableItems, historicalDiagnostics } = await fetchPatchItems(state, existingVersions);
+  const { items, scannedPages, nextState, pageDiagnostics, feedDiagnostics, officialIndexDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems, historicalCandidates, historicalDeferredItems, historicalUnusableItems, historicalDiagnostics } = await fetchPatchItems(state, existingVersions);
   const unique = dedupePatchItems(items).sort(comparePatchVersionsDesc);
   const byVersion = new Map(existing.map(x => [patchKey(x.version), correctLegacyLink(x)]));
   let aiItems = 0;
@@ -1470,7 +1487,7 @@ async function updatePatches(env) {
     });
   }
   const patches = [...byVersion.values()].sort(comparePatchVersionsDesc).map((p, i, all) => ({ ...p, previous: all[i + 1]?.version || null }));
-  return { patches, changed: JSON.stringify(patches) !== JSON.stringify(existing), items: unique, newItems: patches.length - existing.length, aiItems, scannedPages, nextState, pageDiagnostics, feedDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems, historicalCandidates, historicalDeferredItems, historicalUnusableItems, historicalDiagnostics, archiveSha: archive.sha, stateSha: stateFile.sha };
+  return { patches, changed: JSON.stringify(patches) !== JSON.stringify(existing), items: unique, newItems: patches.length - existing.length, aiItems, scannedPages, nextState, pageDiagnostics, feedDiagnostics, officialIndexDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems, historicalCandidates, historicalDeferredItems, historicalUnusableItems, historicalDiagnostics, archiveSha: archive.sha, stateSha: stateFile.sha };
 }
 
 function parsePatchState(value) {
@@ -1526,6 +1543,39 @@ async function fetchPatchItems(state, existingVersions) {
         fallbackSummary: fallbackPatchSummary(candidate.version, content), fallbackFullSummary: fallbackFullSummary(candidate.version, content) });
     }
   } catch (e) { feedDiagnostics = { source: COMMUNITY_FEED_URL, error: e.message }; }
+
+  // The official RSI Patch Notes index is an independent discovery source.
+  // It covers releases omitted by both the community feed and the wiki API index.
+  let officialIndexDiagnostics = { source: PATCH_NOTES_URL, links: 0, accepted: 0 };
+  try {
+    const index = await fetchOfficialPatchIndex();
+    const candidates = index.candidates.filter(candidate =>
+      !existingVersions.has(patchKey(candidate.version)) &&
+      !discovered.some(item => patchKey(item.version) === patchKey(candidate.version)));
+    officialIndexDiagnostics = { source: PATCH_NOTES_URL, httpStatus: index.httpStatus,
+      links: index.links, accepted: candidates.length,
+      sample: candidates[0] ? { id: candidates[0].id, version: candidates[0].version, sourceUrl: candidates[0].sourceUrl } : null };
+    for (const candidate of candidates) {
+      if (fetchedDetails >= PATCH_DETAILS_PER_IMPORT) { deferredPageItems++; continue; }
+      fetchedDetails++;
+      const detail = await fetchPatchDetailRecord(candidate.id, "");
+      let content = cleanPatchText(detail.content);
+      let articleDate = null;
+      if (!publishablePatch(candidate.version, content)) {
+        const official = await fetchOfficialPatchArticle(candidate.sourceUrl, candidate.version, content);
+        content = cleanPatchText(official.content);
+        articleDate = official.date;
+      }
+      if (!publishablePatch(candidate.version, content)) content = cleanPatchText(await fetchWikiUpdatePage(candidate.version, content));
+      const date = detail.date || articleDate || extractPatchReleaseDate(content);
+      if (!date) {
+        officialIndexDiagnostics.dateMissing = (officialIndexDiagnostics.dateMissing || 0) + 1;
+        continue;
+      }
+      discovered.push({ version: candidate.version, date, sourceUrl: candidate.sourceUrl, sourceId: candidate.id, content,
+        fallbackSummary: fallbackPatchSummary(candidate.version, content), fallbackFullSummary: fallbackFullSummary(candidate.version, content) });
+    }
+  } catch (e) { officialIndexDiagnostics = { source: PATCH_NOTES_URL, error: e.message }; }
 
   const pages = state.complete ? [1] : [...new Set([1, ...Array.from({ length: PATCH_PAGES_PER_IMPORT }, (_, i) => state.nextPage + i)])];
   let lastPage = null;
@@ -1585,7 +1635,7 @@ async function fetchPatchItems(state, existingVersions) {
       discovered.push({ version, date, sourceUrl, sourceId: id, content, fallbackSummary: fallbackPatchSummary(version, content), fallbackFullSummary: fallbackFullSummary(version, content) });
     }
   }
-  if (!scannedPages.length || (scannedPages.length === 1 && !recognizedPatchNotes && !feedDiagnostics.accepted))
+  if (!scannedPages.length || (scannedPages.length === 1 && !recognizedPatchNotes && !feedDiagnostics.accepted && !officialIndexDiagnostics.accepted))
     throw Error("Keine Patch Notes in der aktuellen Quelle erkannt; Import abgebrochen.");
 
   // RSI's patch index is sometimes only partially mirrored by the archive API.
@@ -1674,7 +1724,7 @@ async function fetchPatchItems(state, existingVersions) {
   const lastScanned = scannedPages[scannedPages.length - 1];
   const complete = !firstDeferredPage && (state.complete || reachedEnd || (lastPage !== null && lastScanned >= lastPage));
   const nextPage = firstDeferredPage || (complete ? Math.max(lastScanned, state.nextPage) : lastScanned + 1);
-  return { items: unique, scannedPages, pageDiagnostics, feedDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems,
+  return { items: unique, scannedPages, pageDiagnostics, feedDiagnostics, officialIndexDiagnostics, seedDiagnostics, deferredSeedItems, deferredPageItems,
     historicalCandidates, historicalDeferredItems, historicalUnusableItems, historicalDiagnostics,
     nextState: { nextPage, complete,
       historicalStartIndex: historicalCursorIndex,
@@ -1708,31 +1758,50 @@ function extractPatchContent(record) {
   return "";
 }
 
-async function fetchPatchDetail(id, current = "") {
+async function fetchPatchDetailRecord(id, current = "") {
   try {
     const detail = await fetch(`https://api.star-citizen.wiki/api/comm-links/${id}`, {
-      headers: { "user-agent": "Verse-Radar/0.7.0 (+independent fan site)", "accept": "application/json" }
+      headers: { "user-agent": `Verse-Radar/${VERSION} (+independent fan site)`, "accept": "application/json" }
     });
-    if (!detail.ok) return current;
+    if (!detail.ok) return { content: current, date: null };
     const dj = await detail.json();
     const d = dj?.data || dj;
-    return extractPatchContent(d) || current;
-  } catch (_) { return current; }
+    const date = validDate(d?.published_at || d?.created_at || d?.created_at_human || d?.date || "");
+    return { content: extractPatchContent(d) || current, date };
+  } catch (_) { return { content: current, date: null }; }
 }
 
-async function fetchOfficialPatchText(sourceUrl, version, current = "") {
-  if (!/^https:\/\/robertsspaceindustries\.com\/en\/comm-link\/Patch-Notes\/\d+-/i.test(sourceUrl)) return current;
+async function fetchPatchDetail(id, current = "") {
+  return (await fetchPatchDetailRecord(id, current)).content;
+}
+
+async function fetchOfficialPatchArticle(sourceUrl, version, current = "") {
+  if (!/^https:\/\/robertsspaceindustries\.com\/en\/comm-link\/Patch-Notes\/\d+-/i.test(sourceUrl))
+    return { content: current, date: null };
   try {
     const r = await fetch(sourceUrl, { headers: { "user-agent": `Verse-Radar/${VERSION} (+independent fan site)`, "accept": "text/html" } });
-    if (!r.ok) return current;
+    if (!r.ok) return { content: current, date: null };
     const html = await r.text();
+    const date = extractPublishedDate(html);
     const main = html.match(/<article\b[\s\S]*?<\/article>/i)?.[0] || html.match(/<main\b[\s\S]*?<\/main>/i)?.[0] || "";
     const content = cleanPatchText(main);
     // App shells, previews and marketing articles are not patch texts.
     const number = version.replace(/^Alpha\s+/i, "");
-    if (!content.includes(number) || !/\b(?:release notes|patch notes|build information)\b/i.test(content) || content.length < 500) return current;
-    return content;
-  } catch { return current; }
+    if (!content.includes(number) || !/\b(?:release notes|patch notes|build information)\b/i.test(content) || content.length < 500)
+      return { content: current, date };
+    return { content, date };
+  } catch { return { content: current, date: null }; }
+}
+
+async function fetchOfficialPatchText(sourceUrl, version, current = "") {
+  return (await fetchOfficialPatchArticle(sourceUrl, version, current)).content;
+}
+
+function extractPatchReleaseDate(content) {
+  const text = String(content || "");
+  const match = text.match(/\b(?:build\s+)?released\s+on\s*(\d{4}-\d{2}-\d{2})\b/i)
+    || text.match(/\b(\d{4}-\d{2}-\d{2})\s+(?:release date|released)\b/i);
+  return match ? validDate(match[1]) : null;
 }
 
 async function fetchWikiUpdatePage(version, current = "") {
