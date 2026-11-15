@@ -1,5 +1,34 @@
 [
   {
+    "version": "Alpha 4.10.3",
+    "date": "2026-11-12T00:00:00.000Z",
+    "previous": "Alpha 4.10.2",
+    "summary": "Mehrere neue Waffen bzw. Ausrüstungsgegenstände wurden hinzugefügt, darunter neue FPS-Waffen und schwere Ausrüstung. Zusätzlich wurden 129 dokumentierte Korrekturen bzw. Issues geschlossen.",
+    "changes": [
+      {
+        "category": "Inventar",
+        "title": "Neue Waffen und Ausrüstung",
+        "description": "Neue FPS-Waffen und schwere Ausrüstung erweitern das verfügbare Arsenal."
+      },
+      {
+        "category": "Herstellung",
+        "title": "TH-01 Propulsor",
+        "description": "Der TH-01 Propulsor erhält eine Herstellungsmöglichkeit."
+      },
+      {
+        "category": "Technik",
+        "title": "Stabilität und Fehlerbehebungen",
+        "description": "Der Patch enthält zahlreiche Crash-, Stabilitäts- und Performance-Korrekturen."
+      }
+    ],
+    "fullSummary": "Der TH-01 Propulsor kann im Rahmen der neuen Inhalte hergestellt werden. Bei Stabilität und Fehlerbehebungen wurden 129 dokumentierte Korrekturen bzw. Issues geschlossen.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21429-Star-Citizen-Alpha-4103",
+    "sourceType": "Patch Notes",
+    "ai": false,
+    "summaryVersion": "0.6.8",
+    "note": "Deutsche Zusammenfassung der offiziellen Patch Notes. Kein offizieller RSI-Text."
+  },
+  {
     "version": "Alpha 4.10.2",
     "date": "2026-10-09T00:00:00.000Z",
     "previous": "Alpha 4.10.1",
