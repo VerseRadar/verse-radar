@@ -1,10 +1,10 @@
 {
-  "updatedAt": "2026-11-15T12:30:28.766Z",
+  "updatedAt": "2026-11-15T14:30:28.237Z",
   "source": "https://robertsspaceindustries.com/en/comm-link?sort=publish_new",
   "patchSource": "https://robertsspaceindustries.com/en/patch-notes",
   "mode": "live",
   "automation": "Cloudflare Worker + RSI Patch Notes; News-Import pausiert",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "fetchedItems": null,
   "newItems": null,
   "refreshedItems": null,
