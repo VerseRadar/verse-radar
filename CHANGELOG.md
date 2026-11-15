@@ -1,3 +1,9 @@
+# 1.0.6
+
+- Veröffentlichungsdatum offizieller Patch Notes wird bei fehlenden RSI-/Wiki-Detailmetadaten zusätzlich direkt aus dem unveränderten Wiki-Update-Markup gelesen.
+- Verhindert, dass `cleanPatchText()` das Datum aus der Wiki-Einleitung entfernt, bevor der Importer es auswerten kann.
+- Regressionstest ergänzt: Alpha 4.10.3 wird ohne Datumsfeld im Comm-Link-Detail anhand des Wiki-Datums `2026-11-12` korrekt datiert und übernommen.
+
 # 1.0.5
 
 - RSI-Patch-Notes-Index akzeptiert jetzt sowohl `/comm-link/Patch-Notes/...` als auch `/en/comm-link/Patch-Notes/...`; Links ohne Sprachpräfix werden vor der Prüfung auf die kanonische `/en/`-Adresse normalisiert.

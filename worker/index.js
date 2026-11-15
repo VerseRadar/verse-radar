@@ -26,7 +26,7 @@ const PATCH_BACKFILL_CRON = "*/2 * * * *";
 const NEWS_UPDATE_CRON = "0 */2 * * *";
 const PATCH_UPDATE_CRON = "30 */2 * * *";
 const PATCH_BACKFILL_LEASE_MS = 10 * 60 * 1000;
-const VERSION = "1.0.5";
+const VERSION = "1.0.6";
 const COMMUNITY_FEED_URL = "https://leonick.se/feeds/rsi/json";
 const DEFAULT_REFERRAL_URL = "https://www.robertsspaceindustries.com/enlist?referral=STAR-6KT2-XJBC";
 // These two release announcements were imported as patch notes before the
@@ -1577,7 +1577,11 @@ async function fetchPatchItems(state, existingVersions) {
         articleDate = official.date;
       }
       if (!publishablePatch(candidate.version, content)) content = cleanPatchText(await fetchWikiUpdatePage(candidate.version, content));
-      const date = detail.date || articleDate || extractPatchReleaseDate(content);
+      // The Wiki update page contains the release date in its lead paragraph.
+      // cleanPatchText intentionally removes that heading, so retrieve the date
+      // from the raw Wiki markup separately when RSI/Wiki detail metadata lacks it.
+      let date = detail.date || articleDate || extractPatchReleaseDate(content);
+      if (!date) date = await fetchWikiUpdatePageDate(candidate.version);
       if (!date) {
         officialIndexDiagnostics.dateMissing = (officialIndexDiagnostics.dateMissing || 0) + 1;
         continue;
@@ -1812,6 +1816,27 @@ function extractPatchReleaseDate(content) {
   const match = text.match(/\b(?:build\s+)?released\s+on\s*(\d{4}-\d{2}-\d{2})\b/i)
     || text.match(/\b(\d{4}-\d{2}-\d{2})\s+(?:release date|released)\b/i);
   return match ? validDate(match[1]) : null;
+}
+
+async function fetchWikiUpdatePageDate(version) {
+  const title = `Update:Star Citizen ${String(version || "").trim()}`;
+  try {
+    const api = new URL("https://starcitizen.tools/api.php");
+    api.searchParams.set("action", "parse");
+    api.searchParams.set("page", title);
+    api.searchParams.set("prop", "text");
+    api.searchParams.set("format", "json");
+    api.searchParams.set("origin", "*");
+    const response = await fetch(api.toString(), {
+      headers: { "user-agent": `Verse-Radar/${VERSION} (+independent fan site)`, "accept": "application/json" }
+    });
+    if (!response.ok) return null;
+    const body = await response.json();
+    const raw = strip(body?.parse?.text?.["*"] || "");
+    const match = raw.match(/\b(?:Star Citizen\s+)?build\s+released\s+on\s*(\d{4}-\d{2}-\d{2})\b/i)
+      || raw.match(/\bReleased\s+(\d{4}-\d{2}-\d{2})\b/i);
+    return match ? validDate(match[1]) : null;
+  } catch (_) { return null; }
 }
 
 async function fetchWikiUpdatePage(version, current = "") {

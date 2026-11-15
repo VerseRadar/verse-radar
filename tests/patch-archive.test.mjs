@@ -41,6 +41,7 @@ let remaining4DetailsAvailable = false;
 let latestOfficialAvailable = false;
 let feedNewPatch = false;
 let officialIndexAvailable = false;
+let officialWikiDateAvailable = false;
 const externalPatch = { version: 'Alpha 4.6', previous: null, sourceUrl: 'https://robertsspaceindustries.com/external', summary: 'Parallel gespeicherter Patch' };
 
 globalThis.fetch = async (input, init = {}) => {
@@ -54,7 +55,7 @@ globalThis.fetch = async (input, init = {}) => {
     return new Response(html, { headers: { 'content-type': 'text/html' } });
   }
   if (officialIndexAvailable && url.host === 'api.star-citizen.wiki' && url.pathname === '/api/comm-links/21429') {
-    return Response.json({ data: { created_at: '2026-11-12T00:00:00Z', content: sourceText } });
+    return Response.json({ data: { content: sourceText } });
   }
   if (url.host === 'api.star-citizen.wiki' && url.pathname === '/api/comm-links') {
     const page = Number(url.searchParams.get('page[number]'));
@@ -111,6 +112,9 @@ globalThis.fetch = async (input, init = {}) => {
       20360: 'Full Wipe Alpha 4.0 Preview Pyro Server Meshing 5:5:500 Player Shards known issues. '
     }[Number(url.pathname.split('/').at(-1))];
     return Response.json({data:{content:content.repeat(6)}});
+  }
+  if (officialWikiDateAvailable && url.host === 'starcitizen.tools' && url.pathname === '/api.php' && url.searchParams.get('page') === 'Update:Star Citizen Alpha 4.10.3') {
+    return Response.json({ parse: { text: { '*': '<h1>Update:Star Citizen Alpha 4.10.3</h1><p>Star Citizen build released on 2026-11-12</p>' } } });
   }
   if (archivePartialDetails && url.host === 'starcitizen.tools' && url.pathname === '/api.php') {
     const page = url.searchParams.get('page');
@@ -178,7 +182,7 @@ const first = await (await request('/preview/patches')).json();
 assert.equal(first.published, false);
 assert.equal(first.count, 6);
 assert.equal(first.newItems, 3);
-assert.equal(first.items.find(p => p.version === 'Alpha 4.10.2').summaryVersion, '1.0.5');
+assert.equal(first.items.find(p => p.version === 'Alpha 4.10.2').summaryVersion, '1.0.6');
 assert.match(first.items.find(p => p.version === 'Alpha 4.10.2').note, /Redaktionell geprüft/);
 assert.equal(first.items.some(p => p.version === 'Alpha 4.7.2'), false);
 assert.equal(first.items.find(p => p.version === 'Alpha 4.8.1').sourceType, 'Release Info');
@@ -332,6 +336,7 @@ assert.equal(feedPatchItems.items.find(p => p.version === 'Alpha 4.10.3').source
 
 feedNewPatch = false;
 officialIndexAvailable = true;
+officialWikiDateAvailable = true;
 const officialIndexPatch = await (await request('/preview/patches?diagnostic=1')).json();
 assert.equal(officialIndexPatch.feedDiagnostics.accepted, 0);
 assert.equal(officialIndexPatch.officialIndexDiagnostics.accepted, 1);
@@ -339,5 +344,7 @@ const officialIndexItems = await (await request('/preview/patches')).json();
 assert.ok(officialIndexItems.items.some(p => p.version === 'Alpha 4.10.3'));
 assert.equal(officialIndexItems.items.find(p => p.version === 'Alpha 4.10.3').sourceUrl,
   'https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21429-Star-Citizen-Alpha-4103');
+assert.equal(officialIndexItems.items.find(p => p.version === 'Alpha 4.10.3').date, '2026-11-12T00:00:00.000Z');
+assert.equal(officialIndexPatch.officialIndexDiagnostics.dateMissing || 0, 0);
 
 console.log('Patch-Archiv: Vorschau, Nachladen, Fehlerschutz, Cursor-Recovery und RSI-Index-Fallback: OK');
