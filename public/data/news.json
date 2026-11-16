@@ -1,5 +1,29 @@
 [
   {
+    "id": "b41be556",
+    "title": "IAE 2956 Crusader Industries",
+    "category": "EVENT",
+    "date": "2026-11-16T16:05:03.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „IAE 2956 Crusader Industries“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21409-IAE-2956-Crusader-Industries",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
+    "id": "a0685565",
+    "title": "IAE 2956 Tumbril Land Systems",
+    "category": "EVENT",
+    "date": "2026-11-16T16:05:03.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „IAE 2956 Tumbril Land Systems“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21408-IAE-2956-Tumbril-Land-Systems",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "b27eb10d",
     "title": "Star Citizen Behind The Ships Anvil Liberator",
     "category": "SCHIFFE",
