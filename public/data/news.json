@@ -1,5 +1,17 @@
 [
   {
+    "id": "4549d810",
+    "title": "This Week In Star Citizen - November 16, 2026",
+    "category": "NEWS",
+    "date": "2026-11-16T22:35:02.000Z",
+    "summary": "Wochenüberblick vom 16. November 2026. Die konkreten Themen stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21454-This-Week-In-Star-Citizen",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "b41be556",
     "title": "IAE 2956 Crusader Industries",
     "category": "EVENT",
