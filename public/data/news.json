@@ -1,5 +1,17 @@
 [
   {
+    "id": "c0e44756",
+    "title": "IAE 2956 Drake Interplanetary",
+    "category": "EVENT",
+    "date": "2026-11-17T16:05:03.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „IAE 2956 Drake Interplanetary“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21407-IAE-2956-Drake-Interplanetary",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "4549d810",
     "title": "This Week In Star Citizen - November 16, 2026",
     "category": "NEWS",
