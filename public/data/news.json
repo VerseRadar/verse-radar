@@ -1,5 +1,17 @@
 [
   {
+    "id": "49f4fd05",
+    "title": "IAE 2956 Aegis Dynamics",
+    "category": "EVENT",
+    "date": "2026-11-20T16:05:02.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „IAE 2956 Aegis Dynamics“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21398-IAE-2956-Aegis-Dynamics",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "5abe421c",
     "title": "IAE 2956 Mirai",
     "category": "EVENT",
@@ -702,18 +714,6 @@
     "date": "2026-08-31T18:00:00.000Z",
     "summary": "Wochenüberblick vom 31. August 2026. Die konkreten Themen stehen in der Originalmeldung.",
     "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21304-This-Week-In-Star-Citizen",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
-    "summaryVersion": "0.10.1"
-  },
-  {
-    "id": "ccbf58e5",
-    "title": "Letter From The Chairman",
-    "category": "NEWS",
-    "date": "2026-08-27T17:00:00.000Z",
-    "summary": "Brief des Chairman unter dem Titel „Letter From The Chairman“. Den Wortlaut findest du in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21301-Letter-From-The-Chairman",
     "source": "RSI Comm-Link",
     "ai": false,
     "summaryBasis": "Titel",
