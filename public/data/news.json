@@ -1,5 +1,65 @@
 [
   {
+    "id": "2c5a56d4",
+    "title": "Star Citizen Behind The Ships Gatac Hy N",
+    "category": "SCHIFFE",
+    "date": "2026-11-21T16:10:03.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „Star Citizen Behind The Ships Gatac Hy N“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21462-Star-Citizen-Behind-The-Ships-Gatac-Hy-n",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
+    "id": "68566cb",
+    "title": "IAE 2956 Banu",
+    "category": "EVENT",
+    "date": "2026-11-21T16:05:04.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „IAE 2956 Banu“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21396-IAE-2956-Banu",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
+    "id": "960284b7",
+    "title": "IAE 2956 Esperia",
+    "category": "EVENT",
+    "date": "2026-11-21T16:05:04.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „IAE 2956 Esperia“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21395-IAE-2956-Esperia",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
+    "id": "728a5760",
+    "title": "IAE 2956 Aopoa",
+    "category": "EVENT",
+    "date": "2026-11-21T16:05:03.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „IAE 2956 Aopoa“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21397-IAE-2956-Aopoa",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
+    "id": "3da7e84b",
+    "title": "IAE 2956 Gatac Manufacture",
+    "category": "EVENT",
+    "date": "2026-11-21T16:05:03.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „IAE 2956 Gatac Manufacture“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21394-IAE-2956-Gatac-Manufacture",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "49f4fd05",
     "title": "IAE 2956 Aegis Dynamics",
     "category": "EVENT",
@@ -658,65 +718,5 @@
     "ai": false,
     "summaryBasis": "Quelltext",
     "summaryVersion": "0.10.3"
-  },
-  {
-    "id": "1fec9656",
-    "title": "Pirate Week 2026 | Star Citizen",
-    "category": "EVENT",
-    "date": "2026-09-09T16:00:00.000Z",
-    "summary": "RSI-Beitrag mit dem Titel „Pirate Week 2026 | Star Citizen“. Die Einzelheiten stehen in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21285-Pirate-Week-2026",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
-    "summaryVersion": "0.10.1"
-  },
-  {
-    "id": "4d8c5b82",
-    "title": "This Week in Star Citizen - September 7, 2026",
-    "category": "NEWS",
-    "date": "2026-09-07T21:00:00.000Z",
-    "summary": "Wochenüberblick vom 7. September 2026. Die konkreten Themen stehen in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21315-This-Week-In-Star-Citizen",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
-    "summaryVersion": "0.10.1"
-  },
-  {
-    "id": "55bd807f",
-    "title": "Ship Showdown 2956 Winners | Star Citizen",
-    "category": "EVENT",
-    "date": "2026-09-07T21:00:00.000Z",
-    "summary": "RSI gibt in „Ship Showdown 2956 Winners | Star Citizen“ die Gewinner des Ship Showdown bekannt. Die Ergebnisse stehen in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21308-ship-showdown-2956-winners-star-citizen",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
-    "summaryVersion": "0.7.0"
-  },
-  {
-    "id": "9bf70759",
-    "title": "Star Citizen Monthly Report: August 2026",
-    "category": "NEWS",
-    "date": "2026-09-02T19:00:00.000Z",
-    "summary": "Monatsbericht zur Entwicklung von Star Citizen für August 2026. Die behandelten Arbeiten stehen in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21307-Star-Citizen-Monthly-Report-August-2026",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
-    "summaryVersion": "0.10.1"
-  },
-  {
-    "id": "1a9ecc20",
-    "title": "This Week in Star Citizen - August 31, 2026",
-    "category": "NEWS",
-    "date": "2026-08-31T18:00:00.000Z",
-    "summary": "Wochenüberblick vom 31. August 2026. Die konkreten Themen stehen in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21304-This-Week-In-Star-Citizen",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
-    "summaryVersion": "0.10.1"
   }
 ]
