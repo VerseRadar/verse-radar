@@ -1,5 +1,17 @@
 [
   {
+    "id": "4f8d6a68",
+    "title": "IAE 2956 Best In Show",
+    "category": "EVENT",
+    "date": "2026-11-22T16:05:02.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „IAE 2956 Best In Show“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21393-IAE-2956-Best-In-Show",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "2c5a56d4",
     "title": "Star Citizen Behind The Ships Gatac Hy N",
     "category": "SCHIFFE",
@@ -706,17 +718,5 @@
     "ai": false,
     "summaryBasis": "Titel",
     "summaryVersion": "0.10.1"
-  },
-  {
-    "id": "892d9c79",
-    "title": "Roadmap Roundup - September 9, 2026",
-    "category": "ROADMAP",
-    "date": "2026-09-09T20:00:00.000Z",
-    "summary": "Orison Relief Support ist laut Roadmap für ein kommendes 4.10.x-Update vorgesehen. Alpha 4.11 wurde auf das vierte Quartal 2026 verschoben.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21314-Roadmap-Roundup-September-9-2026",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Quelltext",
-    "summaryVersion": "0.10.3"
   }
 ]
