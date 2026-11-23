@@ -1,5 +1,17 @@
 [
   {
+    "id": "6e2e46a4",
+    "title": "IAE 2956 Finale",
+    "category": "EVENT",
+    "date": "2026-11-23T16:05:02.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „IAE 2956 Finale“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21392-IAE-2956-Finale",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "4f8d6a68",
     "title": "IAE 2956 Best In Show",
     "category": "EVENT",
@@ -705,18 +717,6 @@
     "source": "RSI Comm-Link",
     "ai": false,
     "summaryBasis": "Patch Notes",
-    "summaryVersion": "0.10.1"
-  },
-  {
-    "id": "705b4bcd",
-    "title": "This Week in Star Citizen - September 14, 2026",
-    "category": "NEWS",
-    "date": "2026-09-14T22:00:00.000Z",
-    "summary": "Wochenüberblick vom 14. September 2026. Die konkreten Themen stehen in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21318-This-Week-In-Star-Citizen",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
     "summaryVersion": "0.10.1"
   }
 ]
