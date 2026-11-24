@@ -1,5 +1,17 @@
 [
   {
+    "id": "cc2c3553",
+    "title": "This Week In Star Citizen - November 23, 2026",
+    "category": "NEWS",
+    "date": "2026-11-23T22:30:03.000Z",
+    "summary": "Wochenüberblick vom 23. November 2026. Die konkreten Themen stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21459-This-Week-In-Star-Citizen",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "6e2e46a4",
     "title": "IAE 2956 Finale",
     "category": "EVENT",
@@ -705,18 +717,6 @@
     "source": "RSI Comm-Link",
     "ai": false,
     "summaryBasis": "Titel",
-    "summaryVersion": "0.10.1"
-  },
-  {
-    "id": "ca3a18d1",
-    "title": "Star Citizen Alpha 4.10.1",
-    "category": "PATCH NOTES",
-    "date": "2026-09-16T18:00:00.000Z",
-    "summary": "Orison Relief Support bringt eine neue Reihe von Wiederaufbau-, Transport-, Herstellungs- und Kampfeinsätzen mit persönlichem Fortschritts- und Belohnungssystem.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/Patch-Notes/21330-Star-Citizen-Alpha-4101",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Patch Notes",
     "summaryVersion": "0.10.1"
   }
 ]
