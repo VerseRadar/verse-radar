@@ -1,5 +1,17 @@
 [
   {
+    "id": "8075d9ca",
+    "title": "IAE 2956 Farewell",
+    "category": "EVENT",
+    "date": "2026-11-27T20:05:03.000Z",
+    "summary": "RSI-Beitrag mit dem Titel „IAE 2956 Farewell“. Die Einzelheiten stehen in der Originalmeldung.",
+    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21391-IAE-2956-Farewell",
+    "source": "RSI Comm-Link",
+    "ai": false,
+    "summaryBasis": "Titel",
+    "summaryVersion": "0.10.3"
+  },
+  {
     "id": "cc2c3553",
     "title": "This Week In Star Citizen - November 23, 2026",
     "category": "NEWS",
@@ -702,18 +714,6 @@
     "date": "2026-09-16T18:00:00.000Z",
     "summary": "Fragen und Antworten zu Aegis Sabre Raven EX and Argo ATLS IKTI Akuma. Die einzelnen Aussagen stehen in der Originalmeldung.",
     "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/engineering/21329-Q-A-Aegis-Sabre-Raven-EX-And-Argo-ATLS-IKTI-Akuma",
-    "source": "RSI Comm-Link",
-    "ai": false,
-    "summaryBasis": "Titel",
-    "summaryVersion": "0.10.1"
-  },
-  {
-    "id": "2172e784",
-    "title": "Aegis Sabre Raven EX | Star Citizen",
-    "category": "SCHIFFE",
-    "date": "2026-09-16T18:00:00.000Z",
-    "summary": "RSI-Beitrag über Aegis Sabre Raven EX | Star Citizen. Weitere Angaben stehen in der Originalmeldung.",
-    "sourceUrl": "https://robertsspaceindustries.com/en/comm-link/transmission/21332-Aegis-Sabre-Raven-EX",
     "source": "RSI Comm-Link",
     "ai": false,
     "summaryBasis": "Titel",
